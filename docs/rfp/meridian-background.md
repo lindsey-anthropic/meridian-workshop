@@ -4,9 +4,9 @@
 
 ---
 
-**Company.** Meridian Components, Inc. is a privately held distributor of industrial automation parts — sensors, actuators, PLCs, controllers, power supplies. Founded 2009, headquartered outside Columbus OH. ~180 employees. Revenue approx. $9.6M (FY25).
+**Company.** Meridian Components, Inc. is a privately held distributor of industrial automation parts — sensors, actuators, controllers, circuit boards, power supplies. Founded 2009, headquartered in San Francisco. ~180 employees. Revenue approx. $9.6M (FY25).
 
-**Operations.** Five warehouses: four North America (Columbus, Dallas, Reno, Toronto) plus one in Tokyo opened 2023 to serve APAC OEM customers. Tokyo team is ~12 people; English proficiency varies, which is the driver behind the i18n ask.
+**Operations.** Three warehouses: San Francisco (HQ and primary distribution), London (EMEA), and Tokyo (opened 2023 to serve APAC OEM customers). Tokyo team is ~12 people; English proficiency varies, which is the driver behind the i18n ask.
 
 **Buying committee.**
 - **J. Okafor** (Director of Procurement) — issued the RFP, owns vendor selection process. Cares about timeline and price predictability.
