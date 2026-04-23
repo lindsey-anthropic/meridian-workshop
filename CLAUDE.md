@@ -22,9 +22,11 @@ No code in this act. The participant may not be an engineer. The goal is a propo
 
 **Clarifying questions.** Draft 3–5 questions you'd send to procurement (per RFP §6). This is a good moment to use the AskUserQuestion tool — frame it as "if you were the client, how would you answer this?" and let them pick. Their answers become assumptions in the proposal.
 
-**Write the proposal.** Work through the sections the RFP asks for (§4): executive summary, technical approach, timeline, pricing assumptions. Write each to a file in `proposal/`. These are all prose documents — when you say "technical approach," make clear you mean the written narrative describing *how* you'd address each requirement, not the code itself. Offer Plan Mode (`Shift+Tab`) before drafting it — it's a natural fit for "let's outline this before writing."
+**Write the proposal.** Work through the sections the RFP asks for (§4): executive summary, technical approach, timeline, pricing assumptions. Write each to a file in `proposal/`. These are all prose documents — when you say "technical approach," make clear you mean the written narrative describing *how* you'd address each requirement, not the code itself. Offer Plan Mode (`Shift+Tab`) before drafting the technical approach — it's a natural fit for "let's outline this before writing."
 
-**Build the deck.** RFP §4 says shortlisted vendors may be asked for a 10–15 slide capabilities presentation. Generate it as a single self-contained HTML file at `proposal/capabilities-deck.html`. Keep it simple — title, problem, approach, timeline, why-us. Open it in their browser when done.
+Draft one section at a time, and after each one stop and ask what they'd change — tone, emphasis, anything they'd cut or add. They're the consultant; you're producing a first draft for them to shape, not a finished deliverable. Revise before moving to the next section. If they say "looks fine" twice in a row, you can pick up the pace.
+
+**Build the deck.** RFP §4 says shortlisted vendors may be asked for a 10–15 slide capabilities presentation. Generate it as a single self-contained HTML file at `proposal/capabilities-deck.html`. Keep it simple — title, problem, approach, timeline, why-us. Open it in their browser when done, then ask what they'd change: different ordering, more or fewer slides, a different visual style (darker theme, their firm's colors, more minimal, etc.). Iterate at least once before moving on — the point is they see how easy it is to reshape.
 
 Once it's up, offer the PowerPoint option but don't block on it: "I can convert this to a .pptx if you want a real file to hand around — it'll take a few minutes though. Say the word if you want it; otherwise let's keep moving." Default to moving on. If they do want it, generate via python-pptx to `proposal/capabilities-deck.pptx`.
 
@@ -34,7 +36,9 @@ Once it's up, offer the PowerPoint option but don't block on it: "I can convert 
 
 This is the shift from writing about the work to doing it. The codebase in `client/` and `server/` is what Meridian's previous vendor built. The RFP requirements (R1–R4, D1–D3) are now the statement of work.
 
-**Get it running.** Offer to start the app. There's a `/start` slash command in `.claude/commands/` — mention it exists so they see project-level commands are a thing, then use it (or run the underlying scripts). Once it's up at localhost:3000, have them click around. They may notice the Reports page is off — good, that's R1.
+**Get it running.** This is a good moment to introduce slash commands. Explain briefly: a slash command is a project-defined shortcut — this repo ships a few in `.claude/commands/`, and `/start` runs both the backend and frontend dev servers. Then tell them exactly what to do: **"type `/start` in the prompt and press Enter."** Make clear that slash commands are something *they* type, not something you run for them. (If `/start` gives them trouble, you can fall back to running `./scripts/start.sh` yourself.)
+
+Once it's up at localhost:3000, have them click around. They may notice the Reports page is off — good, that's R1.
 
 **Architecture review (R4).** The RFP asks for current-state architecture docs. Explore the codebase together and generate an overview — an HTML diagram works well, write it to `proposal/architecture.html` and open it. This is also genuinely useful orientation for the rest of Act 2.
 
