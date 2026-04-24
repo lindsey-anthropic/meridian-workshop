@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Components — Architecture Overview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8fafc; color: #1e293b; padding: 40px; }
+  h1 { font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+  .meta { font-size: 13px; color: #64748b; margin-bottom: 40px; }
+  h2 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 16px; }
+
+  .section { margin-bottom: 48px; }
+
+  /* Diagram */
+  .diagram {
+    display: grid;
+    grid-template-columns: 1fr 80px 1fr 80px 1fr;
+    gap: 0;
+    align-items: start;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 48px;
+  }
+
+  .layer { display: flex; flex-direction: column; gap: 10px; }
+  .layer-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 8px; text-align: center; }
+
+  .box {
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    border: 1px solid transparent;
+  }
+
+  .box-vue     { background: #f0fdf4; border-color: #86efac; color: #166534; }
+  .box-api     { background: #eff6ff; border-color: #93c5fd; color: #1e40af; }
+  .box-fast    { background: #fdf4ff; border-color: #d8b4fe; color: #6b21a8; }
+  .box-data    { background: #fff7ed; border-color: #fed7aa; color: #9a3412; }
+  .box-warn    { background: #fef9c3; border-color: #fde047; color: #854d0e; font-size: 11px; }
+
+  .arrow-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 36px;
+    flex-direction: column;
+    gap: 4px;
+    color: #94a3b8;
+    font-size: 20px;
+  }
+  .arrow-label { font-size: 10px; color: #94a3b8; text-align: center; line-height: 1.3; }
+
+  /* Filter matrix */
+  table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; font-size: 13px; }
+  th { background: #f1f5f9; padding: 10px 14px; text-align: left; font-weight: 600; color: #475569; font-size: 12px; }
+  td { padding: 10px 14px; border-top: 1px solid #f1f5f9; color: #334155; }
+  tr:hover td { background: #f8fafc; }
+  .check { color: #16a34a; font-weight: 700; }
+  .cross { color: #dc2626; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+  .tag-ok   { background: #dcfce7; color: #166534; }
+  .tag-warn { background: #fef9c3; color: #854d0e; }
+  .tag-err  { background: #fee2e2; color: #991b1b; }
+
+  /* Issues */
+  .issues { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .issue-card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px 20px; border-left: 4px solid #e2e8f0; }
+  .issue-card.critical { border-left-color: #ef4444; }
+  .issue-card.medium   { border-left-color: #f59e0b; }
+  .issue-card h3 { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+  .issue-card p { font-size: 13px; color: #64748b; line-height: 1.5; }
+
+  /* Stack */
+  .stack-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .stack-card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px 20px; }
+  .stack-card h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 10px; }
+  .stack-card ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .stack-card li { font-size: 13px; color: #334155; }
+  .stack-card li::before { content: '· '; color: #94a3b8; }
+
+  .note { background: #fef9c3; border: 1px solid #fde047; border-radius: 8px; padding: 14px 18px; font-size: 13px; color: #854d0e; margin-top: 16px; }
+
+  footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8; }
+</style>
+</head>
+<body>
+
+<h1>Meridian Components — Inventory Dashboard</h1>
+<p class="meta">Architecture Overview · Prepared by [Your Firm] · April 2026 · Confidential</p>
+
+<!-- SYSTEM DIAGRAM -->
+<div class="section">
+  <h2>System Diagram</h2>
+  <div class="diagram">
+
+    <!-- Frontend -->
+    <div class="layer">
+      <div class="layer-title">Frontend (Vue 3 · port 3000)</div>
+      <div class="box box-vue">Dashboard</div>
+      <div class="box box-vue">Inventory</div>
+      <div class="box box-vue">Orders</div>
+      <div class="box box-vue">Spending</div>
+      <div class="box box-vue">Demand</div>
+      <div class="box box-vue">Backlog</div>
+      <div class="box box-vue" style="border-color:#fca5a5;background:#fef2f2;color:#991b1b">Reports ⚠</div>
+      <div style="margin-top:8px" class="box box-warn">FilterBar<br>(useFilters composable)</div>
+    </div>
+
+    <!-- Arrow 1 -->
+    <div class="arrow-col">
+      <div>⟷</div>
+      <div class="arrow-label">Axios<br>HTTP</div>
+    </div>
+
+    <!-- API Client -->
+    <div class="layer">
+      <div class="layer-title">API Client (api.js)</div>
+      <div class="box box-api">getInventory(filters)</div>
+      <div class="box box-api">getOrders(filters)</div>
+      <div class="box box-api">getDashboardSummary(filters)</div>
+      <div class="box box-api">getDemandForecasts()</div>
+      <div class="box box-api">getBacklog()</div>
+      <div class="box box-api">getSpending*()</div>
+      <div class="box box-api">getReports*()</div>
+      <div class="box box-api">tasks / purchase-orders</div>
+    </div>
+
+    <!-- Arrow 2 -->
+    <div class="arrow-col">
+      <div>⟷</div>
+      <div class="arrow-label">HTTP<br>REST</div>
+    </div>
+
+    <!-- Backend + Data -->
+    <div class="layer">
+      <div class="layer-title">Backend (FastAPI · port 8001)</div>
+      <div class="box box-fast">GET /api/inventory</div>
+      <div class="box box-fast">GET /api/orders</div>
+      <div class="box box-fast">GET /api/dashboard/summary</div>
+      <div class="box box-fast">GET /api/demand ✗ filters</div>
+      <div class="box box-fast">GET /api/backlog ✗ filters</div>
+      <div class="box box-fast">GET /api/spending/* ✗ filters</div>
+      <div class="box box-fast">GET /api/reports/* ✗ filters</div>
+      <div class="box box-fast">POST /api/tasks &amp; purchase-orders</div>
+      <div style="margin-top:12px" class="layer-title">Data Layer (JSON files)</div>
+      <div class="box box-data">inventory.json (~48 items)</div>
+      <div class="box box-data">orders.json (~1500 orders)</div>
+      <div class="box box-data">demand_forecasts.json (9 items)</div>
+      <div class="box box-data">backlog_items.json (9 items)</div>
+      <div class="box box-data">spending.json + transactions.json</div>
+      <div class="box box-data" style="border-color:#fca5a5;background:#fef2f2;color:#991b1b">purchase_orders.json (empty)</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FILTER MATRIX -->
+<div class="section">
+  <h2>Filter Support Matrix</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>View</th>
+        <th>Warehouse</th>
+        <th>Category</th>
+        <th>Status</th>
+        <th>Month / Quarter</th>
+        <th>Assessment</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Dashboard</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td><span class="tag tag-ok">Fully wired</span></td></tr>
+      <tr><td>Inventory</td><td class="check">✓</td><td class="check">✓</td><td class="cross">—</td><td class="cross">—</td><td><span class="tag tag-ok">Correct scope</span></td></tr>
+      <tr><td>Orders</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td><td><span class="tag tag-ok">Fully wired</span></td></tr>
+      <tr><td>Reports</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td><span class="tag tag-err">Unwired — defect</span></td></tr>
+      <tr><td>Spending</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td><span class="tag tag-warn">By design (aggregate)</span></td></tr>
+      <tr><td>Demand</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td><span class="tag tag-warn">No filter support</span></td></tr>
+      <tr><td>Backlog</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td><span class="tag tag-warn">No filter support</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- DATA FLOW -->
+<div class="section">
+  <h2>Data Flow — Filters</h2>
+  <table>
+    <thead>
+      <tr><th>Step</th><th>Location</th><th>Detail</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1. User selects filter</td><td>FilterBar.vue</td><td>Writes to useFilters() composable (singleton ref state)</td></tr>
+      <tr><td>2. Component detects change</td><td>Each view</td><td>watch([selectedLocation, selectedCategory, …]) triggers reload</td></tr>
+      <tr><td>3. API call built</td><td>api.js</td><td>getCurrentFilters() maps composable state → URLSearchParams; skips 'all' values</td></tr>
+      <tr><td>4. HTTP request</td><td>Axios → FastAPI</td><td>GET /api/endpoint?warehouse=Tokyo&amp;category=sensors</td></tr>
+      <tr><td>5. Backend filters</td><td>main.py</td><td>apply_filters() does case-insensitive matching; filter_by_month() handles YYYY-MM and Q#-YYYY</td></tr>
+      <tr><td>6. Response</td><td>Pydantic → JSON</td><td>Validated response returned; component updates reactive refs</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- KNOWN ISSUES -->
+<div class="section">
+  <h2>Known Issues (inherited from previous vendor)</h2>
+  <div class="issues">
+    <div class="issue-card critical">
+      <h3>Reports filters unwired</h3>
+      <p>The Reports view does not pass filters to the API, and the backend endpoints (/api/reports/quarterly, /api/reports/monthly-trends) do not accept filter parameters. Changing warehouse or time period has no effect.</p>
+    </div>
+    <div class="issue-card critical">
+      <h3>Reports i18n gaps</h3>
+      <p>Several strings in Reports.vue are hardcoded in English and do not use the t() translation function. Currency symbols are hardcoded as "$" rather than using the currencySymbol computed property.</p>
+    </div>
+    <div class="issue-card critical">
+      <h3>Tasks endpoint missing</h3>
+      <p>The frontend calls GET /api/tasks on mount, but this endpoint is not implemented in the backend. The app works around this via mock data in useAuth(), but the API call generates console errors on every load.</p>
+    </div>
+    <div class="issue-card critical">
+      <h3>Purchase orders data empty</h3>
+      <p>purchase_orders.json is an empty array. The Backlog detail modal can display PO status but the data layer has no sample records and the creation flow is incomplete.</p>
+    </div>
+    <div class="issue-card medium">
+      <h3>Status / category case mismatch</h3>
+      <p>Frontend sends lowercase filter values (e.g. "delivered", "circuit boards"); backend data uses title case. Works only because apply_filters() does case-insensitive comparison — fragile if that utility changes.</p>
+    </div>
+    <div class="issue-card medium">
+      <h3>Mixed Vue API patterns</h3>
+      <p>Most components use explicit setup() functions; some newer ones use &lt;script setup&gt; shorthand. Both are valid Vue 3, but inconsistency increases maintenance cost.</p>
+    </div>
+    <div class="issue-card medium">
+      <h3>Hardcoded i18n strings across views</h3>
+      <p>Backlog, Spending, and Demand views contain English-only strings that bypass the t() function. Tokyo warehouse staff see these in English regardless of language setting.</p>
+    </div>
+    <div class="issue-card medium">
+      <h3>No pagination on large datasets</h3>
+      <p>The Orders view renders ~1,500 rows without pagination. At current data volumes this is slow; at production scale it would be unusable.</p>
+    </div>
+  </div>
+</div>
+
+<!-- STACK -->
+<div class="section">
+  <h2>Technology Stack</h2>
+  <div class="stack-grid">
+    <div class="stack-card">
+      <h3>Frontend</h3>
+      <ul>
+        <li>Vue 3.4 (Composition API)</li>
+        <li>Vue Router 4.3</li>
+        <li>Vite 5.2 (build)</li>
+        <li>Axios 1.6 (HTTP)</li>
+      </ul>
+    </div>
+    <div class="stack-card">
+      <h3>Backend</h3>
+      <ul>
+        <li>Python 3 / FastAPI</li>
+        <li>Pydantic (validation)</li>
+        <li>Uvicorn (ASGI server)</li>
+        <li>CORS: all origins (dev)</li>
+      </ul>
+    </div>
+    <div class="stack-card">
+      <h3>Data</h3>
+      <ul>
+        <li>JSON files (server/data/)</li>
+        <li>In-memory at runtime</li>
+        <li>No persistence layer</li>
+        <li>No database</li>
+      </ul>
+    </div>
+    <div class="stack-card">
+      <h3>i18n</h3>
+      <ul>
+        <li>Custom useI18n composable</li>
+        <li>EN + JA locale files</li>
+        <li>LanguageSwitcher component</li>
+        <li>Incomplete coverage</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note">⚠ No automated test coverage exists. No CI/CD pipeline. Changes must be manually verified against localhost before deployment.</div>
+</div>
+
+<footer>
+  Meridian Components Inventory Dashboard · Architecture Overview · Prepared for IT handoff · April 2026<br>
+  Confidential — [Your Firm Name]
+</footer>
+
+</body>
+</html>

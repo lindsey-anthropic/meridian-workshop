@@ -1,0 +1,19 @@
+{
+  "name": "meridian-workshop",
+  "version": "1.0.0",
+  "description": "A Claude Code workshop. You're a consultant responding to an RFP, then delivering the engagement.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
+  }
+}
