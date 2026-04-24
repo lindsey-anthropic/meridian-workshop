@@ -6,6 +6,7 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -309,6 +310,113 @@ export default {
     english: 'English',
     japanese: 'Japanese',
     selectLanguage: 'Select Language'
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    description: 'Purchase order recommendations based on stock levels, demand forecasts, and budget',
+    budgetLabel: 'Budget Ceiling',
+    budgetPlaceholder: 'No limit',
+    itemsRecommended: 'Items Recommended',
+    totalCost: 'Total Cost',
+    budgetRemaining: 'Budget Remaining',
+    noBudgetSet: 'No limit',
+    noItems: 'No items are currently at or below their reorder point.',
+    noItemsBudget: 'No items fit within the specified budget.',
+    table: {
+      sku: 'SKU',
+      itemName: 'Item Name',
+      warehouse: 'Warehouse',
+      category: 'Category',
+      stockVsReorder: 'Stock / Reorder',
+      recommendedQty: 'Recommended Qty',
+      unitCost: 'Unit Cost',
+      lineTotal: 'Line Total',
+      trend: 'Demand Trend',
+      urgency: 'Urgency'
+    }
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    quarterlyPerformance: 'Quarterly Performance',
+    monthlyRevenueTrend: 'Monthly Revenue Trend',
+    momAnalysis: 'Month-over-Month Analysis',
+    table: {
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    },
+    stats: {
+      totalRevenueYTD: 'Total Revenue (YTD)',
+      avgMonthlyRevenue: 'Avg Monthly Revenue',
+      totalOrdersYTD: 'Total Orders (YTD)',
+      bestQuarter: 'Best Performing Quarter'
+    }
+  },
+
+  // Product Names
+  productNames: {
+    'Single Layer PCB Assembly': 'Single Layer PCB Assembly',
+    'Dual Layer PCB Assembly': 'Dual Layer PCB Assembly',
+    'Multi Layer PCB Assembly': 'Multi Layer PCB Assembly',
+    'Temperature Sensor Module': 'Temperature Sensor Module',
+    'Humidity Sensor Module': 'Humidity Sensor Module',
+    'Pressure Sensor Module': 'Pressure Sensor Module',
+    'Proximity Sensor': 'Proximity Sensor',
+    'Ultrasonic Distance Sensor': 'Ultrasonic Distance Sensor',
+    'Micro Servo Motor': 'Micro Servo Motor',
+    'Standard Servo Motor': 'Standard Servo Motor',
+    'Stepper Motor NEMA 17': 'Stepper Motor NEMA 17',
+    '8-bit Microcontroller': '8-bit Microcontroller',
+    '32-bit ARM Microcontroller': '32-bit ARM Microcontroller',
+    'Digital Signal Processor': 'Digital Signal Processor',
+    '3-Axis Accelerometer': '3-Axis Accelerometer',
+    'Gyroscope Module': 'Gyroscope Module',
+    'Light Dependent Resistor': 'Light Dependent Resistor',
+    'Coil Spring Heavy Duty': 'Coil Spring Heavy Duty',
+    'Compression Spring': 'Compression Spring',
+    'PWM Motor Controller': 'PWM Motor Controller',
+    'H-Bridge Motor Driver': 'H-Bridge Motor Driver',
+    'Stepper Motor NEMA 23': 'Stepper Motor NEMA 23',
+    'Drive Pulley': 'Drive Pulley',
+    'LED Driver IC': 'LED Driver IC',
+    '5V 10A Switching Power Supply': '5V 10A Switching Power Supply',
+    '12V 5A Power Supply Module': '12V 5A Power Supply Module',
+    '24V 3A Industrial Power Supply': '24V 3A Industrial Power Supply',
+    'Dual Output ±15V Power Supply': 'Dual Output ±15V Power Supply',
+    '48V DC Power Supply Unit': '48V DC Power Supply Unit',
+    'USB-C PD 100W Power Supply': 'USB-C PD 100W Power Supply',
+    'Battery Backup Power Supply': 'Battery Backup Power Supply',
+    'Adjustable Bench Power Supply': 'Adjustable Bench Power Supply'
+  },
+
+  // Customer Names
+  customerNames: {
+    'MegaCorp Industries': 'MegaCorp Industries',
+    'Elite Systems Corp': 'Elite Systems Corp',
+    'Horizon Technologies': 'Horizon Technologies',
+    'FastAssembly Ltd': 'FastAssembly Ltd',
+    'TechSolutions Group': 'TechSolutions Group',
+    'Apex Engineering': 'Apex Engineering',
+    'Superior Manufacturing': 'Superior Manufacturing',
+    'Cascade Manufacturing': 'Cascade Manufacturing',
+    'Acme Manufacturing Corp': 'Acme Manufacturing Corp',
+    'TechBuild Industries': 'TechBuild Industries',
+    'Advanced Components Inc': 'Advanced Components Inc',
+    'Premier Industries': 'Premier Industries',
+    'Stellar Components Ltd': 'Stellar Components Ltd',
+    'Dynamic Systems Ltd': 'Dynamic Systems Ltd'
   },
 
   // Common
