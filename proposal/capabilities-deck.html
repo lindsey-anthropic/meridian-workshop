@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accenture — Meridian Components Capabilities Presentation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .deck {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    padding: 64px 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    opacity: 0;
+    transform: translateX(40px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    pointer-events: none;
+  }
+
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+  }
+
+  .slide.exit {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+
+  /* Layout variants */
+  .slide.center { align-items: center; text-align: center; }
+  .slide.split { flex-direction: row; gap: 64px; align-items: center; }
+  .slide.split .col { flex: 1; }
+
+  /* Typography */
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #38bdf8;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: #f8fafc;
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #f8fafc;
+    margin-bottom: 24px;
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #38bdf8;
+    margin-bottom: 8px;
+  }
+
+  p {
+    font-size: 18px;
+    line-height: 1.7;
+    color: #94a3b8;
+    max-width: 640px;
+  }
+
+  .subtitle {
+    font-size: 22px;
+    color: #64748b;
+    margin-top: 8px;
+  }
+
+  /* Cards */
+  .cards {
+    display: grid;
+    gap: 16px;
+    margin-top: 8px;
+  }
+
+  .cards.cols-2 { grid-template-columns: 1fr 1fr; }
+  .cards.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cards.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+  .card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .card .number {
+    font-size: 32px;
+    font-weight: 800;
+    color: #38bdf8;
+    margin-bottom: 4px;
+  }
+
+  .card p {
+    font-size: 14px;
+    color: #64748b;
+    max-width: none;
+  }
+
+  /* List */
+  .item-list { list-style: none; display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
+  .item-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 17px;
+    color: #cbd5e1;
+    line-height: 1.5;
+  }
+  .item-list li .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #38bdf8;
+    margin-top: 8px;
+    flex-shrink: 0;
+  }
+  .item-list li strong { color: #f1f5f9; }
+
+  /* Timeline */
+  .timeline { display: flex; flex-direction: column; gap: 0; margin-top: 8px; }
+  .tl-item {
+    display: flex;
+    gap: 24px;
+    align-items: stretch;
+  }
+  .tl-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 40px;
+    flex-shrink: 0;
+  }
+  .tl-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #38bdf8;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+  .tl-line {
+    width: 2px;
+    background: #1e293b;
+    flex: 1;
+    margin: 4px 0;
+  }
+  .tl-item:last-child .tl-line { display: none; }
+  .tl-content { padding-bottom: 20px; }
+  .tl-content h3 { margin-bottom: 2px; font-size: 15px; }
+  .tl-content p { font-size: 14px; color: #64748b; max-width: none; }
+
+  /* Pricing table */
+  .price-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .price-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #475569;
+    padding: 8px 16px;
+    border-bottom: 1px solid #1e293b;
+  }
+  .price-table td {
+    padding: 14px 16px;
+    font-size: 16px;
+    color: #cbd5e1;
+    border-bottom: 1px solid #1e293b;
+  }
+  .price-table td:last-child { text-align: right; font-weight: 600; color: #f1f5f9; }
+  .price-table tr.total td { color: #38bdf8; font-weight: 700; font-size: 18px; border-bottom: none; border-top: 2px solid #334155; }
+  .price-table tr.bonus td { color: #4ade80; font-size: 15px; }
+
+  /* Tag */
+  .tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    background: #0c4a6e;
+    color: #38bdf8;
+    margin-bottom: 20px;
+  }
+
+  .tag.green { background: #14532d; color: #4ade80; }
+  .tag.amber { background: #451a03; color: #fb923c; }
+
+  /* Divider */
+  .divider { width: 48px; height: 3px; background: #38bdf8; border-radius: 2px; margin: 20px 0; }
+
+  /* Logo area */
+  .logo {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #334155;
+    text-transform: uppercase;
+  }
+
+  /* Nav */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 80px;
+    border-top: 1px solid #1e293b;
+    background: #0f172a;
+  }
+
+  .nav-info { font-size: 13px; color: #334155; }
+  .slide-title-nav { font-size: 13px; color: #475569; }
+
+  .nav-buttons { display: flex; gap: 8px; }
+  .nav-btn {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #94a3b8;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .nav-btn:hover { background: #334155; color: #f1f5f9; }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+  .progress {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .pip {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #1e293b;
+    border: 1px solid #334155;
+    transition: background 0.2s;
+    cursor: pointer;
+  }
+  .pip.active { background: #38bdf8; border-color: #38bdf8; }
+
+  /* Accent bg for title slide */
+  .slide.title-slide::before {
+    content: '';
+    position: absolute;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(56,189,248,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- SLIDE 1: Title -->
+  <div class="slide center title-slide active" data-title="Title">
+    <div class="logo">Accenture</div>
+    <div style="margin-top: 48px;">
+      <div class="eyebrow">Capabilities Presentation — RFP #MC-2026-0417</div>
+      <h1>Modernizing the<br>Meridian Dashboard</h1>
+      <div class="subtitle">Inventory Management Platform — Remediation & Extension</div>
+      <div class="divider" style="margin: 28px auto;"></div>
+      <p style="margin: 0 auto; font-size: 15px;">April 24, 2026 &nbsp;·&nbsp; Confidential</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: Who We Are -->
+  <div class="slide" data-title="Who We Are">
+    <div class="eyebrow">About Us</div>
+    <h2>A firm that finishes<br>what it starts.</h2>
+    <div class="divider"></div>
+    <ul class="item-list">
+      <li><span class="dot"></span><div><strong>Full-stack delivery.</strong> We scope, build, and hand off — no gaps between what the proposal says and what ships.</div></li>
+      <li><span class="dot"></span><div><strong>Relevant experience.</strong> Inventory management, operations dashboards, and legacy remediation engagements across mid-market and enterprise clients.</div></li>
+      <li><span class="dot"></span><div><strong>Modern tooling, no surprises.</strong> Vue 3, FastAPI, Playwright — the same stack Meridian already has. No replatforming risk.</div></li>
+      <li><span class="dot"></span><div><strong>Fixed-fee commitment.</strong> We don't discover scope after the contract is signed. We audited your codebase before writing this proposal.</div></li>
+    </ul>
+  </div>
+
+  <!-- SLIDE 3: The Problem -->
+  <div class="slide" data-title="The Problem">
+    <div class="eyebrow">Current State</div>
+    <h2>Three blockers holding<br>your operations back.</h2>
+    <div class="divider"></div>
+    <div class="cards cols-3" style="margin-top: 24px;">
+      <div class="card">
+        <div class="tag amber">Reports</div>
+        <h3>Broken module</h3>
+        <p>Six confirmed defects — filters disconnected, legacy architecture, diagnostic noise left in production.</p>
+      </div>
+      <div class="card">
+        <div class="tag amber">Restocking</div>
+        <h3>Missing capability</h3>
+        <p>No tool to translate stock levels and demand forecasts into purchase order recommendations. Your operations team is working around it.</p>
+      </div>
+      <div class="card">
+        <div class="tag amber">Testing</div>
+        <h3>IT is blocked</h3>
+        <p>Zero automated test coverage means your IT team cannot safely approve changes — a bottleneck that compounds every other problem.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: Our Approach -->
+  <div class="slide" data-title="Our Approach">
+    <div class="eyebrow">Proposed Solution</div>
+    <h2>Four deliverables.<br>One fixed fee.</h2>
+    <div class="divider"></div>
+    <div class="cards cols-2" style="margin-top: 16px;">
+      <div class="card">
+        <div class="tag">R1 — Required</div>
+        <h3>Reports Remediation</h3>
+        <p>All six confirmed defects resolved. Filters wired. Architecture modernized. Locale files synchronized.</p>
+      </div>
+      <div class="card">
+        <div class="tag">R2 — Required</div>
+        <h3>Restocking Recommendations</h3>
+        <p>New view: stock + demand + budget ceiling → ranked purchase order recommendations. Built to the same standard as every other view in the application.</p>
+      </div>
+      <div class="card">
+        <div class="tag">R3 — Required</div>
+        <h3>Automated Browser Testing</h3>
+        <p>Playwright end-to-end suite covering critical flows. Runnable by Meridian IT on any future change. Unblocks your approval pipeline permanently.</p>
+      </div>
+      <div class="card">
+        <div class="tag">R4 — Required</div>
+        <h3>Architecture Documentation</h3>
+        <p>Current-state system overview for Meridian IT. Self-contained, browser-renderable, accurate — not a copy of the previous vendor's stale notes.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: R1 Deep Dive -->
+  <div class="slide" data-title="Reports Remediation">
+    <div class="eyebrow">R1 — Deep Dive</div>
+    <h2>We audited before<br>we proposed.</h2>
+    <div class="divider"></div>
+    <p style="margin-bottom: 20px;">Six defects confirmed in the Reports module during pre-proposal code review — not estimated, not assumed.</p>
+    <div class="cards cols-2">
+      <div class="card"><h3>API pattern violation</h3><p>Direct calls bypassing centralized client — filters broken as a result.</p></div>
+      <div class="card"><h3>Legacy architecture</h3><p>Options API in a Composition API codebase — inconsistent and unmaintainable.</p></div>
+      <div class="card"><h3>Filter bar disconnected</h3><p>Warehouse, category, time period controls have zero effect on Reports data.</p></div>
+      <div class="card"><h3>i18n parity gap</h3><p>English locale missing keys present in Japanese — asymmetric behavior across languages.</p></div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: R2 Deep Dive -->
+  <div class="slide" data-title="Restocking Recommendations">
+    <div class="eyebrow">R2 — Deep Dive</div>
+    <h2>Restocking, built<br>on data you already have.</h2>
+    <div class="divider"></div>
+    <ul class="item-list">
+      <li><span class="dot"></span><div><strong>No new data required.</strong> Reorder point thresholds and unit cost data are confirmed present in the existing inventory dataset.</div></li>
+      <li><span class="dot"></span><div><strong>Backend:</strong> New <code style="color:#38bdf8; font-size:14px;">GET /api/restocking</code> endpoint — stock vs reorder point, demand-ranked, budget-capped.</div></li>
+      <li><span class="dot"></span><div><strong>Frontend:</strong> Budget ceiling input → sortable recommendations table → real-time spend utilization indicator.</div></li>
+      <li><span class="dot"></span><div><strong>Consistent architecture.</strong> Built to the same Composition API standard as every other view — no new patterns to maintain.</div></li>
+    </ul>
+  </div>
+
+  <!-- SLIDE 7: R3 Testing -->
+  <div class="slide" data-title="Automated Testing">
+    <div class="eyebrow">R3 — Browser Testing</div>
+    <h2>Test coverage that<br>unblocks IT permanently.</h2>
+    <div class="divider"></div>
+    <p style="margin-bottom: 24px;">We will establish a Playwright end-to-end suite covering the flows Meridian IT needs to approve changes safely.</p>
+    <div class="cards cols-2">
+      <div class="card"><h3>Dashboard load</h3><p>KPI cards render with valid data; no runtime errors.</p></div>
+      <div class="card"><h3>Inventory filtering</h3><p>Warehouse and category filters update the data table correctly.</p></div>
+      <div class="card"><h3>Reports render</h3><p>Quarterly and monthly tables populate; filter controls functional.</p></div>
+      <div class="card"><h3>Restocking flows</h3><p>Budget input updates recommendations; zero-budget edge case handled.</p></div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: Timeline -->
+  <div class="slide split" data-title="Timeline">
+    <div class="col">
+      <div class="eyebrow">Delivery Plan</div>
+      <h2>9 weeks.<br>4 milestones.</h2>
+      <div class="divider"></div>
+      <p>Structured to deliver IT-unblocking value in Week 1 — so every subsequent phase can be approved without delay.</p>
+      <div style="margin-top: 24px;">
+        <div class="tag green">Target completion: July 17, 2026</div>
+        <p style="font-size: 14px; margin-top: 8px;">One full week ahead of the early-completion bonus deadline.</p>
+      </div>
+    </div>
+    <div class="col">
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+          <div class="tl-content"><h3>Phase 1 — Foundation (Wks 1–2)</h3><p>Architecture docs · Test scaffold · Codebase audit</p></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+          <div class="tl-content"><h3>Phase 2 — Reports (Wks 3–4)</h3><p>All six defects resolved · Filter integration · i18n parity</p></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+          <div class="tl-content"><h3>Phase 3 — Restocking (Wks 5–7)</h3><p>Backend endpoint · Frontend view · Stakeholder review</p></div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+          <div class="tl-content"><h3>Phase 4 — Handoff (Wks 8–9)</h3><p>Test suite finalized · IT handoff · All assets delivered</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: Pricing -->
+  <div class="slide" data-title="Pricing">
+    <div class="eyebrow">Commercial Terms</div>
+    <h2>Fixed fee. No surprises.</h2>
+    <div class="divider"></div>
+    <table class="price-table">
+      <thead>
+        <tr>
+          <th>Deliverable</th>
+          <th style="text-align:right">Fee</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>R1 — Reports Module Remediation</td><td>$18,000</td></tr>
+        <tr><td>R2 — Restocking Recommendations</td><td>$42,000</td></tr>
+        <tr><td>R3 — Automated Browser Testing</td><td>$22,000</td></tr>
+        <tr><td>R4 — Architecture Documentation</td><td>$8,000</td></tr>
+        <tr><td>Project Management & Oversight</td><td>$10,000</td></tr>
+        <tr class="total"><td>Total Fixed Fee</td><td>$100,000</td></tr>
+        <tr class="bonus"><td>Early-completion bonus (acceptance by July 17, 2026)</td><td>+$35,000</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SLIDE 10: Desired Items -->
+  <div class="slide" data-title="Desired Items">
+    <div class="eyebrow">D1–D3 — Optional Scope</div>
+    <h2>Optional enhancements,<br>fixed addendum pricing.</h2>
+    <div class="divider"></div>
+    <div class="cards cols-3" style="margin-top: 16px;">
+      <div class="card">
+        <div class="number">$12k</div>
+        <h3>D1 — UI Modernization</h3>
+        <p>Visual refresh extending existing design tokens — familiar to current users, materially improved standard.</p>
+      </div>
+      <div class="card">
+        <div class="number">$6k</div>
+        <h3>D2 — Internationalization</h3>
+        <p>Extend i18n coverage to remaining English-only modules. Tokyo warehouse staff work in this dashboard daily.</p>
+      </div>
+      <div class="card">
+        <div class="number">$5k</div>
+        <h3>D3 — Dark Mode</h3>
+        <p>Operator-selectable theme via CSS custom properties. Targeted at warehouse floor stations in low-light environments.</p>
+      </div>
+    </div>
+    <div style="margin-top: 20px; padding: 16px 20px; background: #14532d22; border: 1px solid #14532d; border-radius: 8px;">
+      <p style="font-size: 15px; color: #4ade80;">All three items authorized together: <strong>$19,000</strong> — a 17% reduction versus individual authorization.</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 11: Why Us -->
+  <div class="slide" data-title="Why Us">
+    <div class="eyebrow">Why Accenture</div>
+    <h2>What makes us<br>the right choice.</h2>
+    <div class="divider"></div>
+    <div class="cards cols-2" style="margin-top: 16px;">
+      <div class="card">
+        <h3>We already know what's broken.</h3>
+        <p>We audited the codebase before submitting this proposal. Every defect listed is confirmed, not estimated. You are not paying for a discovery phase.</p>
+      </div>
+      <div class="card">
+        <h3>We put money on our timeline.</h3>
+        <p>The early-completion bonus is our confidence in written form. We don't offer incentives we don't intend to earn.</p>
+      </div>
+      <div class="card">
+        <h3>We speak IT's language.</h3>
+        <p>R3 (testing) is treated as a first-class deliverable, not an afterthought. Phase 1 ends with a test scaffold — before a single line of feature code is written.</p>
+      </div>
+      <div class="card">
+        <h3>No replatforming risk.</h3>
+        <p>Vue 3, FastAPI, Playwright — we work in the stack you already have. No migration, no new dependencies, no surprises at handoff.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 12: Close -->
+  <div class="slide center title-slide" data-title="Thank You">
+    <div class="eyebrow">Accenture — RFP #MC-2026-0417</div>
+    <h1>Let's get Meridian's<br>dashboard to where<br>it should be.</h1>
+    <div class="divider" style="margin: 28px auto;"></div>
+    <p style="margin: 0 auto;">Questions or follow-up: <span style="color: #38bdf8;">bartosz.bozyczko@accenture.com</span></p>
+    <p style="margin: 12px auto 0; font-size: 15px; color: #334155;">Proposal valid through May 24, 2026</p>
+  </div>
+
+</div>
+
+<!-- Navigation -->
+<nav>
+  <div class="nav-info">
+    <span class="slide-title-nav" id="slideTitle">Title</span>
+  </div>
+  <div class="progress" id="progress"></div>
+  <div class="nav-buttons">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>← Prev</button>
+    <span class="nav-info" id="counter" style="padding: 0 12px; line-height: 36px;">1 / 12</span>
+    <button class="nav-btn" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+</nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const progress = document.getElementById('progress');
+  let current = 0;
+
+  // Build pips
+  slides.forEach((_, i) => {
+    const pip = document.createElement('div');
+    pip.className = 'pip' + (i === 0 ? ' active' : '');
+    pip.onclick = () => goTo(i);
+    progress.appendChild(pip);
+  });
+
+  function goTo(index) {
+    slides[current].classList.remove('active');
+    slides[current].classList.add('exit');
+    setTimeout(() => slides[current].classList.remove('exit'), 350);
+    current = index;
+    slides[current].classList.add('active');
+    update();
+  }
+
+  function navigate(dir) {
+    const next = current + dir;
+    if (next < 0 || next >= slides.length) return;
+    goTo(next);
+  }
+
+  function update() {
+    document.getElementById('counter').textContent = (current + 1) + ' / ' + slides.length;
+    document.getElementById('slideTitle').textContent = slides[current].dataset.title || '';
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === slides.length - 1;
+    document.querySelectorAll('.pip').forEach((p, i) => p.classList.toggle('active', i === current));
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navigate(-1);
+  });
+</script>
+</body>
+</html>
