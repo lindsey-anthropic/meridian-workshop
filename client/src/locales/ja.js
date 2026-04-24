@@ -6,7 +6,9 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
-    companyName: '触媒コンポーネンツ',
+    restocking: '再入荷',
+    reports: 'レポート',
+    companyName: 'メリディアン・コンポーネンツ',
     subtitle: '在庫管理システム'
   },
 
@@ -185,6 +187,70 @@ export default {
       change: '変化',
       trend: 'トレンド',
       period: '期間'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: '再入荷推奨',
+    description: '在庫レベル、需要、予算に基づく発注推奨',
+    budgetCeiling: '予算上限',
+    budgetPlaceholder: '予算上限を入力...',
+    itemsNeedingRestock: '再入荷が必要な商品',
+    totalEstimatedCost: '推定総コスト',
+    itemsWithinBudget: '予算内の商品数',
+    budgetExceeded: '予算上限に達しました — 残りの商品は予算外です',
+    noItems: '選択したフィルターで再発注点を下回る商品はありません。',
+    table: {
+      itemName: '商品名',
+      sku: 'SKU',
+      warehouse: '倉庫',
+      category: 'カテゴリ',
+      onHand: '在庫数',
+      reorderPoint: '再発注点',
+      shortage: '不足数',
+      demandTrend: '需要トレンド',
+      recommendedQty: '推奨数量',
+      estimatedCost: '推定コスト',
+      status: 'ステータス'
+    },
+    trend: {
+      increasing: '増加',
+      stable: '安定',
+      decreasing: '減少',
+      unknown: '不明'
+    },
+    status: {
+      withinBudget: '予算内',
+      overBudget: '予算超過',
+      noBudget: '—'
+    }
+  },
+
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期パフォーマンス指標と月次トレンドを確認',
+    quarterlyPerformance: '四半期パフォーマンス',
+    monthlyRevenueTrend: '月次売上トレンド',
+    monthOverMonth: '前月比分析',
+    table: {
+      quarter: '四半期',
+      totalOrders: '総注文数',
+      totalRevenue: '総売上',
+      avgOrderValue: '平均注文額',
+      fulfillmentRate: '履行率',
+      month: '月',
+      orders: '注文数',
+      revenue: '売上',
+      change: '変化',
+      growthRate: '成長率'
+    },
+    summary: {
+      totalRevenueYTD: '総売上（年初来）',
+      avgMonthlyRevenue: '月平均売上',
+      totalOrdersYTD: '総注文数（年初来）',
+      bestQuarter: '最高パフォーマンス四半期'
     }
   },
 
