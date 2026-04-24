@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Components — Architecture Overview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #f8fafc;
+    color: #0f172a;
+    min-height: 100vh;
+  }
+
+  header {
+    background: #0f172a;
+    color: white;
+    padding: 24px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  header h1 { font-size: 20px; font-weight: 700; }
+  header p { font-size: 13px; color: #64748b; margin-top: 4px; }
+  .badge { background: #1e293b; color: #94a3b8; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 40px; }
+
+  /* Section headers */
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 16px;
+    margin-top: 40px;
+  }
+
+  /* Main architecture diagram */
+  .arch-diagram {
+    display: grid;
+    grid-template-columns: 1fr 80px 1fr 80px 1fr;
+    gap: 0;
+    align-items: start;
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    margin-bottom: 32px;
+  }
+
+  .layer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .layer-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 6px 0;
+    border-radius: 6px;
+    margin-bottom: 4px;
+  }
+
+  .layer-frontend .layer-title { background: #eff6ff; color: #1d4ed8; }
+  .layer-api .layer-title { background: #f0fdf4; color: #15803d; }
+  .layer-data .layer-title { background: #fef3c7; color: #b45309; }
+
+  .box {
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+
+  .box:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+  .box-blue { background: #eff6ff; border-color: #bfdbfe; }
+  .box-blue:hover { border-color: #3b82f6; }
+  .box-green { background: #f0fdf4; border-color: #bbf7d0; }
+  .box-green:hover { border-color: #22c55e; }
+  .box-yellow { background: #fefce8; border-color: #fde68a; }
+  .box-yellow:hover { border-color: #eab308; }
+  .box-purple { background: #faf5ff; border-color: #e9d5ff; }
+  .box-purple:hover { border-color: #a855f7; }
+
+  .box h3 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .box p { font-size: 11px; color: #64748b; line-height: 1.5; }
+  .box code { font-size: 10px; background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 3px; font-family: monospace; }
+
+  .arrow-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: 52px;
+    gap: 8px;
+  }
+
+  .arrow {
+    font-size: 22px;
+    color: #94a3b8;
+    line-height: 1;
+  }
+
+  .arrow-label {
+    font-size: 9px;
+    color: #94a3b8;
+    text-align: center;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* API endpoint table */
+  .endpoint-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    margin-bottom: 32px;
+  }
+
+  .endpoint-table th {
+    background: #f8fafc;
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #64748b;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .endpoint-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: top;
+  }
+
+  .endpoint-table tr:last-child td { border-bottom: none; }
+  .endpoint-table tr:hover td { background: #f8fafc; }
+
+  .method {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: monospace;
+  }
+
+  .get { background: #dcfce7; color: #15803d; }
+
+  .path { font-family: monospace; font-size: 12px; color: #0f172a; }
+  .filters-badge { font-size: 10px; color: #94a3b8; font-family: monospace; }
+
+  /* File map */
+  .file-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .file-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  .file-card h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 11px;
+  }
+
+  .file-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .file-item:last-child { border-bottom: none; }
+
+  .file-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .file-path {
+    font-family: monospace;
+    font-size: 12px;
+    color: #334155;
+    font-weight: 600;
+  }
+
+  .file-desc {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+
+  /* Patterns section */
+  .patterns-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .pattern-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  .pattern-card h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 8px;
+  }
+
+  .pattern-card p {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+
+  pre {
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    line-height: 1.6;
+    overflow-x: auto;
+  }
+
+  .kw { color: #818cf8; }
+  .fn { color: #34d399; }
+  .str { color: #fbbf24; }
+  .cm { color: #475569; }
+
+  /* Stack pills */
+  .stack-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+
+  .stack-pill {
+    background: white;
+    border-radius: 10px;
+    padding: 14px 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    text-align: center;
+    min-width: 120px;
+  }
+
+  .stack-pill .name { font-size: 14px; font-weight: 700; color: #0f172a; }
+  .stack-pill .version { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+  .stack-pill .role { font-size: 11px; color: #64748b; margin-top: 4px; }
+
+  footer {
+    background: #0f172a;
+    color: #64748b;
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Meridian Components — Architecture Overview</h1>
+    <p>Inventory Management System · Current State · Delivered by Accenture, April 2026</p>
+  </div>
+  <span class="badge">R4 — Handoff Document</span>
+</header>
+
+<div class="container">
+
+  <!-- Tech Stack -->
+  <div class="section-title">Technology Stack</div>
+  <div class="stack-row">
+    <div class="stack-pill">
+      <div class="name">Vue 3</div>
+      <div class="version">+ Composition API</div>
+      <div class="role">Frontend framework</div>
+    </div>
+    <div class="stack-pill">
+      <div class="name">Vite</div>
+      <div class="version">v5.4</div>
+      <div class="role">Dev server · :3000</div>
+    </div>
+    <div class="stack-pill">
+      <div class="name">Python</div>
+      <div class="version">3.13 · FastAPI</div>
+      <div class="role">Backend API · :8001</div>
+    </div>
+    <div class="stack-pill">
+      <div class="name">Pydantic</div>
+      <div class="version">v2.5</div>
+      <div class="role">Data validation</div>
+    </div>
+    <div class="stack-pill">
+      <div class="name">Axios</div>
+      <div class="version">HTTP client</div>
+      <div class="role">API calls (api.js)</div>
+    </div>
+    <div class="stack-pill">
+      <div class="name">JSON files</div>
+      <div class="version">In-memory</div>
+      <div class="role">No database</div>
+    </div>
+    <div class="stack-pill">
+      <div class="name">Playwright</div>
+      <div class="version">v1.49</div>
+      <div class="role">E2E test suite</div>
+    </div>
+  </div>
+
+  <!-- Architecture diagram -->
+  <div class="section-title">System Architecture</div>
+  <div class="arch-diagram">
+
+    <!-- Frontend -->
+    <div class="layer layer-frontend">
+      <div class="layer-title">Frontend · localhost:3000</div>
+
+      <div class="box box-blue">
+        <h3>Views (Vue SFC)</h3>
+        <p>Dashboard · Inventory · Orders · Finance · Demand · Reports · Restocking</p>
+        <p style="margin-top:6px"><code>client/src/views/*.vue</code></p>
+      </div>
+
+      <div class="box box-purple">
+        <h3>Composables</h3>
+        <p><strong>useFilters</strong> — shared filter state (singleton)</p>
+        <p><strong>useI18n</strong> — EN/JA translations</p>
+        <p><strong>useAuth</strong> — user profile</p>
+        <p style="margin-top:6px"><code>client/src/composables/</code></p>
+      </div>
+
+      <div class="box box-blue">
+        <h3>API Client</h3>
+        <p>Centralized axios wrapper. All views call methods here — no direct fetch calls.</p>
+        <p style="margin-top:6px"><code>client/src/api.js</code></p>
+      </div>
+
+      <div class="box box-blue">
+        <h3>Router</h3>
+        <p>Vue Router, client-side history. Route → View mapping in <code>main.js</code>.</p>
+      </div>
+    </div>
+
+    <!-- Arrow 1 -->
+    <div class="arrow-col">
+      <div class="arrow">⇄</div>
+      <div class="arrow-label">HTTP<br>JSON<br>:8001</div>
+    </div>
+
+    <!-- Backend -->
+    <div class="layer layer-api">
+      <div class="layer-title">Backend · localhost:8001</div>
+
+      <div class="box box-green">
+        <h3>FastAPI App</h3>
+        <p>Single file. Auto-docs at <code>/docs</code>. CORS open (dev only).</p>
+        <p style="margin-top:6px"><code>server/main.py</code></p>
+      </div>
+
+      <div class="box box-green">
+        <h3>Filter Utilities</h3>
+        <p><code>apply_filters()</code> — warehouse, category, status</p>
+        <p><code>filter_by_month()</code> — direct month or quarter (Q1–Q4)</p>
+      </div>
+
+      <div class="box box-green">
+        <h3>Pydantic Models</h3>
+        <p>InventoryItem · Order · DemandForecast · BacklogItem · PurchaseOrder</p>
+        <p>All responses validated and serialized.</p>
+      </div>
+
+      <div class="box box-green">
+        <h3>Data Loader</h3>
+        <p>JSON → Python dicts at startup. In-memory for runtime. Restart to reload.</p>
+        <p style="margin-top:6px"><code>server/mock_data.py</code></p>
+      </div>
+    </div>
+
+    <!-- Arrow 2 -->
+    <div class="arrow-col">
+      <div class="arrow">⇄</div>
+      <div class="arrow-label">Load<br>at<br>startup</div>
+    </div>
+
+    <!-- Data -->
+    <div class="layer layer-data">
+      <div class="layer-title">Data · server/data/</div>
+
+      <div class="box box-yellow">
+        <h3>inventory.json</h3>
+        <p>32 SKUs across 3 warehouses. Fields: sku, name, category, warehouse, quantity_on_hand, reorder_point, unit_cost.</p>
+      </div>
+
+      <div class="box box-yellow">
+        <h3>orders.json</h3>
+        <p>All customer orders. Fields: order_date, status, total_value, warehouse, category, items[].</p>
+      </div>
+
+      <div class="box box-yellow">
+        <h3>demand_forecasts.json</h3>
+        <p>Per-SKU demand. Fields: item_sku, current_demand, forecasted_demand, trend (increasing/stable/decreasing).</p>
+      </div>
+
+      <div class="box box-yellow">
+        <h3>Other files</h3>
+        <p>backlog_items.json · purchase_orders.json · spending data (summary, monthly, categories, transactions)</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Endpoints -->
+  <div class="section-title">API Endpoints</div>
+  <table class="endpoint-table">
+    <thead>
+      <tr>
+        <th>Method</th>
+        <th>Path</th>
+        <th>Description</th>
+        <th>Filters supported</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><span class="path">/api/inventory</span></td>
+        <td>All inventory items</td>
+        <td><span class="filters-badge">warehouse, category</span></td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><span class="path">/api/inventory/{id}</span></td>
+        <td>Single inventory item</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><span class="path">/api/orders</span></td>
+        <td>All orders</td>
+        <td><span class="filters-badge">warehouse, category, status, month</span></td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><span class="path">/api/orders/{id}</span></td>
+        <td>Single order</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><span class="path">/api/dashboard/summary</span></td>
+        <td>KPI summary for dashboard</td>
+        <td><span class="filters-badge">warehouse, category, status, month</span></td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><span class="path">/api/demand</span></td>
+        <td>Demand forecasts</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><span class="path">/api/backlog</span></td>
+        <td>Backlog items with purchase order flag</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><span class="path">/api/spending/summary</span></td>
+        <td>Spending summary stats</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><span class="path">/api/spending/monthly</span></td>
+        <td>Monthly spending breakdown</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><span class="path">/api/spending/categories</span></td>
+        <td>Spending by category</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><span class="path">/api/spending/transactions</span></td>
+        <td>Recent transactions</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><span class="path">/api/reports/quarterly</span></td>
+        <td>Quarterly performance aggregates</td>
+        <td><span class="filters-badge">warehouse, category, status, month</span></td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><span class="path">/api/reports/monthly-trends</span></td>
+        <td>Month-over-month revenue and orders</td>
+        <td><span class="filters-badge">warehouse, category, status, month</span></td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><span class="path">/api/restocking</span></td>
+        <td>Purchase order recommendations within budget</td>
+        <td><span class="filters-badge">budget, warehouse, category</span></td>
+      </tr>
+      <tr>
+        <td><span class="method get">GET</span></td>
+        <td><span class="path">/api/purchase-orders/{backlog_item_id}</span></td>
+        <td>Purchase order for a backlog item</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- File map -->
+  <div class="section-title">Key Files</div>
+  <div class="file-grid">
+    <div class="file-card">
+      <h3>Frontend</h3>
+      <div class="file-item">
+        <span class="file-icon">🗂</span>
+        <div>
+          <div class="file-path">client/src/main.js</div>
+          <div class="file-desc">App entry, Vue Router setup, route → view mapping</div>
+        </div>
+      </div>
+      <div class="file-item">
+        <span class="file-icon">📄</span>
+        <div>
+          <div class="file-path">client/src/App.vue</div>
+          <div class="file-desc">Root component, nav, filter bar, router-view</div>
+        </div>
+      </div>
+      <div class="file-item">
+        <span class="file-icon">🔌</span>
+        <div>
+          <div class="file-path">client/src/api.js</div>
+          <div class="file-desc">All HTTP calls. Every view imports from here — no raw axios elsewhere</div>
+        </div>
+      </div>
+      <div class="file-item">
+        <span class="file-icon">🔧</span>
+        <div>
+          <div class="file-path">client/src/composables/useFilters.js</div>
+          <div class="file-desc">Singleton filter state shared across all views. Watch it to react to filter changes</div>
+        </div>
+      </div>
+      <div class="file-item">
+        <span class="file-icon">🌐</span>
+        <div>
+          <div class="file-path">client/src/composables/useI18n.js</div>
+          <div class="file-desc">EN/JA translations, t() function, locale persistence in localStorage</div>
+        </div>
+      </div>
+      <div class="file-item">
+        <span class="file-icon">📁</span>
+        <div>
+          <div class="file-path">client/src/views/*.vue</div>
+          <div class="file-desc">Dashboard, Inventory, Orders, Spending, Demand, Reports, Restocking</div>
+        </div>
+      </div>
+      <div class="file-item">
+        <span class="file-icon">📁</span>
+        <div>
+          <div class="file-path">client/src/locales/en.js · ja.js</div>
+          <div class="file-desc">Translation strings. Add new keys to both files when adding UI text</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <h3>Backend &amp; Tests</h3>
+      <div class="file-item">
+        <span class="file-icon">🐍</span>
+        <div>
+          <div class="file-path">server/main.py</div>
+          <div class="file-desc">All FastAPI endpoints and filter utilities. Single-file backend</div>
+        </div>
+      </div>
+      <div class="file-item">
+        <span class="file-icon">📦</span>
+        <div>
+          <div class="file-path">server/mock_data.py</div>
+          <div class="file-desc">Loads JSON files into Python dicts at startup. In-memory only</div>
+        </div>
+      </div>
+      <div class="file-item">
+        <span class="file-icon">📁</span>
+        <div>
+          <div class="file-path">server/data/*.json</div>
+          <div class="file-desc">inventory, orders, demand_forecasts, backlog_items, purchase_orders, spending data</div>
+        </div>
+      </div>
+      <div class="file-item">
+        <span class="file-icon">🧪</span>
+        <div>
+          <div class="file-path">tests/backend/</div>
+          <div class="file-desc">pytest + FastAPI TestClient. 51 API tests. Run: cd tests && uv run pytest -v</div>
+        </div>
+      </div>
+      <div class="file-item">
+        <span class="file-icon">🎭</span>
+        <div>
+          <div class="file-path">tests/e2e/*.spec.js</div>
+          <div class="file-desc">Playwright browser tests. 22 tests covering inventory, reports, restocking</div>
+        </div>
+      </div>
+      <div class="file-item">
+        <span class="file-icon">⚙️</span>
+        <div>
+          <div class="file-path">playwright.config.js</div>
+          <div class="file-desc">Playwright config. Run: node_modules/.bin/playwright test</div>
+        </div>
+      </div>
+      <div class="file-item">
+        <span class="file-icon">🚀</span>
+        <div>
+          <div class="file-path">scripts/start.sh</div>
+          <div class="file-desc">Starts both frontend and backend. Claude Code: /start</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Patterns -->
+  <div class="section-title">Key Patterns</div>
+  <div class="patterns-grid">
+    <div class="pattern-card">
+      <h3>Filter flow</h3>
+      <p>Global filter bar → <code>useFilters</code> singleton refs → views watch for changes → call <code>getCurrentFilters()</code> → pass to <code>api.js</code> → query params on backend.</p>
+      <pre><span class="kw">const</span> { selectedLocation, getCurrentFilters } = <span class="fn">useFilters</span>()
+<span class="fn">watch</span>(selectedLocation, () => {
+  <span class="fn">loadData</span>()
+})
+<span class="kw">const</span> <span class="fn">loadData</span> = <span class="kw">async</span> () => {
+  <span class="kw">const</span> filters = <span class="fn">getCurrentFilters</span>()
+  data.value = <span class="kw">await</span> api.<span class="fn">getInventory</span>(filters)
+}</pre>
+    </div>
+
+    <div class="pattern-card">
+      <h3>View structure</h3>
+      <p>All views follow the same Composition API pattern: <code>ref</code> for state, <code>computed</code> for derived values, <code>onMounted</code> + <code>watch</code> for data loading.</p>
+      <pre><span class="fn">setup</span>() {
+  <span class="kw">const</span> loading = <span class="fn">ref</span>(<span class="kw">true</span>)
+  <span class="kw">const</span> data = <span class="fn">ref</span>([])
+
+  <span class="kw">const</span> <span class="fn">loadData</span> = <span class="kw">async</span> () => {
+    <span class="cm">// try/catch/finally</span>
+  }
+
+  <span class="fn">onMounted</span>(loadData)
+  <span class="fn">watch</span>([...filters], loadData)
+  <span class="kw">return</span> { loading, data, loadData }
+}</pre>
+    </div>
+
+    <div class="pattern-card">
+      <h3>Backend filter pattern</h3>
+      <p>All filterable endpoints accept optional query params, pass through <code>apply_filters()</code> and <code>filter_by_month()</code> before returning data.</p>
+      <pre><span class="kw">@app</span>.<span class="fn">get</span>(<span class="str">"/api/orders"</span>)
+<span class="kw">def</span> <span class="fn">get_orders</span>(
+  warehouse: Optional[str] = None,
+  category: Optional[str] = None,
+  status: Optional[str] = None,
+  month: Optional[str] = None
+):
+  result = <span class="fn">apply_filters</span>(
+    orders, warehouse, category, status
+  )
+  <span class="kw">return</span> <span class="fn">filter_by_month</span>(result, month)</pre>
+    </div>
+  </div>
+
+  <!-- Known limitations -->
+  <div class="section-title">Known Limitations (for IT)</div>
+  <div class="file-card" style="margin-bottom: 0">
+    <div class="file-item">
+      <span class="file-icon">⚠️</span>
+      <div>
+        <div class="file-path">No database</div>
+        <div class="file-desc">All data lives in JSON files loaded at server startup. Changes (e.g. purchase orders created via API) are lost on restart. Adding a real database is the natural next step for production use.</div>
+      </div>
+    </div>
+    <div class="file-item">
+      <span class="file-icon">⚠️</span>
+      <div>
+        <div class="file-path">No authentication</div>
+        <div class="file-desc">CORS is open to all origins. The user profile is hardcoded. Not suitable for production as-is without an auth layer.</div>
+      </div>
+    </div>
+    <div class="file-item">
+      <span class="file-icon">⚠️</span>
+      <div>
+        <div class="file-path">No pagination</div>
+        <div class="file-desc">All endpoints return full datasets. Acceptable for current data volume (~32 SKUs, ~100 orders); will need pagination if data grows significantly.</div>
+      </div>
+    </div>
+    <div class="file-item" style="border-bottom: none">
+      <span class="file-icon">✅</span>
+      <div>
+        <div class="file-path">Test coverage</div>
+        <div class="file-desc">51 backend API tests (pytest) + 22 browser tests (Playwright). Run both before deploying any change.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Meridian Components Inventory Management System · Architecture documentation prepared by Accenture · April 2026
+</footer>
+
+</body>
+</html>
