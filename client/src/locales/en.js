@@ -6,7 +6,7 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
-    companyName: 'Catalyst Components',
+    companyName: 'Meridian Components',
     subtitle: 'Inventory Management System'
   },
 
