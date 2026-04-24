@@ -16,6 +16,9 @@
           <router-link to="/orders" :class="{ active: $route.path === '/orders' }">
             {{ t('nav.orders') }}
           </router-link>
+          <router-link to="/restocking" :class="{ active: $route.path === '/restocking' }">
+            Restocking
+          </router-link>
           <router-link to="/spending" :class="{ active: $route.path === '/spending' }">
             {{ t('nav.finance') }}
           </router-link>
@@ -26,6 +29,7 @@
             Reports
           </router-link>
         </nav>
+        <DarkModeToggle />
         <LanguageSwitcher />
         <ProfileMenu
           @show-profile-details="showProfileDetails = true"
@@ -64,6 +68,7 @@ import ProfileMenu from './components/ProfileMenu.vue'
 import ProfileDetailsModal from './components/ProfileDetailsModal.vue'
 import TasksModal from './components/TasksModal.vue'
 import LanguageSwitcher from './components/LanguageSwitcher.vue'
+import DarkModeToggle from './components/DarkModeToggle.vue'
 
 export default {
   name: 'App',
@@ -72,7 +77,8 @@ export default {
     ProfileMenu,
     ProfileDetailsModal,
     TasksModal,
-    LanguageSwitcher
+    LanguageSwitcher,
+    DarkModeToggle
   },
   setup() {
     const { currentUser } = useAuth()
@@ -162,6 +168,92 @@ export default {
 </script>
 
 <style>
+/* ── CSS CUSTOM PROPERTIES ─────────────────────────── */
+:root {
+  --bg-page:    #f8fafc;
+  --bg-card:    #ffffff;
+  --bg-nav:     #ffffff;
+  --bg-thead:   #f8fafc;
+  --bg-hover:   #f1f5f9;
+  --bg-row-hover: #f8fafc;
+
+  --text-primary:   #0f172a;
+  --text-secondary: #1e293b;
+  --text-muted:     #64748b;
+  --text-table:     #334155;
+  --text-th:        #475569;
+
+  --border:       #e2e8f0;
+  --border-light: #f1f5f9;
+  --border-strong: #cbd5e1;
+
+  --accent:       #2563eb;
+  --accent-bg:    #eff6ff;
+
+  --color-warning: #ea580c;
+  --color-success: #059669;
+  --color-danger:  #dc2626;
+  --color-info:    #2563eb;
+
+  --badge-success-bg:    #d1fae5; --badge-success-text:    #065f46;
+  --badge-warning-bg:    #fed7aa; --badge-warning-text:    #92400e;
+  --badge-danger-bg:     #fecaca; --badge-danger-text:     #991b1b;
+  --badge-info-bg:       #dbeafe; --badge-info-text:       #1e40af;
+  --badge-stable-bg:     #e0e7ff; --badge-stable-text:     #3730a3;
+  --badge-increasing-bg: #d1fae5; --badge-increasing-text: #065f46;
+  --badge-decreasing-bg: #fecaca; --badge-decreasing-text: #991b1b;
+  --badge-high-bg:       #fecaca; --badge-high-text:       #991b1b;
+  --badge-medium-bg:     #fed7aa; --badge-medium-text:     #92400e;
+  --badge-low-bg:        #dbeafe; --badge-low-text:        #1e40af;
+
+  --error-bg:     #fef2f2;
+  --error-border: #fecaca;
+  --error-text:   #991b1b;
+}
+
+html.dark {
+  --bg-page:    #0f1117;
+  --bg-card:    #1e2130;
+  --bg-nav:     #161b27;
+  --bg-thead:   #151824;
+  --bg-hover:   #252b3b;
+  --bg-row-hover: #1a1f2e;
+
+  --text-primary:   #f1f5f9;
+  --text-secondary: #e2e8f0;
+  --text-muted:     #94a3b8;
+  --text-table:     #cbd5e1;
+  --text-th:        #94a3b8;
+
+  --border:       #2d3348;
+  --border-light: #1a1f2e;
+  --border-strong: #3d4663;
+
+  --accent:       #60a5fa;
+  --accent-bg:    #1e2f4d;
+
+  --color-warning: #fb923c;
+  --color-success: #34d399;
+  --color-danger:  #f87171;
+  --color-info:    #60a5fa;
+
+  --badge-success-bg:    #064e3b; --badge-success-text:    #6ee7b7;
+  --badge-warning-bg:    #78350f; --badge-warning-text:    #fdba74;
+  --badge-danger-bg:     #7f1d1d; --badge-danger-text:     #fca5a5;
+  --badge-info-bg:       #1e3a5f; --badge-info-text:       #93c5fd;
+  --badge-stable-bg:     #312e81; --badge-stable-text:     #c4b5fd;
+  --badge-increasing-bg: #064e3b; --badge-increasing-text: #6ee7b7;
+  --badge-decreasing-bg: #7f1d1d; --badge-decreasing-text: #fca5a5;
+  --badge-high-bg:       #7f1d1d; --badge-high-text:       #fca5a5;
+  --badge-medium-bg:     #78350f; --badge-medium-text:     #fdba74;
+  --badge-low-bg:        #1e3a5f; --badge-low-text:        #93c5fd;
+
+  --error-bg:     #2d1b1b;
+  --error-border: #7f1d1d;
+  --error-text:   #fca5a5;
+}
+
+/* ── RESET ─────────────────────────────────────────── */
 * {
   margin: 0;
   padding: 0;
@@ -170,10 +262,11 @@ export default {
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background: #f8fafc;
-  color: #1e293b;
+  background: var(--bg-page);
+  color: var(--text-secondary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background 0.2s, color 0.2s;
 }
 
 .app {
@@ -183,8 +276,8 @@ body {
 }
 
 .top-nav {
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--bg-nav);
+  border-bottom: 1px solid var(--border);
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
@@ -218,16 +311,16 @@ body {
 .logo h1 {
   font-size: 1.375rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   letter-spacing: -0.025em;
 }
 
 .subtitle {
   font-size: 0.813rem;
-  color: #64748b;
+  color: var(--text-muted);
   font-weight: 400;
   padding-left: 0.75rem;
-  border-left: 1px solid #e2e8f0;
+  border-left: 1px solid var(--border);
 }
 
 .nav-tabs {
@@ -237,7 +330,7 @@ body {
 
 .nav-tabs a {
   padding: 0.625rem 1.25rem;
-  color: #64748b;
+  color: var(--text-muted);
   text-decoration: none;
   font-weight: 500;
   font-size: 0.938rem;
@@ -247,13 +340,13 @@ body {
 }
 
 .nav-tabs a:hover {
-  color: #0f172a;
-  background: #f1f5f9;
+  color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
 .nav-tabs a.active {
-  color: #2563eb;
-  background: #eff6ff;
+  color: var(--accent);
+  background: var(--accent-bg);
 }
 
 .nav-tabs a.active::after {
@@ -263,7 +356,7 @@ body {
   left: 0;
   right: 0;
   height: 2px;
-  background: #2563eb;
+  background: var(--accent);
 }
 
 .main-content {
@@ -281,13 +374,13 @@ body {
 .page-header h2 {
   font-size: 1.875rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   margin-bottom: 0.375rem;
   letter-spacing: -0.025em;
 }
 
 .page-header p {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.938rem;
 }
 
@@ -299,20 +392,20 @@ body {
 }
 
 .stat-card {
-  background: white;
+  background: var(--bg-card);
   padding: 1.25rem;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   transition: all 0.2s ease;
 }
 
 .stat-card:hover {
-  border-color: #cbd5e1;
+  border-color: var(--border-strong);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .stat-label {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.875rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -323,31 +416,20 @@ body {
 .stat-value {
   font-size: 2.25rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   letter-spacing: -0.025em;
 }
 
-.stat-card.warning .stat-value {
-  color: #ea580c;
-}
-
-.stat-card.success .stat-value {
-  color: #059669;
-}
-
-.stat-card.danger .stat-value {
-  color: #dc2626;
-}
-
-.stat-card.info .stat-value {
-  color: #2563eb;
-}
+.stat-card.warning .stat-value { color: var(--color-warning); }
+.stat-card.success .stat-value { color: var(--color-success); }
+.stat-card.danger  .stat-value { color: var(--color-danger); }
+.stat-card.info    .stat-value { color: var(--color-info); }
 
 .card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 10px;
   padding: 1.25rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   margin-bottom: 1.25rem;
 }
 
@@ -357,13 +439,13 @@ body {
   align-items: center;
   margin-bottom: 1rem;
   padding-bottom: 0.875rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border);
 }
 
 .card-title {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   letter-spacing: -0.025em;
 }
 
@@ -377,16 +459,16 @@ table {
 }
 
 thead {
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--bg-thead);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 th {
   text-align: left;
   padding: 0.5rem 0.75rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-th);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -394,8 +476,8 @@ th {
 
 td {
   padding: 0.5rem 0.75rem;
-  border-top: 1px solid #f1f5f9;
-  color: #334155;
+  border-top: 1px solid var(--border-light);
+  color: var(--text-table);
   font-size: 0.875rem;
 }
 
@@ -404,7 +486,7 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: #f8fafc;
+  background: var(--bg-row-hover);
 }
 
 .badge {
@@ -417,67 +499,28 @@ tbody tr:hover {
   letter-spacing: 0.025em;
 }
 
-.badge.success {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.badge.warning {
-  background: #fed7aa;
-  color: #92400e;
-}
-
-.badge.danger {
-  background: #fecaca;
-  color: #991b1b;
-}
-
-.badge.info {
-  background: #dbeafe;
-  color: #1e40af;
-}
-
-.badge.increasing {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.badge.decreasing {
-  background: #fecaca;
-  color: #991b1b;
-}
-
-.badge.stable {
-  background: #e0e7ff;
-  color: #3730a3;
-}
-
-.badge.high {
-  background: #fecaca;
-  color: #991b1b;
-}
-
-.badge.medium {
-  background: #fed7aa;
-  color: #92400e;
-}
-
-.badge.low {
-  background: #dbeafe;
-  color: #1e40af;
-}
+.badge.success    { background: var(--badge-success-bg);    color: var(--badge-success-text); }
+.badge.warning    { background: var(--badge-warning-bg);    color: var(--badge-warning-text); }
+.badge.danger     { background: var(--badge-danger-bg);     color: var(--badge-danger-text); }
+.badge.info       { background: var(--badge-info-bg);       color: var(--badge-info-text); }
+.badge.increasing { background: var(--badge-increasing-bg); color: var(--badge-increasing-text); }
+.badge.decreasing { background: var(--badge-decreasing-bg); color: var(--badge-decreasing-text); }
+.badge.stable     { background: var(--badge-stable-bg);     color: var(--badge-stable-text); }
+.badge.high       { background: var(--badge-high-bg);       color: var(--badge-high-text); }
+.badge.medium     { background: var(--badge-medium-bg);     color: var(--badge-medium-text); }
+.badge.low        { background: var(--badge-low-bg);        color: var(--badge-low-text); }
 
 .loading {
   text-align: center;
   padding: 3rem;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.938rem;
 }
 
 .error {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #991b1b;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  color: var(--error-text);
   padding: 1rem;
   border-radius: 8px;
   margin: 1rem 0;

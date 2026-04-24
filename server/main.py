@@ -228,12 +228,15 @@ def get_recent_transactions():
     return recent_transactions
 
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
     """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
+    filtered_orders = apply_filters(orders, warehouse, category)
     quarters = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -258,7 +261,7 @@ def get_quarterly_reports():
 
         quarters[quarter]['total_orders'] += 1
         quarters[quarter]['total_revenue'] += order.get('total_value', 0)
-        if order.get('status') == 'Delivered':
+        if order.get('status', '').lower() == 'delivered':
             quarters[quarter]['delivered_orders'] += 1
 
     # Calculate averages and fulfillment rate
@@ -274,11 +277,15 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
     """Get month-over-month trends"""
+    filtered_orders = apply_filters(orders, warehouse, category)
     months = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
@@ -303,6 +310,90 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+PRIORITY_ORDER = {'critical': 0, 'high': 1, 'medium': 2, 'low': 3}
+
+class RestockingRecommendation(BaseModel):
+    sku: str
+    item_name: str
+    category: str
+    warehouse: str
+    quantity_on_hand: int
+    reorder_point: int
+    forecasted_demand: int
+    days_until_shortage: float
+    recommended_quantity: int
+    estimated_cost: float
+    priority: str
+    trend: str
+
+@app.get("/api/restocking/recommendations", response_model=List[RestockingRecommendation])
+def get_restocking_recommendations(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    budget: Optional[float] = None
+):
+    """Generate restocking recommendations based on stock levels and demand forecast."""
+    filtered_inventory = apply_filters(inventory_items, warehouse, category)
+    forecast_by_sku = {f['item_sku']: f for f in demand_forecasts}
+
+    recommendations = []
+    for item in filtered_inventory:
+        forecast = forecast_by_sku.get(item['sku'])
+        if not forecast:
+            continue
+        forecasted_demand = forecast.get('forecasted_demand', 0)
+        if forecasted_demand <= 0:
+            continue
+
+        quantity_on_hand = item['quantity_on_hand']
+        reorder_point = item['reorder_point']
+
+        # Only recommend items that actually need restocking
+        if quantity_on_hand >= forecasted_demand + reorder_point:
+            continue
+
+        days_until_shortage = round((quantity_on_hand / (forecasted_demand / 30)), 1)
+        recommended_quantity = max(1, forecasted_demand + reorder_point - quantity_on_hand)
+        estimated_cost = round(recommended_quantity * item['unit_cost'], 2)
+        trend = forecast.get('trend', 'stable')
+
+        if days_until_shortage < 7 or quantity_on_hand == 0:
+            priority = 'critical'
+        elif days_until_shortage < 14 or trend == 'increasing':
+            priority = 'high'
+        elif days_until_shortage < 30:
+            priority = 'medium'
+        else:
+            priority = 'low'
+
+        recommendations.append({
+            'sku': item['sku'],
+            'item_name': item['name'],
+            'category': item['category'],
+            'warehouse': item['warehouse'],
+            'quantity_on_hand': quantity_on_hand,
+            'reorder_point': reorder_point,
+            'forecasted_demand': forecasted_demand,
+            'days_until_shortage': days_until_shortage,
+            'recommended_quantity': recommended_quantity,
+            'estimated_cost': estimated_cost,
+            'priority': priority,
+            'trend': trend,
+        })
+
+    recommendations.sort(key=lambda x: (PRIORITY_ORDER[x['priority']], x['estimated_cost']))
+
+    if budget is not None:
+        result, running_total = [], 0.0
+        for r in recommendations:
+            if running_total + r['estimated_cost'] <= budget:
+                result.append(r)
+                running_total += r['estimated_cost']
+        return result
+
+    return recommendations
+
 
 if __name__ == "__main__":
     import uvicorn

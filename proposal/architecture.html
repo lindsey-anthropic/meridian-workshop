@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Components — Architecture Overview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.5; }
+
+  header {
+    background: #0f172a; color: #f8fafc; padding: 28px 48px;
+    display: flex; justify-content: space-between; align-items: flex-end;
+  }
+  header h1 { font-size: 22px; font-weight: 700; }
+  header p { font-size: 13px; color: #64748b; margin-top: 4px; }
+  header .meta { font-size: 12px; color: #475569; text-align: right; }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 40px 32px; }
+
+  section { margin-bottom: 48px; }
+  h2 { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; }
+  h3 { font-size: 13px; font-weight: 600; color: #38bdf8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* Flow diagram */
+  .flow {
+    display: flex; align-items: stretch; gap: 0;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .flow-layer {
+    flex: 1; padding: 20px 16px; text-align: center;
+    border-right: 1px solid #e2e8f0;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .flow-layer:last-child { border-right: none; }
+  .flow-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 8px;
+  }
+  .flow-box {
+    background: #f1f5f9; border-radius: 6px; padding: 8px 10px;
+    font-size: 12px; color: #334155; font-weight: 500;
+  }
+  .flow-box.blue { background: #dbeafe; color: #1e40af; }
+  .flow-box.green { background: #dcfce7; color: #166534; }
+  .flow-box.purple { background: #f3e8ff; color: #6b21a8; }
+  .flow-box.amber { background: #fef3c7; color: #92400e; }
+  .flow-box.rose { background: #ffe4e6; color: #9f1239; }
+
+  /* Arrows between layers */
+  .arrow { display: flex; align-items: center; padding: 0 4px; color: #94a3b8; font-size: 18px; }
+
+  /* Files grid */
+  .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .file-card {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px;
+  }
+  .file-card .name { font-size: 13px; font-weight: 600; color: #0f172a; font-family: monospace; margin-bottom: 4px; }
+  .file-card .desc { font-size: 12px; color: #64748b; }
+
+  /* Endpoints table */
+  table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; font-size: 13px; }
+  th { background: #f1f5f9; padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #64748b; }
+  td { padding: 10px 14px; border-top: 1px solid #f1f5f9; color: #334155; vertical-align: top; }
+  tr:hover td { background: #f8fafc; }
+  .method { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; font-family: monospace; }
+  .method.get { background: #dcfce7; color: #166534; }
+  .method.post { background: #dbeafe; color: #1e40af; }
+  .method.patch { background: #fef3c7; color: #92400e; }
+  .method.delete { background: #ffe4e6; color: #9f1239; }
+
+  /* Data files */
+  .data-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+  .data-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; }
+  .data-card .filename { font-family: monospace; font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+  .data-card .fields { font-size: 11px; color: #64748b; font-family: monospace; line-height: 1.8; }
+
+  /* Tech debt */
+  .debt-list { display: flex; flex-direction: column; gap: 10px; }
+  .debt-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; display: flex; gap: 14px; align-items: flex-start; }
+  .severity { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 8px; border-radius: 4px; flex-shrink: 0; margin-top: 1px; }
+  .severity.high { background: #ffe4e6; color: #9f1239; }
+  .severity.medium { background: #fef3c7; color: #92400e; }
+  .severity.low { background: #f1f5f9; color: #64748b; }
+  .debt-item .title { font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 2px; }
+  .debt-item .detail { font-size: 12px; color: #64748b; }
+
+  /* Footer */
+  footer { background: #0f172a; color: #475569; text-align: center; padding: 20px; font-size: 12px; margin-top: 48px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Meridian Components — Current-State Architecture</h1>
+    <p>Inventory Management Dashboard · Architecture Review for IT Handoff</p>
+  </div>
+  <div class="meta">
+    Prepared by: [Vendor]<br>
+    April 2026<br>
+    RFP #MC-2026-0417
+  </div>
+</header>
+
+<main>
+
+  <!-- SYSTEM OVERVIEW -->
+  <section>
+    <h2>System Overview</h2>
+    <p style="font-size:14px;color:#475569;margin-bottom:20px">
+      A two-tier web application: Vue 3 single-page frontend served by Vite, communicating over HTTP with a Python FastAPI backend.
+      There is no database — all data is stored as JSON files loaded into memory at server startup.
+      The system serves three warehouses: San Francisco (HQ), London (EMEA), and Tokyo (APAC).
+    </p>
+
+    <div class="flow">
+      <div class="flow-layer">
+        <div class="flow-label">Browser</div>
+        <div class="flow-box blue">Vue 3 SPA<br><small>port 3000</small></div>
+        <div class="flow-box blue">Vue Router<br><small>6 routes</small></div>
+        <div class="flow-box blue">useFilters<br><small>global state</small></div>
+      </div>
+      <div class="flow-layer" style="flex:0.3;justify-content:center;border:none;color:#94a3b8;font-size:20px;">→<br><small style="font-size:10px">HTTP/JSON<br>axios</small></div>
+      <div class="flow-layer">
+        <div class="flow-label">API Server</div>
+        <div class="flow-box green">FastAPI<br><small>port 8001</small></div>
+        <div class="flow-box green">Pydantic<br><small>validation</small></div>
+        <div class="flow-box green">16+ routes</div>
+      </div>
+      <div class="flow-layer" style="flex:0.3;justify-content:center;border:none;color:#94a3b8;font-size:20px;">→<br><small style="font-size:10px">in-memory<br>read</small></div>
+      <div class="flow-layer">
+        <div class="flow-label">Data Layer</div>
+        <div class="flow-box amber">JSON files<br><small>server/data/</small></div>
+        <div class="flow-box amber">7 files<br><small>loaded at startup</small></div>
+        <div class="flow-box amber" style="background:#fde68a">No database<br><small>writes not persisted</small></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <div class="file-card">
+        <div class="name">Stack</div>
+        <div class="desc">Frontend: Vue 3 + Vite + Composition API<br>Backend: Python 3.11 + FastAPI + uvicorn<br>Package manager: uv (backend), npm (frontend)</div>
+      </div>
+      <div class="file-card">
+        <div class="name">Warehouses</div>
+        <div class="desc">San Francisco (HQ, primary distribution)<br>London (EMEA)<br>Tokyo (APAC, opened 2023)</div>
+      </div>
+      <div class="file-card">
+        <div class="name">Product categories</div>
+        <div class="desc">Sensors · Actuators · Controllers<br>Circuit Boards · Power Supplies</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FRONTEND -->
+  <section>
+    <h2>Frontend — client/src/</h2>
+    <h3 style="margin-bottom:12px">Views (page-level components)</h3>
+    <div class="file-grid" style="margin-bottom:20px">
+      <div class="file-card"><div class="name">Dashboard.vue</div><div class="desc">Main KPI overview: inventory value, order fulfillment, low-stock alerts. Heaviest component (1,271 lines).</div></div>
+      <div class="file-card"><div class="name">Inventory.vue</div><div class="desc">Stock levels table with search, warehouse/category filters, and item detail modal.</div></div>
+      <div class="file-card"><div class="name">Orders.vue</div><div class="desc">Customer orders list with status tracking (Delivered / Shipped / Processing / Backordered).</div></div>
+      <div class="file-card"><div class="name">Reports.vue</div><div class="desc">Quarterly performance reports and monthly trends. <strong style="color:#9f1239">⚠ Known defects — R1 remediation target.</strong></div></div>
+      <div class="file-card"><div class="name">Spending.vue</div><div class="desc">Financial breakdown: procurement, operational, labor, overhead costs with monthly trends (852 lines).</div></div>
+      <div class="file-card"><div class="name">Demand.vue</div><div class="desc">Demand forecasts per SKU with trend direction and inventory recommendations.</div></div>
+      <div class="file-card"><div class="name">Backlog.vue</div><div class="desc">Unfulfilled orders requiring attention, with priority levels and purchase order creation.</div></div>
+    </div>
+
+    <h3 style="margin-bottom:12px">Composables (shared logic)</h3>
+    <div class="file-grid" style="margin-bottom:20px">
+      <div class="file-card"><div class="name">useFilters.js</div><div class="desc">Global singleton: period, warehouse, category, order status. Provides computed params for all API calls.</div></div>
+      <div class="file-card"><div class="name">useI18n.js</div><div class="desc">i18n with English and Japanese (ja) dictionaries. Auto-maps currency (USD/JPY) by locale. Not applied to all views.</div></div>
+      <div class="file-card"><div class="name">useAuth.js</div><div class="desc">Mock user session. Tasks hardcoded here — not persisted to backend. Language-aware user fields.</div></div>
+    </div>
+
+    <h3 style="margin-bottom:12px">API Client</h3>
+    <div class="file-grid">
+      <div class="file-card"><div class="name">api.js</div><div class="desc">Centralized axios client. 15+ methods mapping to all backend endpoints. URLSearchParams for filter encoding.</div></div>
+      <div class="file-card"><div class="name">locales/en.js · ja.js</div><div class="desc">Translation dictionaries for English and Japanese. Incomplete — not all views use them.</div></div>
+      <div class="file-card"><div class="name">utils/currency.js</div><div class="desc">Currency formatting helpers (USD / JPY).</div></div>
+    </div>
+  </section>
+
+  <!-- BACKEND -->
+  <section>
+    <h2>Backend API — server/</h2>
+    <table>
+      <thead>
+        <tr><th>Method</th><th>Endpoint</th><th>Filters / params</th><th>Returns</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="method get">GET</span></td><td>/api/inventory</td><td>warehouse, category</td><td>InventoryItem[]</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/inventory/{id}</td><td>—</td><td>InventoryItem</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/orders</td><td>warehouse, category, status, month</td><td>Order[]</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/orders/{id}</td><td>—</td><td>Order</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/demand</td><td>—</td><td>DemandForecast[]</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/backlog</td><td>—</td><td>BacklogItem[] (with has_purchase_order flag)</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/dashboard/summary</td><td>warehouse, category, status, month</td><td>KPI summary object</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/spending/summary</td><td>—</td><td>Spend totals + % change</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/spending/monthly</td><td>—</td><td>Monthly breakdown[]</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/spending/categories</td><td>—</td><td>Category spend[]</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/spending/transactions</td><td>—</td><td>Transaction[]</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/reports/quarterly</td><td>—</td><td>Quarterly KPIs[]</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/reports/monthly-trends</td><td>—</td><td>Monthly trends[]</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/tasks</td><td>—</td><td>Task[]</td></tr>
+        <tr><td><span class="method post">POST</span></td><td>/api/tasks</td><td>—</td><td>Task (created)</td></tr>
+        <tr><td><span class="method patch">PATCH</span></td><td>/api/tasks/{id}</td><td>—</td><td>Task (toggled)</td></tr>
+        <tr><td><span class="method delete">DELETE</span></td><td>/api/tasks/{id}</td><td>—</td><td>{status}</td></tr>
+        <tr><td><span class="method post">POST</span></td><td>/api/purchase-orders</td><td>—</td><td>PurchaseOrder (created)</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/purchase-orders/{backlog_item_id}</td><td>—</td><td>PurchaseOrder</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- DATA LAYER -->
+  <section>
+    <h2>Data Layer — server/data/</h2>
+    <p style="font-size:13px;color:#64748b;margin-bottom:16px">All data is loaded into memory at server startup from JSON files. No database. Writes via API (tasks, purchase orders) are lost on server restart.</p>
+    <div class="data-grid">
+      <div class="data-card">
+        <div class="filename">inventory.json</div>
+        <div class="fields">id, sku, name, category, warehouse<br>quantity_on_hand, reorder_point<br>unit_cost, location, last_updated</div>
+      </div>
+      <div class="data-card">
+        <div class="filename">orders.json</div>
+        <div class="fields">id, order_number, customer, items[]<br>status, order_date, expected_delivery<br>total_value, warehouse, category</div>
+      </div>
+      <div class="data-card">
+        <div class="filename">demand_forecasts.json</div>
+        <div class="fields">id, item_sku, item_name<br>current_demand, forecasted_demand<br>trend, period</div>
+      </div>
+      <div class="data-card">
+        <div class="filename">backlog_items.json</div>
+        <div class="fields">id, order_id, item_sku, item_name<br>quantity_needed, quantity_available<br>days_delayed, priority</div>
+      </div>
+      <div class="data-card">
+        <div class="filename">spending.json</div>
+        <div class="fields">spending_summary {totals, % changes}<br>monthly_spending[]<br>category_spending[]</div>
+      </div>
+      <div class="data-card">
+        <div class="filename">transactions.json</div>
+        <div class="fields">id, date, description, category<br>warehouse, amount, vendor, type</div>
+      </div>
+      <div class="data-card">
+        <div class="filename">purchase_orders.json</div>
+        <div class="fields">id, backlog_item_id, supplier_name<br>quantity, unit_cost, status<br><em style="color:#9f1239">Currently empty — write-only via API</em></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TECHNICAL DEBT -->
+  <section>
+    <h2>Known Technical Debt</h2>
+    <div class="debt-list">
+      <div class="debt-item">
+        <span class="severity high">High</span>
+        <div>
+          <div class="title">No data persistence</div>
+          <div class="detail">Data is loaded from JSON at startup; any writes (tasks, purchase orders) are lost on server restart. Acceptable for a demo system, significant limitation for production use.</div>
+        </div>
+      </div>
+      <div class="debt-item">
+        <span class="severity medium">Medium</span>
+        <div>
+          <div class="title">Mixed Vue API styles</div>
+          <div class="detail">FilterBar.vue and TasksModal.vue use Options API, while all other components use the newer Composition API (&lt;script setup&gt;). The previous vendor's migration was incomplete.</div>
+        </div>
+      </div>
+      <div class="debt-item">
+        <span class="severity medium">Medium</span>
+        <div>
+          <div class="title">Reports module defects</div>
+          <div class="detail">Multiple known defects: filters not fully wired up, i18n gaps, data inconsistencies. Primary remediation target (R1).</div>
+        </div>
+      </div>
+      <div class="debt-item">
+        <span class="severity medium">Medium</span>
+        <div>
+          <div class="title">Inconsistent status casing</div>
+          <div class="detail">Order status values use Title Case in data ("Delivered") but filter logic uses lowercase comparison. Worked around with .lower() — fragile if data changes.</div>
+        </div>
+      </div>
+      <div class="debt-item">
+        <span class="severity medium">Medium</span>
+        <div>
+          <div class="title">i18n incomplete</div>
+          <div class="detail">useI18n.js and locale files (en.js, ja.js) exist but are not applied to all views. Tokyo warehouse staff see English-only content in most views.</div>
+        </div>
+      </div>
+      <div class="debt-item">
+        <span class="severity low">Low</span>
+        <div>
+          <div class="title">No pagination</div>
+          <div class="detail">All inventory and order data returned in single responses. Acceptable at current data volume; would need addressing as data grows.</div>
+        </div>
+      </div>
+      <div class="debt-item">
+        <span class="severity low">Low</span>
+        <div>
+          <div class="title">CORS wildcard (dev only)</div>
+          <div class="detail">allow_origins=["*"] is set in main.py. This is documented as development configuration and must be restricted before any production deployment.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Meridian Components · Architecture Review · April 2026 · Prepared by [Vendor] · RFP #MC-2026-0417
+</footer>
+
+</body>
+</html>
