@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Components — System Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #f8fafc;
+    color: #0f172a;
+    padding: 40px 24px 60px;
+  }
+
+  .page { max-width: 1000px; margin: 0 auto; }
+
+  header { margin-bottom: 40px; border-bottom: 2px solid #e2e8f0; padding-bottom: 24px; }
+  header h1 { font-size: 26px; font-weight: 800; color: #0f172a; }
+  header p { font-size: 14px; color: #64748b; margin-top: 6px; }
+
+  h2 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 14px; }
+
+  /* ── Layer diagram ── */
+  .layers { display: flex; flex-direction: column; gap: 2px; margin-bottom: 40px; }
+
+  .layer {
+    border-radius: 10px;
+    padding: 18px 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .layer-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; width: 90px; flex-shrink: 0; padding-top: 3px;
+  }
+
+  .layer-content { flex: 1; }
+  .layer-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .layer-detail { font-size: 13px; color: #475569; line-height: 1.6; }
+
+  .layer.browser  { background: #eff6ff; border: 1px solid #bfdbfe; }
+  .layer.browser .layer-label { color: #1d4ed8; }
+  .layer.browser .layer-title { color: #1e40af; }
+
+  .layer.frontend { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .layer.frontend .layer-label { color: #15803d; }
+  .layer.frontend .layer-title { color: #166534; }
+
+  .layer.api      { background: #fdf4ff; border: 1px solid #e9d5ff; }
+  .layer.api .layer-label { color: #7e22ce; }
+  .layer.api .layer-title { color: #6b21a8; }
+
+  .layer.data     { background: #fff7ed; border: 1px solid #fed7aa; }
+  .layer.data .layer-label { color: #c2410c; }
+  .layer.data .layer-title { color: #9a3412; }
+
+  .arrow {
+    text-align: center; font-size: 18px; color: #cbd5e1;
+    margin: 0; line-height: 1;
+  }
+
+  /* ── Two-column sections ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; }
+
+  .box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .box h3 { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 12px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-weight: 600; color: #64748b; padding: 6px 8px; border-bottom: 1px solid #f1f5f9; }
+  td { padding: 7px 8px; border-bottom: 1px solid #f8fafc; color: #334155; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  code { font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 12px; background: #f1f5f9; padding: 1px 5px; border-radius: 3px; color: #0f172a; }
+
+  /* ── Filter flow ── */
+  .flow { display: flex; align-items: center; gap: 0; margin-bottom: 40px; flex-wrap: wrap; }
+  .flow-step {
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;
+    padding: 12px 16px; font-size: 13px; flex: 1; min-width: 120px;
+  }
+  .flow-step .step-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 4px; }
+  .flow-step .step-name { font-weight: 600; color: #0f172a; }
+  .flow-step .step-detail { font-size: 12px; color: #64748b; margin-top: 2px; }
+  .flow-arrow { color: #cbd5e1; font-size: 20px; padding: 0 6px; flex-shrink: 0; }
+
+  /* ── Gaps section ── */
+  .gap-list { list-style: none; margin-bottom: 40px; }
+  .gap-list li {
+    display: flex; gap: 12px; padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9; align-items: flex-start; font-size: 14px;
+  }
+  .gap-list li:last-child { border-bottom: none; }
+  .gap-tag {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.07em; padding: 2px 8px; border-radius: 4px;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .gap-tag.r1 { background: #fee2e2; color: #991b1b; }
+  .gap-tag.gap { background: #fef3c7; color: #92400e; }
+  .gap-list li span { color: #334155; line-height: 1.5; }
+  .gap-list li strong { color: #0f172a; }
+
+  footer { font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <h1>Meridian Components — Inventory Dashboard Architecture</h1>
+    <p>Current-state overview · Prepared by Accenture · April 2026 · Based on direct codebase inspection</p>
+  </header>
+
+  <!-- Layer diagram -->
+  <h2>System Layers</h2>
+  <div class="layers">
+    <div class="layer browser">
+      <div class="layer-label">Browser</div>
+      <div class="layer-content">
+        <div class="layer-title">Single-Page Application — Vue 3 + Vite</div>
+        <div class="layer-detail">Runs entirely in the browser. Six views: Dashboard, Inventory, Orders, Spending, Demand, Backlog, Reports. Client-side routing via Vue Router. No page reloads.</div>
+      </div>
+    </div>
+    <div class="arrow">↕</div>
+    <div class="layer frontend">
+      <div class="layer-label">Frontend</div>
+      <div class="layer-content">
+        <div class="layer-title">State & API Layer — <code>useFilters.js</code> · <code>api.js</code> (Axios)</div>
+        <div class="layer-detail">Shared filter state (warehouse, category, status, period) lives in a singleton composable. All views watch this state and re-fetch when it changes. HTTP calls go through <code>api.js</code> to the backend.</div>
+      </div>
+    </div>
+    <div class="arrow">↕  HTTP / JSON  (port 8001)</div>
+    <div class="layer api">
+      <div class="layer-label">Backend</div>
+      <div class="layer-content">
+        <div class="layer-title">REST API — FastAPI + Uvicorn (Python)</div>
+        <div class="layer-detail">16 endpoints across inventory, orders, dashboard, spending, demand, backlog, tasks, reports, and purchase orders. Filter parameters received as query strings; applied in-memory. Pydantic models validate all responses.</div>
+      </div>
+    </div>
+    <div class="arrow">↕</div>
+    <div class="layer data">
+      <div class="layer-label">Data</div>
+      <div class="layer-content">
+        <div class="layer-title">JSON Files — loaded at startup into memory</div>
+        <div class="layer-detail"><code>inventory.json</code> · <code>orders.json</code> · <code>demand_forecasts.json</code> · <code>backlog_items.json</code> · <code>spending.json</code> · <code>transactions.json</code> · <code>purchase_orders.json</code>. No database. Changes are not persisted between restarts.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Views + Endpoints -->
+  <div class="two-col" style="margin-bottom:40px;">
+    <div class="box">
+      <h3>Frontend Views</h3>
+      <table>
+        <tr><th>View</th><th>Primary data</th><th>Filter support</th></tr>
+        <tr><td>Dashboard</td><td>Summary KPIs</td><td>All 4 filters</td></tr>
+        <tr><td>Inventory</td><td>Stock levels</td><td>Warehouse, Category</td></tr>
+        <tr><td>Orders</td><td>Order table</td><td>All 4 filters</td></tr>
+        <tr><td>Spending</td><td>Cost breakdown</td><td>None ⚠</td></tr>
+        <tr><td>Demand</td><td>Forecasts</td><td>None</td></tr>
+        <tr><td>Backlog</td><td>Shortages</td><td>Partial ⚠</td></tr>
+        <tr><td>Reports</td><td>Trends</td><td>None ⚠</td></tr>
+      </table>
+    </div>
+    <div class="box">
+      <h3>Backend Endpoints</h3>
+      <table>
+        <tr><th>Endpoint</th><th>Filters</th></tr>
+        <tr><td><code>GET /api/inventory</code></td><td>warehouse, category</td></tr>
+        <tr><td><code>GET /api/orders</code></td><td>warehouse, category, status, month</td></tr>
+        <tr><td><code>GET /api/dashboard/summary</code></td><td>All 4</td></tr>
+        <tr><td><code>GET /api/demand</code></td><td>—</td></tr>
+        <tr><td><code>GET /api/backlog</code></td><td>—</td></tr>
+        <tr><td><code>GET /api/reports/quarterly</code></td><td>—</td></tr>
+        <tr><td><code>GET /api/reports/monthly-trends</code></td><td>—</td></tr>
+        <tr><td><code>GET /api/spending/*</code></td><td>—</td></tr>
+        <tr><td><code>/api/tasks</code></td><td>GET/POST/PATCH/DELETE</td></tr>
+        <tr><td><code>/api/purchase-orders</code></td><td>GET/POST</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Filter flow -->
+  <h2>Filter System — End-to-End Flow</h2>
+  <div class="flow" style="margin-bottom: 12px;">
+    <div class="flow-step">
+      <div class="step-label">1 · UI</div>
+      <div class="step-name">FilterBar.vue</div>
+      <div class="step-detail">User selects warehouse, category, status, or period</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-label">2 · State</div>
+      <div class="step-name">useFilters.js</div>
+      <div class="step-detail">Singleton updates; all views watch via Vue reactivity</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-label">3 · HTTP</div>
+      <div class="step-name">api.js (Axios)</div>
+      <div class="step-detail">Builds query string; GET /api/orders?warehouse=London</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-label">4 · Backend</div>
+      <div class="step-name">main.py</div>
+      <div class="step-detail">apply_filters() runs in-memory list comprehension</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="step-label">5 · Response</div>
+      <div class="step-name">Pydantic → JSON</div>
+      <div class="step-detail">Validated response updates Vue reactive ref; template re-renders</div>
+    </div>
+  </div>
+  <p style="font-size:13px;color:#64748b;margin-bottom:40px;">Note: Spending, Demand, Backlog, and Reports endpoints do not participate in this filter flow — they always return full datasets.</p>
+
+  <!-- Tech stack -->
+  <h2>Technology Stack</h2>
+  <div class="two-col" style="margin-bottom:40px;">
+    <div class="box">
+      <h3>Frontend</h3>
+      <table>
+        <tr><td>Framework</td><td>Vue 3.4 · Composition API</td></tr>
+        <tr><td>Build</td><td>Vite 5.2</td></tr>
+        <tr><td>Routing</td><td>Vue Router</td></tr>
+        <tr><td>HTTP</td><td>Axios</td></tr>
+        <tr><td>i18n</td><td>Custom composable (en / ja)</td></tr>
+        <tr><td>Charts</td><td>Custom SVG + CSS Grid</td></tr>
+        <tr><td>Dev port</td><td>3000</td></tr>
+      </table>
+    </div>
+    <div class="box">
+      <h3>Backend</h3>
+      <table>
+        <tr><td>Framework</td><td>FastAPI</td></tr>
+        <tr><td>Server</td><td>Uvicorn (ASGI)</td></tr>
+        <tr><td>Validation</td><td>Pydantic v2</td></tr>
+        <tr><td>Language</td><td>Python 3.12</td></tr>
+        <tr><td>Data</td><td>JSON files (no database)</td></tr>
+        <tr><td>CORS</td><td>Allow all origins (dev only)</td></tr>
+        <tr><td>Dev port</td><td>8001 · /docs for Swagger UI</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Gaps & findings -->
+  <h2>Findings — Gaps & Inconsistencies</h2>
+  <ul class="gap-list">
+    <li>
+      <span class="gap-tag r1">R1</span>
+      <span><strong>Reports module filters not wired.</strong> The Reports view has no connection to the shared filter state. Quarterly and monthly-trend endpoints exist on the backend but accept no filter parameters — warehouse, category, status, and period selections have no effect on Reports data.</span>
+    </li>
+    <li>
+      <span class="gap-tag r1">R1</span>
+      <span><strong>i18n gaps in Reports and Backlog.</strong> Several labels in these views are hardcoded English strings and do not use the <code>useI18n</code> composable. Tokyo warehouse staff see English-only text in these modules.</span>
+    </li>
+    <li>
+      <span class="gap-tag r1">R1</span>
+      <span><strong>API pattern inconsistency.</strong> Most views use Composition API + <code>useFilters</code> + <code>api.js</code>. At least one view still uses the Options API pattern from the previous vendor's earlier work — migration was incomplete at handoff.</span>
+    </li>
+    <li>
+      <span class="gap-tag gap">Gap</span>
+      <span><strong>Spending view has no filter support.</strong> <code>/api/spending/*</code> endpoints return static totals regardless of warehouse or category. A London warehouse manager sees the same global numbers as a San Francisco manager.</span>
+    </li>
+    <li>
+      <span class="gap-tag gap">Gap</span>
+      <span><strong>Purchase order UI is missing.</strong> Backend endpoints for creating and retrieving purchase orders exist and are used by the Backlog view — but there is no dedicated UI for browsing or managing purchase orders.</span>
+    </li>
+    <li>
+      <span class="gap-tag gap">Gap</span>
+      <span><strong>No automated tests on the frontend.</strong> The <code>tests/backend/</code> directory contains 51 pytest tests covering backend endpoints. There is no frontend test infrastructure.</span>
+    </li>
+    <li>
+      <span class="gap-tag gap">Gap</span>
+      <span><strong>No persistence.</strong> All data lives in memory. Tasks created via the UI, purchase orders created via the Backlog view — all are lost on server restart. Acceptable for a demo; would need a database for production.</span>
+    </li>
+  </ul>
+
+  <footer>
+    Prepared by Accenture · RFP MC-2026-0417 · Based on direct inspection of source code at <code>client/</code> and <code>server/</code>. Previous vendor handoff notes treated as unverified; all findings confirmed against actual code.
+  </footer>
+
+</div>
+</body>
+</html>

@@ -6,7 +6,9 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
-    companyName: 'Catalyst Components',
+    restocking: 'Restocking',
+    reports: 'Reports',
+    companyName: 'Meridian Components',
     subtitle: 'Inventory Management System'
   },
 
@@ -185,6 +187,70 @@ export default {
       change: 'Change',
       trend: 'Trend',
       period: 'Period'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    description: 'Purchase order recommendations based on stock levels, demand, and budget',
+    budgetCeiling: 'Budget Ceiling',
+    budgetPlaceholder: 'Enter budget ceiling...',
+    itemsNeedingRestock: 'Items Needing Restock',
+    totalEstimatedCost: 'Total Estimated Cost',
+    itemsWithinBudget: 'Items Within Budget',
+    budgetExceeded: 'Budget ceiling reached — remaining items are outside budget',
+    noItems: 'No items currently below reorder point for the selected filters.',
+    table: {
+      itemName: 'Item Name',
+      sku: 'SKU',
+      warehouse: 'Warehouse',
+      category: 'Category',
+      onHand: 'On Hand',
+      reorderPoint: 'Reorder Point',
+      shortage: 'Shortage',
+      demandTrend: 'Demand Trend',
+      recommendedQty: 'Rec. Qty',
+      estimatedCost: 'Est. Cost',
+      status: 'Status'
+    },
+    trend: {
+      increasing: 'Increasing',
+      stable: 'Stable',
+      decreasing: 'Decreasing',
+      unknown: 'Unknown'
+    },
+    status: {
+      withinBudget: 'Within Budget',
+      overBudget: 'Over Budget',
+      noBudget: '—'
+    }
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    quarterlyPerformance: 'Quarterly Performance',
+    monthlyRevenueTrend: 'Monthly Revenue Trend',
+    monthOverMonth: 'Month-over-Month Analysis',
+    table: {
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    },
+    summary: {
+      totalRevenueYTD: 'Total Revenue (YTD)',
+      avgMonthlyRevenue: 'Avg Monthly Revenue',
+      totalOrdersYTD: 'Total Orders (YTD)',
+      bestQuarter: 'Best Performing Quarter'
     }
   },
 
