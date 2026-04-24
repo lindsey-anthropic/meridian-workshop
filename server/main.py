@@ -228,12 +228,19 @@ def get_recent_transactions():
     return recent_transactions
 
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
     """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
+    filtered_orders = apply_filters(orders, warehouse, category, status)
+    filtered_orders = filter_by_month(filtered_orders, month)
+
     quarters = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -261,6 +268,8 @@ def get_quarterly_reports():
         if order.get('status') == 'Delivered':
             quarters[quarter]['delivered_orders'] += 1
 
+
+
     # Calculate averages and fulfillment rate
     result = []
     for q, data in quarters.items():
@@ -274,11 +283,19 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
     """Get month-over-month trends"""
+    filtered_orders = apply_filters(orders, warehouse, category, status)
+    filtered_orders = filter_by_month(filtered_orders, month)
+
     months = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
@@ -303,6 +320,63 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+@app.get("/api/restocking")
+def get_restocking_recommendations(
+    budget: Optional[float] = None,
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
+    """Recommend purchase orders for items below reorder point, within budget."""
+    TREND_PRIORITY = {'increasing': 0, 'stable': 1, 'decreasing': 2}
+
+    # Build demand lookup by SKU
+    demand_by_sku = {d['item_sku']: d for d in demand_forecasts}
+
+    # Find items below reorder point
+    filtered = apply_filters(inventory_items, warehouse, category)
+    candidates = [item for item in filtered if item['quantity_on_hand'] <= item['reorder_point']]
+
+    # Build recommendations
+    recommendations = []
+    for item in candidates:
+        demand = demand_by_sku.get(item['sku'])
+        trend = demand['trend'] if demand else 'stable'
+        forecasted = demand['forecasted_demand'] if demand else 0
+
+        shortage = item['reorder_point'] - item['quantity_on_hand']
+        qty = max(shortage + item['reorder_point'], forecasted)
+        est_cost = round(qty * item['unit_cost'], 2)
+
+        recommendations.append({
+            'sku': item['sku'],
+            'name': item['name'],
+            'category': item['category'],
+            'warehouse': item['warehouse'],
+            'quantity_on_hand': item['quantity_on_hand'],
+            'reorder_point': item['reorder_point'],
+            'recommended_qty': qty,
+            'unit_cost': item['unit_cost'],
+            'estimated_cost': est_cost,
+            'demand_trend': trend,
+            'priority': TREND_PRIORITY.get(trend, 1)
+        })
+
+    # Sort by priority (increasing demand first), then by shortage severity
+    recommendations.sort(key=lambda x: (x['priority'], x['quantity_on_hand'] - x['reorder_point']))
+
+    # Apply budget ceiling greedily
+    if budget is not None and budget > 0:
+        selected = []
+        remaining = budget
+        for rec in recommendations:
+            if rec['estimated_cost'] <= remaining:
+                selected.append(rec)
+                remaining -= rec['estimated_cost']
+        recommendations = selected
+
+    return recommendations
+
 
 if __name__ == "__main__":
     import uvicorn

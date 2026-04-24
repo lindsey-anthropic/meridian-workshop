@@ -6,6 +6,8 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    reports: 'Reports',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -309,6 +311,79 @@ export default {
     english: 'English',
     japanese: 'Japanese',
     selectLanguage: 'Select Language'
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    description: 'Recommended purchase orders based on stock levels, demand, and your budget',
+    budgetLabel: 'Budget ceiling',
+    budgetPlaceholder: 'Enter budget (e.g. 50000)',
+    generate: 'Generate recommendations',
+    noItems: 'No items below reorder point for the current filters.',
+    budgetRemaining: 'Budget remaining',
+    totalCost: 'Total estimated cost',
+    itemsRecommended: 'Items recommended',
+    withinBudget: 'Within budget',
+    table: {
+      sku: 'SKU',
+      item: 'Item',
+      warehouse: 'Warehouse',
+      currentStock: 'Current Stock',
+      reorderPoint: 'Reorder Point',
+      recommended: 'Recommended Qty',
+      unitCost: 'Unit Cost',
+      totalCost: 'Total Cost',
+      demand: 'Demand Trend',
+      rationale: 'Rationale',
+      action: 'Action'
+    },
+    trends: {
+      increasing: 'Increasing',
+      stable: 'Stable',
+      decreasing: 'Decreasing',
+      unknown: 'Unknown'
+    },
+    actions: {
+      accept: 'Accept',
+      reject: 'Reject'
+    },
+    rationale: {
+      increasing: 'High priority — increasing demand, stock below reorder point',
+      stable: 'Reorder point reached, stable demand',
+      decreasing: 'Low priority — decreasing demand, minimal restock recommended',
+      default: 'Stock below reorder point'
+    },
+    summary: {
+      accepted: 'Accepted',
+      rejected: 'Rejected',
+      pending: 'Pending'
+    }
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    quarterlyPerformance: 'Quarterly Performance',
+    monthlyTrend: 'Monthly Revenue Trend',
+    monthOverMonth: 'Month-over-Month Analysis',
+    totalRevenueYTD: 'Total Revenue (YTD)',
+    avgMonthlyRevenue: 'Avg Monthly Revenue',
+    totalOrdersYTD: 'Total Orders (YTD)',
+    bestQuarter: 'Best Performing Quarter',
+    table: {
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    }
   },
 
   // Common

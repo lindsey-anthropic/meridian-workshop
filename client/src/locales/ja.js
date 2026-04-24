@@ -311,6 +311,79 @@ export default {
     selectLanguage: '言語を選択'
   },
 
+  // Restocking
+  restocking: {
+    title: '在庫補充推奨',
+    description: '在庫レベル、需要、予算に基づく発注推奨',
+    budgetLabel: '予算上限',
+    budgetPlaceholder: '予算を入力（例：50000）',
+    generate: '推奨を生成',
+    noItems: '現在のフィルターでは再発注点を下回るアイテムはありません。',
+    budgetRemaining: '残余予算',
+    totalCost: '推定合計費用',
+    itemsRecommended: '推奨アイテム数',
+    withinBudget: '予算内',
+    table: {
+      sku: 'SKU',
+      item: 'アイテム',
+      warehouse: '倉庫',
+      currentStock: '現在在庫',
+      reorderPoint: '再発注点',
+      recommended: '推奨数量',
+      unitCost: '単価',
+      totalCost: '合計費用',
+      demand: '需要トレンド',
+      rationale: '理由',
+      action: 'アクション'
+    },
+    trends: {
+      increasing: '増加',
+      stable: '安定',
+      decreasing: '減少',
+      unknown: '不明'
+    },
+    actions: {
+      accept: '承認',
+      reject: '却下'
+    },
+    rationale: {
+      increasing: '高優先度 — 需要増加、在庫が再発注点以下',
+      stable: '再発注点到達、安定需要',
+      decreasing: '低優先度 — 需要減少、最小限の補充推奨',
+      default: '在庫が再発注点以下'
+    },
+    summary: {
+      accepted: '承認済み',
+      rejected: '却下済み',
+      pending: '保留中'
+    }
+  },
+
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期パフォーマンス指標と月次トレンドを表示',
+    quarterlyPerformance: '四半期パフォーマンス',
+    monthlyTrend: '月次収益トレンド',
+    monthOverMonth: '前月比分析',
+    totalRevenueYTD: '年初来総収益',
+    avgMonthlyRevenue: '月平均収益',
+    totalOrdersYTD: '年初来総注文数',
+    bestQuarter: '最高パフォーマンス四半期',
+    table: {
+      quarter: '四半期',
+      totalOrders: '総注文数',
+      totalRevenue: '総収益',
+      avgOrderValue: '平均注文額',
+      fulfillmentRate: '履行率',
+      month: '月',
+      orders: '注文数',
+      revenue: '収益',
+      change: '変化',
+      growthRate: '成長率'
+    }
+  },
+
   // Common
   common: {
     loading: '読み込み中...',
