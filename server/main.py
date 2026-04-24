@@ -227,13 +227,80 @@ def get_recent_transactions():
     """Get recent transactions"""
     return recent_transactions
 
+@app.get("/api/restocking")
+def get_restocking_recommendations(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    budget: Optional[float] = None
+):
+    """Get restocking recommendations based on stock levels and demand forecasts"""
+    filtered = apply_filters(inventory_items, warehouse, category)
+
+    forecast_map = {f['item_sku']: f for f in demand_forecasts}
+
+    URGENCY_ORDER = {'high': 0, 'medium': 1, 'low': 2, 'unknown': 3}
+
+    recommendations = []
+    for item in filtered:
+        forecast = forecast_map.get(item['sku'])
+        trend = forecast['trend'] if forecast else 'unknown'
+        forecasted_demand = forecast['forecasted_demand'] if forecast else 0
+
+        stock_gap = max(0, item['reorder_point'] - item['quantity_on_hand'])
+        demand_gap = max(0, forecasted_demand - item['quantity_on_hand'])
+        recommended_qty = max(stock_gap, demand_gap, 1)
+        estimated_cost = round(recommended_qty * item['unit_cost'], 2)
+
+        below_reorder = item['quantity_on_hand'] < item['reorder_point']
+        if trend == 'increasing' and below_reorder:
+            urgency = 'high'
+        elif trend == 'increasing' or below_reorder:
+            urgency = 'medium'
+        elif forecast:
+            urgency = 'low'
+        else:
+            urgency = 'unknown'
+
+        recommendations.append({
+            'sku': item['sku'],
+            'name': item['name'],
+            'category': item['category'],
+            'warehouse': item['warehouse'],
+            'quantity_on_hand': item['quantity_on_hand'],
+            'reorder_point': item['reorder_point'],
+            'forecasted_demand': forecasted_demand,
+            'trend': trend,
+            'urgency': urgency,
+            'recommended_qty': recommended_qty,
+            'estimated_cost': estimated_cost,
+            'within_budget': False
+        })
+
+    recommendations.sort(key=lambda x: (URGENCY_ORDER[x['urgency']], -max(0, x['reorder_point'] - x['quantity_on_hand'])))
+
+    cumulative = 0.0
+    for rec in recommendations:
+        if budget is None or cumulative + rec['estimated_cost'] <= budget:
+            rec['within_budget'] = True
+            cumulative += rec['estimated_cost']
+
+    return recommendations
+
+
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
     """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
+    filtered = apply_filters(orders, warehouse, category, status)
+    filtered = filter_by_month(filtered, month)
+
     quarters = {}
 
-    for order in orders:
+    for order in filtered:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -274,30 +341,37 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
     """Get month-over-month trends"""
+    filtered = apply_filters(orders, warehouse, category, status)
+    filtered = filter_by_month(filtered, month)
+
     months = {}
 
-    for order in orders:
+    for order in filtered:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
 
-        # Extract month (format: YYYY-MM-DD)
-        month = order_date[:7]  # Gets YYYY-MM
+        month_key = order_date[:7]  # YYYY-MM
 
-        if month not in months:
-            months[month] = {
-                'month': month,
+        if month_key not in months:
+            months[month_key] = {
+                'month': month_key,
                 'order_count': 0,
                 'revenue': 0,
                 'delivered_count': 0
             }
 
-        months[month]['order_count'] += 1
-        months[month]['revenue'] += order.get('total_value', 0)
+        months[month_key]['order_count'] += 1
+        months[month_key]['revenue'] += order.get('total_value', 0)
         if order.get('status') == 'Delivered':
-            months[month]['delivered_count'] += 1
+            months[month_key]['delivered_count'] += 1
 
     # Convert to list and sort
     result = list(months.values())
