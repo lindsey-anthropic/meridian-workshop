@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Components — Capabilities Presentation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .slide {
+    display: none;
+    width: 100%;
+    height: 100vh;
+    padding: 64px 80px;
+    flex-direction: column;
+    justify-content: center;
+    position: absolute;
+    top: 0; left: 0;
+  }
+  .slide.active { display: flex; }
+
+  .slide--cover { background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); }
+  .slide--content { background: #0f172a; }
+  .slide--alt { background: #1e293b; }
+  .slide--closing {
+    background: linear-gradient(135deg, #0f172a 0%, #1a3a2a 100%);
+    align-items: center;
+    text-align: center;
+  }
+
+  .label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: #38bdf8; margin-bottom: 18px;
+  }
+  .rule { width: 44px; height: 3px; background: #38bdf8; border-radius: 2px; margin-bottom: 28px; }
+
+  h1 { font-size: 50px; font-weight: 700; line-height: 1.1; color: #f8fafc; max-width: 820px; margin-bottom: 20px; }
+  h2 { font-size: 36px; font-weight: 700; color: #f8fafc; margin-bottom: 10px; }
+  h3 { font-size: 15px; font-weight: 600; color: #38bdf8; margin-bottom: 6px; }
+
+  .subtitle { font-size: 19px; color: #94a3b8; max-width: 580px; line-height: 1.55; }
+  p { font-size: 16px; color: #94a3b8; line-height: 1.65; max-width: 760px; }
+
+  .cards { display: grid; gap: 14px; margin-top: 28px; }
+  .cards--2 { grid-template-columns: 1fr 1fr; }
+  .cards--3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cards--4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+  .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 22px; }
+  .card--accent { border-color: #38bdf8; background: #0c2233; }
+
+  .badge {
+    display: inline-block; padding: 2px 9px; border-radius: 99px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.07em;
+    text-transform: uppercase; margin-bottom: 10px;
+  }
+  .badge--req { background: #1e3a5f; color: #38bdf8; }
+  .badge--des { background: #1c2d1c; color: #4ade80; }
+
+  .highlight { border-left: 3px solid #38bdf8; padding-left: 18px; margin-top: 24px; }
+  .highlight p { color: #cbd5e1; font-size: 17px; }
+
+  .timeline { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 36px; position: relative; }
+  .timeline::before {
+    content: ''; position: absolute; top: 17px; left: 10%; right: 10%;
+    height: 2px; background: #334155;
+  }
+  .tl-item { display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .tl-dot {
+    width: 34px; height: 34px; border-radius: 50%; background: #38bdf8;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; color: #0f172a;
+    margin-bottom: 14px; position: relative; z-index: 1;
+  }
+  .tl-label { font-size: 13px; font-weight: 600; color: #f8fafc; margin-bottom: 5px; }
+  .tl-sub { font-size: 11px; color: #64748b; line-height: 1.4; padding: 0 6px; }
+
+  .bar-row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+  .bar-lbl { width: 170px; font-size: 14px; color: #94a3b8; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 7px; background: #1e293b; border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; background: #38bdf8; border-radius: 4px; }
+  .bar-pct { width: 38px; text-align: right; font-size: 14px; color: #38bdf8; font-weight: 600; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 24px; font-size: 14px; }
+  th {
+    text-align: left; padding: 9px 14px; color: #64748b;
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; border-bottom: 1px solid #1e293b;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid #1e293b; color: #cbd5e1; }
+  .amt { text-align: right; color: #38bdf8; font-weight: 600; }
+  .total-row td { font-weight: 700; color: #f8fafc; border-top: 2px solid #334155; }
+
+  nav {
+    position: fixed; bottom: 24px; left: 0; right: 0;
+    display: flex; justify-content: center; align-items: center; gap: 14px; z-index: 100;
+  }
+  nav button {
+    background: #1e293b; border: 1px solid #334155; color: #e2e8f0;
+    padding: 7px 18px; border-radius: 6px; cursor: pointer; font-size: 13px; font-family: inherit;
+  }
+  nav button:hover { background: #334155; }
+  nav button:disabled { opacity: 0.3; cursor: default; }
+  .counter { font-size: 13px; color: #475569; min-width: 54px; text-align: center; }
+</style>
+</head>
+<body>
+
+<!-- 1: Cover -->
+<div class="slide slide--cover active">
+  <div class="label">Capabilities Presentation · RFP #MC-2026-0417</div>
+  <h1>Modernizing Meridian's Inventory Dashboard</h1>
+  <p class="subtitle">A proposal to remediate, extend, and future-proof the platform your operations team depends on every day.</p>
+  <div style="margin-top:48px;font-size:13px;color:#475569">April 2026 · Confidential</div>
+</div>
+
+<!-- 2: Situation -->
+<div class="slide slide--content">
+  <div class="label">The Situation</div>
+  <div class="rule"></div>
+  <h2>A system that works — but isn't finished.</h2>
+  <div class="cards cards--3">
+    <div class="card">
+      <h3>Reports module broken</h3>
+      <p style="font-size:14px">At least 8 logged issues. Filters not wired up. Previous vendor left before closing them out.</p>
+    </div>
+    <div class="card">
+      <h3>No test coverage</h3>
+      <p style="font-size:14px">IT has frozen all changes. Without a safety net, every fix is a risk and nothing ships.</p>
+    </div>
+    <div class="card">
+      <h3>Capability gaps</h3>
+      <p style="font-size:14px">Tokyo staff work in English only. No restocking recommendations. The ops team works around the tool.</p>
+    </div>
+  </div>
+  <div class="highlight">
+    <p>The ask isn't to rebuild — it's to take what's there, make it right, and extend it responsibly.</p>
+  </div>
+</div>
+
+<!-- 3: Scope -->
+<div class="slide slide--alt">
+  <div class="label">Scope of Work</div>
+  <div class="rule"></div>
+  <h2>Four required. Three desired. All scoped.</h2>
+  <div class="cards cards--2">
+    <div class="card card--accent">
+      <div class="badge badge--req">Required</div>
+      <h3>R1 — Reports Remediation</h3>
+      <p style="font-size:13px;margin-bottom:14px">Full audit + fix of all defects. Filters, i18n gaps, inconsistencies — end-to-end.</p>
+      <h3>R2 — Restocking View</h3>
+      <p style="font-size:13px;margin-bottom:14px">New module: PO recommendations based on stock, forecast, and budget ceiling.</p>
+      <h3>R3 — Browser Test Coverage</h3>
+      <p style="font-size:13px;margin-bottom:14px">Playwright E2E tests for critical flows. IT can safely approve changes.</p>
+      <h3>R4 — Architecture Docs</h3>
+      <p style="font-size:13px">Current-state overview for IT handoff.</p>
+    </div>
+    <div class="card">
+      <div class="badge badge--des">Desired</div>
+      <h3>D1 — UI Modernization</h3>
+      <p style="font-size:13px;margin-bottom:14px">Visual refresh of spacing, typography, and color system.</p>
+      <h3>D2 — i18n Expansion</h3>
+      <p style="font-size:13px;margin-bottom:14px">Extend language support to all views. Priority: Tokyo warehouse team.</p>
+      <h3>D3 — Dark Mode</h3>
+      <p style="font-size:13px">Operator-selectable theme. No structural changes required.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 4: Approach -->
+<div class="slide slide--content">
+  <div class="label">Technical Approach</div>
+  <div class="rule"></div>
+  <h2>Safety net first. Then fix. Then build.</h2>
+  <div class="cards cards--3">
+    <div class="card">
+      <h3>1 — Discover</h3>
+      <p style="font-size:14px">We audit before we touch anything. Handoff docs are thin — discovery time is in the plan, not a future change order.</p>
+    </div>
+    <div class="card">
+      <h3>2 — Test harness first</h3>
+      <p style="font-size:14px">R3 ships in Week 2, before we fix Reports. Every subsequent change is covered. IT's freeze lifts.</p>
+    </div>
+    <div class="card">
+      <h3>3 — Consistent patterns</h3>
+      <p style="font-size:14px">New code follows Composition API throughout. We complete the migration the previous vendor left half-done.</p>
+    </div>
+  </div>
+  <div class="highlight">
+    <p>We align the Restocking logic with R. Tanaka's team before building — the algorithm reflects how Meridian thinks, not a generic formula.</p>
+  </div>
+</div>
+
+<!-- 5: Timeline -->
+<div class="slide slide--alt">
+  <div class="label">Delivery Timeline</div>
+  <div class="rule"></div>
+  <h2>10 weeks. Four phases.</h2>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot">1</div>
+      <div class="tl-label">Foundation</div>
+      <div class="tl-sub">Weeks 1–2<br>Discovery · Test harness · Defect inventory</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot">2</div>
+      <div class="tl-label">Remediation</div>
+      <div class="tl-sub">Weeks 3–4<br>Reports fixed · Architecture doc delivered</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot">3</div>
+      <div class="tl-label">New Feature</div>
+      <div class="tl-sub">Weeks 5–7<br>Restocking view built and tested</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot">4</div>
+      <div class="tl-label">Closeout</div>
+      <div class="tl-sub">Weeks 8–10<br>i18n · Dark mode · IT handoff</div>
+    </div>
+  </div>
+  <div class="cards cards--3" style="margin-top:36px">
+    <div class="card">
+      <h3>Week 2 milestone</h3>
+      <p style="font-size:13px">IT signs off on test framework. Changes can flow from this point forward.</p>
+    </div>
+    <div class="card">
+      <h3>Week 5 alignment</h3>
+      <p style="font-size:13px">Logic review with ops team before Restocking build begins.</p>
+    </div>
+    <div class="card">
+      <h3>30-day warranty</h3>
+      <p style="font-size:13px">Defects in delivered work fixed at no charge post-delivery.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 6: Evaluation -->
+<div class="slide slide--content">
+  <div class="label">Evaluation Fit</div>
+  <div class="rule"></div>
+  <h2>Your criteria, our positioning.</h2>
+  <div style="margin-top:32px">
+    <div class="bar-row">
+      <div class="bar-lbl">Technical approach</div>
+      <div class="bar-track"><div class="bar-fill" style="width:40%"></div></div>
+      <div class="bar-pct">40%</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-lbl">Relevant experience</div>
+      <div class="bar-track"><div class="bar-fill" style="width:25%"></div></div>
+      <div class="bar-pct">25%</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-lbl">Timeline</div>
+      <div class="bar-track"><div class="bar-fill" style="width:20%"></div></div>
+      <div class="bar-pct">20%</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-lbl">Price</div>
+      <div class="bar-track"><div class="bar-fill" style="width:15%"></div></div>
+      <div class="bar-pct">15%</div>
+    </div>
+  </div>
+  <div class="cards cards--2" style="margin-top:28px">
+    <div class="card card--accent">
+      <h3>Technical (40%)</h3>
+      <p style="font-size:13px">We've read the handoff notes and mapped the defect categories. We audit before we fix. Root causes, not symptoms.</p>
+    </div>
+    <div class="card card--accent">
+      <h3>Timeline (20%)</h3>
+      <p style="font-size:13px">Discovery is in the plan, not a change order. IT milestone in Week 2. Weekly check-ins. No surprises.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 7: Why us -->
+<div class="slide slide--alt">
+  <div class="label">Why Us</div>
+  <div class="rule"></div>
+  <h2>Three things the previous vendor didn't do.</h2>
+  <div class="cards cards--3">
+    <div class="card">
+      <h3>We finish what we start</h3>
+      <p style="font-size:14px">We scope conservatively. We flag issues before they become schedule problems. We don't hand off incomplete work.</p>
+    </div>
+    <div class="card">
+      <h3>We leave things better</h3>
+      <p style="font-size:14px">Test coverage, architecture docs, consistent code patterns — when we leave, Meridian IT can maintain what we built.</p>
+    </div>
+    <div class="card">
+      <h3>We speak to operations</h3>
+      <p style="font-size:14px">The dashboard serves teams on three continents. We build tools that fit how your people actually work.</p>
+    </div>
+  </div>
+  <div class="highlight">
+    <p>This isn't a rebuild. It's an engagement with a team that has been waiting for a vendor that delivers.</p>
+  </div>
+</div>
+
+<!-- 8: Pricing -->
+<div class="slide slide--content">
+  <div class="label">Investment</div>
+  <div class="rule"></div>
+  <h2>Fixed-fee. No surprises.</h2>
+  <table>
+    <thead>
+      <tr><th>Phase</th><th>Scope</th><th>Weeks</th><th style="text-align:right">Fee</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Foundation</td><td>Discovery, defect inventory, test harness</td><td>1–2</td><td class="amt">$8,500</td></tr>
+      <tr><td>Remediation</td><td>Reports (R1), architecture docs (R4)</td><td>3–4</td><td class="amt">$12,000</td></tr>
+      <tr><td>New Feature</td><td>Restocking view (R2) + full test coverage</td><td>5–7</td><td class="amt">$18,000</td></tr>
+      <tr><td>Closeout</td><td>i18n (D2), dark mode (D3), UI refresh (D1), handoff</td><td>8–10</td><td class="amt">$11,500</td></tr>
+      <tr class="total-row"><td>Total</td><td style="color:#94a3b8">All required + desired · 10 weeks</td><td></td><td class="amt" style="font-size:17px">$50,000</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:18px;font-size:13px;color:#64748b">Payment: 25% at signature · 35% at Phase 2 completion · 40% at final delivery · 30-day warranty included.</p>
+</div>
+
+<!-- 9: Next Steps -->
+<div class="slide slide--alt">
+  <div class="label">Next Steps</div>
+  <div class="rule"></div>
+  <h2>Ready to start the week after award.</h2>
+  <div class="cards cards--4">
+    <div class="card"><h3 style="font-size:12px;margin-bottom:6px">May 8</h3><p style="font-size:14px">Proposal deadline</p></div>
+    <div class="card"><h3 style="font-size:12px;margin-bottom:6px">May 12–16</h3><p style="font-size:14px">Shortlist presentations (if requested)</p></div>
+    <div class="card"><h3 style="font-size:12px;margin-bottom:6px">May 19–23</h3><p style="font-size:14px">Contract finalization</p></div>
+    <div class="card card--accent"><h3 style="font-size:12px;margin-bottom:6px">Week of May 26</h3><p style="font-size:14px">Kick-off. Discovery begins.</p></div>
+  </div>
+  <div style="margin-top:44px">
+    <p>Questions before May 8: <span style="color:#38bdf8">procurement@meridiancomponents.example</span></p>
+  </div>
+</div>
+
+<!-- 10: Close -->
+<div class="slide slide--closing">
+  <div class="label" style="margin-bottom:28px">Meridian Components · RFP #MC-2026-0417</div>
+  <h1 style="text-align:center;max-width:680px">Let's finish what was started.</h1>
+  <p style="margin-top:20px;text-align:center;max-width:500px">We have the approach, the team, and the discipline to deliver this engagement cleanly. We look forward to the conversation.</p>
+  <div style="margin-top:56px;color:#334155;font-size:12px">Confidential · April 2026</div>
+</div>
+
+<nav>
+  <button id="prev" onclick="go(-1)" disabled>← Prev</button>
+  <span class="counter" id="ctr">1 / 10</span>
+  <button id="next" onclick="go(1)">Next →</button>
+</nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let cur = 0;
+  function go(d) {
+    slides[cur].classList.remove('active');
+    cur = Math.max(0, Math.min(slides.length - 1, cur + d));
+    slides[cur].classList.add('active');
+    document.getElementById('ctr').textContent = `${cur+1} / ${slides.length}`;
+    document.getElementById('prev').disabled = cur === 0;
+    document.getElementById('next').disabled = cur === slides.length - 1;
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') go(-1);
+  });
+</script>
+</body>
+</html>
