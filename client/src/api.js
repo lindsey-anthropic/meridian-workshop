@@ -94,6 +94,24 @@ export const api = {
     return response.data
   },
 
+  async getQuarterlyReports(filters = {}) {
+    const params = new URLSearchParams()
+    if (filters.warehouse && filters.warehouse !== 'all') params.append('warehouse', filters.warehouse)
+    if (filters.category && filters.category !== 'all') params.append('category', filters.category)
+
+    const response = await axios.get(`${API_BASE_URL}/reports/quarterly?${params.toString()}`)
+    return response.data
+  },
+
+  async getMonthlyTrends(filters = {}) {
+    const params = new URLSearchParams()
+    if (filters.warehouse && filters.warehouse !== 'all') params.append('warehouse', filters.warehouse)
+    if (filters.category && filters.category !== 'all') params.append('category', filters.category)
+
+    const response = await axios.get(`${API_BASE_URL}/reports/monthly-trends?${params.toString()}`)
+    return response.data
+  },
+
   async createPurchaseOrder(purchaseOrderData) {
     const response = await axios.post(`${API_BASE_URL}/purchase-orders`, purchaseOrderData)
     return response.data
@@ -101,6 +119,15 @@ export const api = {
 
   async getPurchaseOrderByBacklogItem(backlogItemId) {
     const response = await axios.get(`${API_BASE_URL}/purchase-orders/${backlogItemId}`)
+    return response.data
+  },
+
+  async getRestockRecommendations(budget = 50000, filters = {}) {
+    const params = new URLSearchParams()
+    params.append('budget', budget)
+    if (filters.warehouse && filters.warehouse !== 'all') params.append('warehouse', filters.warehouse)
+    if (filters.category && filters.category !== 'all') params.append('category', filters.category)
+    const response = await axios.get(`${API_BASE_URL}/restock/recommendations?${params.toString()}`)
     return response.data
   }
 }

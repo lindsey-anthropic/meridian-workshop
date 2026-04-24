@@ -6,6 +6,7 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restock: 'Restock',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -309,6 +310,65 @@ export default {
     english: 'English',
     japanese: 'Japanese',
     selectLanguage: 'Select Language'
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    quarterly: {
+      title: 'Quarterly Performance',
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate'
+    },
+    monthlyChart: {
+      title: 'Monthly Revenue Trend'
+    },
+    monthOverMonth: {
+      title: 'Month-over-Month Analysis',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    },
+    stats: {
+      totalRevenueYTD: 'Total Revenue (YTD)',
+      avgMonthlyRevenue: 'Avg Monthly Revenue',
+      totalOrdersYTD: 'Total Orders (YTD)',
+      bestQuarter: 'Best Performing Quarter'
+    }
+  },
+
+  // Restock
+  restock: {
+    title: 'Restock Recommendations',
+    description: 'Recommended purchase orders based on stock levels and demand forecasts',
+    budgetLabel: 'Budget Ceiling',
+    generateButton: 'Generate Recommendations',
+    table: {
+      sku: 'SKU',
+      name: 'Item Name',
+      category: 'Category',
+      warehouse: 'Warehouse',
+      onHand: 'On Hand',
+      reorderPoint: 'Reorder Point',
+      forecastedDemand: 'Forecasted Demand',
+      suggestedQty: 'Suggested Qty',
+      unitCost: 'Unit Cost',
+      estimatedCost: 'Est. Cost'
+    },
+    summary: {
+      totalSpend: 'Total Spend',
+      of: 'of',
+      budget: 'budget',
+      itemCount: '{count} items recommended'
+    },
+    empty: 'No restock needed — all items are above reorder point within this budget.',
+    loading: 'Calculating recommendations...'
   },
 
   // Common
