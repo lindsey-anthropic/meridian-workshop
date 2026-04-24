@@ -228,12 +228,17 @@ def get_recent_transactions():
     return recent_transactions
 
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
+def get_quarterly_reports(warehouse: Optional[str] = None, category: Optional[str] = None):
     """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
+    filtered_orders = orders
+    if warehouse and warehouse != 'all':
+        filtered_orders = [o for o in filtered_orders if o.get('warehouse') == warehouse]
+    if category and category != 'all':
+        filtered_orders = [o for o in filtered_orders if o.get('category', '').lower() == category.lower()]
+
     quarters = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -274,11 +279,17 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
+def get_monthly_trends(warehouse: Optional[str] = None, category: Optional[str] = None):
     """Get month-over-month trends"""
+    filtered_orders = orders
+    if warehouse and warehouse != 'all':
+        filtered_orders = [o for o in filtered_orders if o.get('warehouse') == warehouse]
+    if category and category != 'all':
+        filtered_orders = [o for o in filtered_orders if o.get('category', '').lower() == category.lower()]
+
     months = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
@@ -303,6 +314,84 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+@app.get("/api/restock/recommendations")
+def get_restock_recommendations(
+    budget: float = 50000,
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
+    """Recommend purchase orders based on stock levels, demand forecasts, and a budget ceiling."""
+    # Build a SKU lookup from demand forecasts
+    forecast_by_sku = {f['item_sku']: f for f in demand_forecasts}
+
+    candidates = []
+    for item in inventory_items:
+        if warehouse and warehouse != 'all' and item.get('warehouse') != warehouse:
+            continue
+        if category and category != 'all' and item.get('category', '').lower() != category.lower():
+            continue
+
+        sku = item.get('sku')
+        forecast = forecast_by_sku.get(sku)
+        qty_on_hand = item.get('quantity_on_hand', 0)
+        reorder_point = item.get('reorder_point', 0)
+
+        # Only recommend items that are at or below reorder point
+        if qty_on_hand > reorder_point:
+            continue
+
+        forecasted_demand = forecast['forecasted_demand'] if forecast else reorder_point * 2
+        suggested_qty = max(1, forecasted_demand - qty_on_hand)
+        unit_cost = item.get('unit_cost', 0)
+        estimated_cost = round(suggested_qty * unit_cost, 2)
+        stock_gap = reorder_point - qty_on_hand  # higher = more urgent
+
+        candidates.append({
+            'sku': sku,
+            'name': item.get('name'),
+            'category': item.get('category'),
+            'warehouse': item.get('warehouse'),
+            'quantity_on_hand': qty_on_hand,
+            'reorder_point': reorder_point,
+            'forecasted_demand': forecasted_demand,
+            'suggested_qty': int(suggested_qty),
+            'unit_cost': unit_cost,
+            'estimated_cost': estimated_cost,
+            'stock_gap': stock_gap,
+        })
+
+    # Sort by urgency (largest gap first)
+    candidates.sort(key=lambda x: x['stock_gap'], reverse=True)
+
+    # Apply budget ceiling, accumulating spend
+    result = []
+    spent = 0.0
+    for item in candidates:
+        if spent + item['estimated_cost'] > budget:
+            break
+        spent = round(spent + item['estimated_cost'], 2)
+        item['cumulative_cost'] = spent
+        result.append(item)
+
+    return {'recommendations': result, 'total_cost': spent, 'budget': budget}
+
+
+@app.get("/api/tasks")
+def get_tasks():
+    return []
+
+@app.post("/api/tasks")
+def create_task(task: dict):
+    return {**task, "id": str(len([])+1)}
+
+@app.patch("/api/tasks/{task_id}")
+def toggle_task(task_id: str):
+    return {"id": task_id}
+
+@app.delete("/api/tasks/{task_id}")
+def delete_task(task_id: str):
+    return {"id": task_id}
 
 if __name__ == "__main__":
     import uvicorn

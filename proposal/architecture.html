@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meridian Components — Current-State Architecture</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 40px 32px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    header .label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+    header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+    header p {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    .diagram {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 0;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ── Columns ── */
+    .col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .col-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #475569;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    /* ── Layer boxes ── */
+    .layer {
+      border-radius: 10px;
+      border: 1px solid;
+      padding: 16px 18px;
+      min-width: 200px;
+    }
+    .layer-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .layer-title .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .layer ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .layer ul li {
+      font-size: 12px;
+      color: #94a3b8;
+      padding: 4px 8px;
+      border-radius: 5px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .layer ul li .badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .badge-get  { background: #064e3b; color: #6ee7b7; }
+    .badge-post { background: #1e1b4b; color: #a5b4fc; }
+    .badge-todo { background: #292524; color: #78716c; text-decoration: line-through; }
+
+    /* frontend */
+    .layer-frontend { background: #0d1f35; border-color: #1e40af; }
+    .layer-frontend .layer-title { color: #60a5fa; }
+    .layer-frontend .dot { background: #3b82f6; }
+
+    /* composables */
+    .layer-composables { background: #0f1f2e; border-color: #155e75; }
+    .layer-composables .layer-title { color: #22d3ee; }
+    .layer-composables .dot { background: #06b6d4; }
+
+    /* backend */
+    .layer-backend { background: #0d2218; border-color: #166534; }
+    .layer-backend .layer-title { color: #4ade80; }
+    .layer-backend .dot { background: #22c55e; }
+
+    /* data */
+    .layer-data { background: #1c1409; border-color: #92400e; }
+    .layer-data .layer-title { color: #fbbf24; }
+    .layer-data .dot { background: #f59e0b; }
+
+    /* components */
+    .layer-components { background: #17103a; border-color: #4c1d95; }
+    .layer-components .layer-title { color: #c4b5fd; }
+    .layer-components .dot { background: #a78bfa; }
+
+    /* ── Arrows ── */
+    .arrow-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 0 8px;
+      padding-top: 32px;
+    }
+    .arrow-line {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .arrow-label {
+      font-size: 9px;
+      color: #475569;
+      text-align: center;
+      white-space: nowrap;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    svg.arrow { overflow: visible; }
+
+    /* ── Info cards at bottom ── */
+    .info-row {
+      display: flex;
+      gap: 16px;
+      max-width: 1100px;
+      margin: 40px auto 0;
+    }
+    .info-card {
+      flex: 1;
+      border-radius: 10px;
+      border: 1px solid #1e293b;
+      background: #141920;
+      padding: 16px 20px;
+    }
+    .info-card h3 {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #475569;
+      margin-bottom: 10px;
+    }
+    .info-card ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .info-card ul li {
+      font-size: 12px;
+      color: #94a3b8;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .info-card ul li::before {
+      content: '·';
+      color: #334155;
+      flex-shrink: 0;
+    }
+    .warn { color: #f59e0b !important; }
+    .ok   { color: #4ade80 !important; }
+
+    .port-pill {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+      margin-left: 4px;
+    }
+    .port-3000 { background: #1e3a5f; color: #60a5fa; }
+    .port-8001 { background: #0d2e1c; color: #4ade80; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="label">Meridian Components · RFP MC-2026-0417</div>
+  <h1>Current-State Architecture</h1>
+  <p>Inventory Management System — Previous Vendor Delivery</p>
+</header>
+
+<div class="diagram">
+
+  <!-- ── COLUMN 1: Frontend Views ── -->
+  <div class="col">
+    <div class="col-label">Frontend Views<span class="port-pill port-3000">:3000</span></div>
+
+    <div class="layer layer-frontend">
+      <div class="layer-title"><span class="dot"></span>Pages (Vue 3 Router)</div>
+      <ul>
+        <li>/ &nbsp; Dashboard</li>
+        <li>/inventory &nbsp; Inventory</li>
+        <li>/orders &nbsp; Orders</li>
+        <li>/demand &nbsp; Demand Forecast</li>
+        <li>/spending &nbsp; Finance / Spending</li>
+        <li>/reports &nbsp; Reports</li>
+        <li>/backlog &nbsp; Backlog</li>
+      </ul>
+    </div>
+
+    <div class="layer layer-components">
+      <div class="layer-title"><span class="dot"></span>Shared Components</div>
+      <ul>
+        <li>FilterBar (global filters)</li>
+        <li>InventoryDetailModal</li>
+        <li>BacklogDetailModal + PO form</li>
+        <li>TasksModal</li>
+        <li>ProfileMenu + ProfileModal</li>
+        <li>LanguageSwitcher (EN / JP)</li>
+      </ul>
+    </div>
+
+    <div class="layer layer-composables">
+      <div class="layer-title"><span class="dot"></span>Composables</div>
+      <ul>
+        <li>useFilters — global filter state</li>
+        <li>useI18n — translations + currency</li>
+        <li>useAuth — mock user / locale</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── ARROW 1 ── -->
+  <div class="arrow-col">
+    <div class="arrow-line">
+      <div class="arrow-label">axios</div>
+      <svg class="arrow" width="48" height="16">
+        <line x1="2" y1="8" x2="46" y2="8" stroke="#334155" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <polygon points="46,4 54,8 46,12" fill="#334155"/>
+      </svg>
+      <div class="arrow-label">src/api.js</div>
+    </div>
+  </div>
+
+  <!-- ── COLUMN 2: Backend API ── -->
+  <div class="col">
+    <div class="col-label">Backend API<span class="port-pill port-8001">:8001</span></div>
+
+    <div class="layer layer-backend">
+      <div class="layer-title"><span class="dot"></span>FastAPI Endpoints</div>
+      <ul>
+        <li><span class="badge badge-get">GET</span> /api/inventory</li>
+        <li><span class="badge badge-get">GET</span> /api/inventory/{id}</li>
+        <li><span class="badge badge-get">GET</span> /api/orders</li>
+        <li><span class="badge badge-get">GET</span> /api/orders/{id}</li>
+        <li><span class="badge badge-get">GET</span> /api/demand</li>
+        <li><span class="badge badge-get">GET</span> /api/backlog</li>
+        <li><span class="badge badge-get">GET</span> /api/dashboard/summary</li>
+        <li><span class="badge badge-get">GET</span> /api/spending/summary</li>
+        <li><span class="badge badge-get">GET</span> /api/spending/monthly</li>
+        <li><span class="badge badge-get">GET</span> /api/spending/categories</li>
+        <li><span class="badge badge-get">GET</span> /api/spending/transactions</li>
+        <li><span class="badge badge-get">GET</span> /api/reports/quarterly</li>
+        <li><span class="badge badge-get">GET</span> /api/reports/monthly-trends</li>
+        <li><span class="badge badge-todo">POST</span> /api/purchase-orders <em style="color:#57534e;font-size:10px">missing</em></li>
+        <li><span class="badge badge-todo">GET/POST</span> /api/tasks <em style="color:#57534e;font-size:10px">missing</em></li>
+      </ul>
+    </div>
+
+    <div class="layer layer-backend" style="border-color:#1a3a20;">
+      <div class="layer-title"><span class="dot"></span>Pydantic Models</div>
+      <ul>
+        <li>InventoryItem</li>
+        <li>Order</li>
+        <li>DemandForecast</li>
+        <li>BacklogItem</li>
+        <li>PurchaseOrder</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── ARROW 2 ── -->
+  <div class="arrow-col">
+    <div class="arrow-line">
+      <div class="arrow-label">filter &amp;</div>
+      <svg class="arrow" width="48" height="16">
+        <line x1="2" y1="8" x2="46" y2="8" stroke="#334155" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <polygon points="46,4 54,8 46,12" fill="#334155"/>
+      </svg>
+      <div class="arrow-label">aggregate</div>
+    </div>
+  </div>
+
+  <!-- ── COLUMN 3: Data Layer ── -->
+  <div class="col">
+    <div class="col-label">Data Layer</div>
+
+    <div class="layer layer-data">
+      <div class="layer-title"><span class="dot"></span>JSON Files (server/data/)</div>
+      <ul>
+        <li>inventory.json <em style="font-size:10px;color:#78716c">~100 items · 3 warehouses</em></li>
+        <li>orders.json <em style="font-size:10px;color:#78716c">~100 orders</em></li>
+        <li>demand_forecasts.json</li>
+        <li>backlog_items.json</li>
+        <li>purchase_orders.json <em style="font-size:10px;color:#f59e0b">empty</em></li>
+        <li>spending.json</li>
+        <li>transactions.json</li>
+      </ul>
+    </div>
+
+    <div class="layer layer-data" style="border-color:#7c2d12;">
+      <div class="layer-title"><span class="dot" style="background:#f97316"></span>mock_data.py (loader)</div>
+      <ul>
+        <li>Reads all JSON at startup</li>
+        <li>In-memory only — no DB</li>
+        <li>No write-back persistence</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Info cards ── -->
+<div class="info-row">
+  <div class="info-card">
+    <h3>Stack Summary</h3>
+    <ul>
+      <li>Vue 3.4 + Vue Router + Vite 5.2</li>
+      <li>FastAPI 0.110 + Uvicorn + Pydantic v2</li>
+      <li>Python 3.12 · No ORM, no migrations</li>
+      <li>EN/JP i18n via custom composable</li>
+      <li>USD/JPY currency switching (client-side)</li>
+    </ul>
+  </div>
+  <div class="info-card">
+    <h3>Known Gaps (RFP R1–R4)</h3>
+    <ul>
+      <li class="warn">R1: Reports page — filter bugs, i18n gaps, console noise</li>
+      <li class="warn">R2: Restocking feature — UI shell exists, API endpoints missing</li>
+      <li class="warn">R3: No automated browser test coverage</li>
+      <li class="ok">R4: This document — current-state architecture</li>
+      <li class="warn">Tasks API — called by frontend, not implemented in backend</li>
+    </ul>
+  </div>
+  <div class="info-card">
+    <h3>Tooling &amp; Config</h3>
+    <ul>
+      <li>Playwright MCP server (browser automation)</li>
+      <li>GitHub MCP server (PR / issue management)</li>
+      <li>pytest + FastAPI TestClient (backend tests)</li>
+      <li>Claude Code subagents: vue-expert, code-reviewer, security-auditor</li>
+      <li>.env.example present — no secrets defined</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>
