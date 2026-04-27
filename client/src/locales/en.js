@@ -8,6 +8,7 @@ export default {
     demandForecast: 'Demand Forecast',
     reports: 'Reports',
     restocking: 'Restocking',
+    backlog: 'Backlog',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -365,6 +366,26 @@ export default {
       totalOrdersYTD: 'Total Orders (YTD)',
       bestQuarter: 'Best Performing Quarter'
     }
+  },
+
+  // Backlog
+  backlog: {
+    title: 'Backlog Management',
+    description: 'Track and resolve inventory shortages',
+    loading: 'Loading backlog...',
+    highPriority: 'High Priority',
+    mediumPriority: 'Medium Priority',
+    lowPriority: 'Low Priority',
+    totalItems: 'Total Backlog Items',
+    itemsTitle: 'Backlog Items',
+    noItems: 'No backlog items - all orders can be fulfilled!',
+    orderId: 'Order ID',
+    sku: 'SKU',
+    itemName: 'Item Name',
+    quantityNeeded: 'Quantity Needed',
+    quantityAvailable: 'Quantity Available',
+    shortage: 'Shortage',
+    daysDelayed: 'Days Delayed'
   },
 
   // Common

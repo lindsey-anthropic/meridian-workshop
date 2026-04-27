@@ -28,6 +28,9 @@
           <router-link to="/restocking" :class="{ active: $route.path === '/restocking' }">
             {{ t('nav.restocking') }}
           </router-link>
+          <router-link to="/backlog" :class="{ active: $route.path === '/backlog' }">
+            {{ t('nav.backlog') }}
+          </router-link>
         </nav>
         <LanguageSwitcher />
         <ProfileMenu
