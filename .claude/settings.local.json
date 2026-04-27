@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(netstat -aon)",
+      "Bash(findstr \":3000 \\\\|:8001 \")",
+      "Bash(findstr \"LISTENING\")",
+      "Bash(where uv *)",
+      "Read(//c/Users/s.d.subramanian/**)",
+      "PowerShell(Get-Command uv -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-ChildItem \"$env:USERPROFILE\\\\.cargo\\\\bin\\\\uv.exe\", \"$env:USERPROFILE\\\\.local\\\\bin\\\\uv.exe\", \"C:\\\\Users\\\\s.d.subramanian\\\\.cargo\\\\bin\\\\uv.exe\" -ErrorAction SilentlyContinue | Select-Object FullName)",
+      "PowerShell(python --version)",
+      "PowerShell(pip --version)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
+    ]
+  }
+}
