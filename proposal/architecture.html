@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture Overview — Meridian Components Inventory Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f8fafc;
+    color: #0f172a;
+    line-height: 1.6;
+  }
+
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+  }
+
+  h1 { font-size: 1.875rem; font-weight: 700; color: #0f172a; margin-bottom: 0.375rem; }
+  h2 { font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 1rem; margin-top: 2.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0; }
+  h3 { font-size: 0.938rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem; }
+  p  { color: #475569; font-size: 0.938rem; margin-bottom: 0.75rem; }
+  .meta { color: #64748b; font-size: 0.875rem; margin-bottom: 2rem; }
+
+  /* Stack overview */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .stack-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 1.25rem;
+    border-top: 3px solid;
+  }
+
+  .stack-card.frontend { border-top-color: #3b82f6; }
+  .stack-card.backend  { border-top-color: #10b981; }
+  .stack-card.data     { border-top-color: #f59e0b; }
+
+  .stack-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+
+  .stack-card.frontend .stack-badge { background: #dbeafe; color: #1e40af; }
+  .stack-card.backend  .stack-badge { background: #d1fae5; color: #065f46; }
+  .stack-card.data     .stack-badge { background: #fef3c7; color: #92400e; }
+
+  .stack-card ul { list-style: none; }
+  .stack-card li { font-size: 0.875rem; color: #475569; padding: 0.2rem 0; }
+  .stack-card li::before { content: "·  "; color: #94a3b8; }
+
+  /* Architecture diagram */
+  .diagram {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 2rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+  }
+
+  .diagram-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: nowrap;
+    min-width: 700px;
+  }
+
+  .node {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    min-width: 110px;
+    flex-shrink: 0;
+  }
+
+  .node.blue   { background: #eff6ff; border-color: #bfdbfe; }
+  .node.green  { background: #f0fdf4; border-color: #bbf7d0; }
+  .node.amber  { background: #fffbeb; border-color: #fde68a; }
+  .node.purple { background: #faf5ff; border-color: #e9d5ff; }
+
+  .node-title { font-size: 0.75rem; font-weight: 700; color: #374151; }
+  .node-sub   { font-size: 0.688rem; color: #6b7280; margin-top: 0.2rem; }
+
+  .arrow {
+    color: #94a3b8;
+    font-size: 1.25rem;
+    padding: 0 0.25rem;
+    flex-shrink: 0;
+  }
+
+  .arrow-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0.25rem;
+    flex-shrink: 0;
+  }
+
+  .arrow-label span {
+    font-size: 0.625rem;
+    color: #94a3b8;
+    white-space: nowrap;
+  }
+
+  /* Views table */
+  .views-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin: 1rem 0;
+  }
+
+  .view-row {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .view-path {
+    font-family: monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #3b82f6;
+    min-width: 110px;
+    flex-shrink: 0;
+  }
+
+  .view-info h3 { font-size: 0.875rem; margin-bottom: 0.2rem; }
+  .view-info p  { font-size: 0.813rem; color: #64748b; margin: 0; }
+
+  .api-pills { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.4rem; }
+  .pill {
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 0.688rem;
+    font-family: monospace;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+  }
+
+  /* Filter system */
+  .filter-diagram {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+  }
+
+  .filter-center {
+    background: #eff6ff;
+    border: 2px solid #3b82f6;
+    border-radius: 8px;
+    padding: 0.75rem 1.25rem;
+    text-align: center;
+    display: inline-block;
+    margin: 0 auto;
+    display: block;
+    max-width: 300px;
+    margin: 0.75rem auto;
+  }
+
+  .filter-center h3 { font-size: 0.875rem; color: #1e40af; }
+  .filter-center p  { font-size: 0.75rem; color: #3b82f6; margin: 0; }
+
+  .filter-consumers {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .consumer-pill {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  /* Known issues */
+  .issues-list { list-style: none; margin: 0.5rem 0; }
+  .issues-list li {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.875rem;
+    color: #475569;
+  }
+
+  .issues-list li:last-child { border-bottom: none; }
+
+  .issue-status {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    height: fit-content;
+    margin-top: 0.1rem;
+    flex-shrink: 0;
+  }
+
+  .resolved   { background: #d1fae5; color: #065f46; }
+  .open       { background: #fef3c7; color: #92400e; }
+  .by-design  { background: #e0e7ff; color: #3730a3; }
+
+  /* File map */
+  .file-map {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    font-family: monospace;
+    font-size: 0.813rem;
+    line-height: 2;
+  }
+
+  .file-map .dir  { color: #3b82f6; font-weight: 700; }
+  .file-map .file { color: #374151; }
+  .file-map .note { color: #94a3b8; font-family: sans-serif; font-size: 0.75rem; }
+
+  .indent1 { padding-left: 1.25rem; }
+  .indent2 { padding-left: 2.5rem; }
+  .indent3 { padding-left: 3.75rem; }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    font-size: 0.813rem;
+    color: #94a3b8;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Architecture Overview</h1>
+  <p class="meta">Meridian Components — Inventory Dashboard · Prepared by [Your Firm Name] · April 2026 · Based on direct code review</p>
+
+  <!-- Stack -->
+  <h2>1. Technology Stack</h2>
+  <div class="stack-grid">
+    <div class="stack-card frontend">
+      <div class="stack-badge">Frontend</div>
+      <h3>Vue 3 + Vite</h3>
+      <ul>
+        <li>Port 3000 (dev)</li>
+        <li>Composition API</li>
+        <li>Vue Router (web history)</li>
+        <li>Axios for HTTP</li>
+        <li>Custom SVG charts</li>
+        <li>CSS Grid / Flexbox layouts</li>
+        <li>i18n: English + Japanese</li>
+      </ul>
+    </div>
+    <div class="stack-card backend">
+      <div class="stack-badge">Backend</div>
+      <h3>Python FastAPI</h3>
+      <ul>
+        <li>Port 8001</li>
+        <li>Uvicorn ASGI server</li>
+        <li>Pydantic data models</li>
+        <li>CORS: all origins (dev)</li>
+        <li>Auto docs at /docs</li>
+        <li>In-memory data (no DB)</li>
+      </ul>
+    </div>
+    <div class="stack-card data">
+      <div class="stack-badge">Data</div>
+      <h3>JSON flat files</h3>
+      <ul>
+        <li>server/data/*.json</li>
+        <li>Loaded at startup</li>
+        <li>In-memory during runtime</li>
+        <li>No persistence layer</li>
+        <li>Restart = reset to file state</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Data flow -->
+  <h2>2. Data Flow</h2>
+  <p>A typical page load follows this path from user interaction to rendered data:</p>
+  <div class="diagram">
+    <div class="diagram-flow">
+      <div class="node blue">
+        <div class="node-title">Vue Component</div>
+        <div class="node-sub">views/*.vue</div>
+      </div>
+      <div class="arrow-label">
+        <span>→</span>
+        <span>calls</span>
+      </div>
+      <div class="node blue">
+        <div class="node-title">api.js</div>
+        <div class="node-sub">URLSearchParams + axios</div>
+      </div>
+      <div class="arrow-label">
+        <span>→</span>
+        <span>HTTP GET</span>
+      </div>
+      <div class="node green">
+        <div class="node-title">FastAPI</div>
+        <div class="node-sub">main.py endpoint</div>
+      </div>
+      <div class="arrow-label">
+        <span>→</span>
+        <span>calls</span>
+      </div>
+      <div class="node green">
+        <div class="node-title">apply_filters()</div>
+        <div class="node-sub">mock_data.py</div>
+      </div>
+      <div class="arrow-label">
+        <span>→</span>
+        <span>reads</span>
+      </div>
+      <div class="node amber">
+        <div class="node-title">JSON files</div>
+        <div class="node-sub">server/data/</div>
+      </div>
+      <div class="arrow-label">
+        <span>→</span>
+        <span>Pydantic</span>
+      </div>
+      <div class="node green">
+        <div class="node-title">JSON response</div>
+        <div class="node-sub">typed, validated</div>
+      </div>
+      <div class="arrow-label">
+        <span>→</span>
+        <span>reactive ref</span>
+      </div>
+      <div class="node blue">
+        <div class="node-title">Template</div>
+        <div class="node-sub">rendered to DOM</div>
+      </div>
+    </div>
+  </div>
+
+  <p>All filter parameters (warehouse, category, status, month) are passed as URL query strings. The backend utility function <code>apply_filters()</code> in <strong>mock_data.py</strong> is shared across all endpoints. Filtering always operates on copies — the in-memory dataset is never mutated.</p>
+
+  <!-- Views -->
+  <h2>3. Views and API Dependencies</h2>
+  <p>The application has eight views, all registered in <strong>client/src/main.js</strong>.</p>
+  <div class="views-grid">
+    <div class="view-row">
+      <div class="view-path">/</div>
+      <div class="view-info">
+        <h3>Dashboard</h3>
+        <p>KPIs, order health, inventory value by category, shortages, top products</p>
+        <div class="api-pills">
+          <span class="pill">/api/dashboard/summary</span>
+          <span class="pill">/api/inventory</span>
+          <span class="pill">/api/orders</span>
+        </div>
+      </div>
+    </div>
+    <div class="view-row">
+      <div class="view-path">/inventory</div>
+      <div class="view-info">
+        <h3>Inventory</h3>
+        <p>Full stock list with search, status badges, detail modal</p>
+        <div class="api-pills">
+          <span class="pill">/api/inventory</span>
+          <span class="pill">/api/inventory/:id</span>
+        </div>
+      </div>
+    </div>
+    <div class="view-row">
+      <div class="view-path">/orders</div>
+      <div class="view-info">
+        <h3>Orders</h3>
+        <p>Order list with all four filters, detail modal</p>
+        <div class="api-pills">
+          <span class="pill">/api/orders</span>
+          <span class="pill">/api/orders/:id</span>
+        </div>
+      </div>
+    </div>
+    <div class="view-row">
+      <div class="view-path">/spending</div>
+      <div class="view-info">
+        <h3>Finance</h3>
+        <p>Revenue vs costs, monthly cost flow, category spending, transactions</p>
+        <div class="api-pills">
+          <span class="pill">/api/spending/summary</span>
+          <span class="pill">/api/spending/monthly</span>
+          <span class="pill">/api/spending/categories</span>
+          <span class="pill">/api/spending/transactions</span>
+        </div>
+      </div>
+    </div>
+    <div class="view-row">
+      <div class="view-path">/demand</div>
+      <div class="view-info">
+        <h3>Demand Forecast</h3>
+        <p>Demand trend cards grouped by increasing / stable / decreasing</p>
+        <div class="api-pills">
+          <span class="pill">/api/demand</span>
+        </div>
+      </div>
+    </div>
+    <div class="view-row">
+      <div class="view-path">/reports</div>
+      <div class="view-info">
+        <h3>Reports</h3>
+        <p>Quarterly performance, monthly revenue trend chart, MoM analysis</p>
+        <div class="api-pills">
+          <span class="pill">/api/reports/quarterly</span>
+          <span class="pill">/api/reports/monthly-trends</span>
+        </div>
+      </div>
+    </div>
+    <div class="view-row">
+      <div class="view-path">/restocking</div>
+      <div class="view-info">
+        <h3>Restocking</h3>
+        <p>Purchase order recommendations with operator budget ceiling</p>
+        <div class="api-pills">
+          <span class="pill">/api/restocking</span>
+        </div>
+      </div>
+    </div>
+    <div class="view-row">
+      <div class="view-path">/backlog</div>
+      <div class="view-info">
+        <h3>Backlog</h3>
+        <p>Unfulfilled orders with shortage detail and purchase order creation</p>
+        <div class="api-pills">
+          <span class="pill">/api/backlog</span>
+          <span class="pill">/api/purchase-orders</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter system -->
+  <h2>4. Filter System</h2>
+  <p>Filters are managed by a singleton composable at <strong>client/src/composables/useFilters.js</strong>. The four filter refs (<code>selectedPeriod</code>, <code>selectedLocation</code>, <code>selectedCategory</code>, <code>selectedStatus</code>) are defined at module scope, so every component that calls <code>useFilters()</code> shares the same reactive state.</p>
+  <div class="filter-diagram">
+    <div style="text-align:center; font-size:0.8rem; color:#64748b; margin-bottom:0.5rem;">Filter state lives here (singleton)</div>
+    <div class="filter-center">
+      <h3>useFilters() composable</h3>
+      <p>selectedPeriod · selectedLocation · selectedCategory · selectedStatus</p>
+    </div>
+    <div style="text-align:center; font-size:0.8rem; color:#64748b; margin: 0.5rem 0;">↑ written by FilterBar · read by all views ↓</div>
+    <div class="filter-consumers">
+      <span class="consumer-pill">FilterBar (writes)</span>
+      <span class="consumer-pill">Dashboard</span>
+      <span class="consumer-pill">Inventory</span>
+      <span class="consumer-pill">Orders</span>
+      <span class="consumer-pill">Reports</span>
+      <span class="consumer-pill">Restocking</span>
+      <span class="consumer-pill">Finance</span>
+    </div>
+  </div>
+  <p>Each view watches its relevant filter refs and calls <code>loadData()</code> on change. Filters are passed to the backend as query parameters via the shared <code>getCurrentFilters()</code> helper.</p>
+
+  <!-- Known state -->
+  <h2>5. Known State and Inconsistencies</h2>
+  <p>The following issues were identified during architecture review. Resolved items were addressed as part of this engagement; open items are documented for Meridian IT awareness.</p>
+  <ul class="issues-list">
+    <li>
+      <span class="issue-status resolved">Resolved</span>
+      <span>Reports module written in Options API while rest of application uses Composition API. Migrated to Composition API as part of R1.</span>
+    </li>
+    <li>
+      <span class="issue-status resolved">Resolved</span>
+      <span>Reports filters were not connected to the global filter system. All four filters now wired and reactive.</span>
+    </li>
+    <li>
+      <span class="issue-status resolved">Resolved</span>
+      <span>Reports made direct <code>axios.get('http://localhost:8001/...')</code> calls with hardcoded host. Consolidated to shared <code>api.js</code> module.</span>
+    </li>
+    <li>
+      <span class="issue-status resolved">Resolved</span>
+      <span>Extensive debug <code>console.log</code> calls throughout Reports, including per-cell logging on every render. All removed.</span>
+    </li>
+    <li>
+      <span class="issue-status resolved">Resolved</span>
+      <span>Reports had no i18n — all strings hardcoded in English. Reports section added to both <code>en.js</code> and <code>ja.js</code> locale files.</span>
+    </li>
+    <li>
+      <span class="issue-status resolved">Resolved</span>
+      <span>Manual character-by-character number formatter with edge cases. Replaced with <code>Intl.NumberFormat</code> via <code>toLocaleString()</code>.</span>
+    </li>
+    <li>
+      <span class="issue-status resolved">Resolved</span>
+      <span>Duplicate <code>var i</code> declarations in same function scope. Rewritten with <code>const</code>/<code>let</code> and array methods.</span>
+    </li>
+    <li>
+      <span class="issue-status resolved">Resolved</span>
+      <span>Bar chart height recalculated O(n²) on every render. Moved to cached computed property.</span>
+    </li>
+    <li>
+      <span class="issue-status by-design">By design</span>
+      <span>No persistence layer — all data loaded from JSON files at startup. Writes (purchase orders, tasks) are in-memory only and reset on server restart. Acceptable for current scope; a database would be required for production use.</span>
+    </li>
+    <li>
+      <span class="issue-status open">Note</span>
+      <span>CORS is configured to allow all origins (<code>allow_origins=["*"]</code>). Acceptable for internal dev; should be restricted to specific origins before any external exposure.</span>
+    </li>
+    <li>
+      <span class="issue-status open">Note</span>
+      <span>No authentication or authorisation layer. The application assumes a trusted internal network. Suitable for current internal deployment only.</span>
+    </li>
+  </ul>
+
+  <!-- File map -->
+  <h2>6. File Map</h2>
+  <div class="file-map">
+    <div class="dir">client/src/</div>
+    <div class="indent1 file">main.js <span class="note">— app entry, router registration</span></div>
+    <div class="indent1 file">App.vue <span class="note">— root component, nav, FilterBar, modals</span></div>
+    <div class="indent1 file">api.js <span class="note">— all HTTP calls, URLSearchParams filter building</span></div>
+    <div class="indent1 dir">views/</div>
+    <div class="indent2 file">Dashboard.vue, Inventory.vue, Orders.vue, Spending.vue</div>
+    <div class="indent2 file">Demand.vue, Reports.vue, Restocking.vue, Backlog.vue</div>
+    <div class="indent1 dir">components/</div>
+    <div class="indent2 file">FilterBar.vue <span class="note">— global filter bar, bound to useFilters singleton</span></div>
+    <div class="indent2 file">LanguageSwitcher.vue, ProfileMenu.vue</div>
+    <div class="indent2 file">*DetailModal.vue <span class="note">— detail overlays for inventory, orders, backlog</span></div>
+    <div class="indent1 dir">composables/</div>
+    <div class="indent2 file">useFilters.js <span class="note">— singleton filter state shared across all views</span></div>
+    <div class="indent2 file">useI18n.js <span class="note">— locale switching, translation helper t()</span></div>
+    <div class="indent2 file">useAuth.js <span class="note">— mock user session (no real auth)</span></div>
+    <div class="indent1 dir">locales/</div>
+    <div class="indent2 file">en.js <span class="note">— English translations</span></div>
+    <div class="indent2 file">ja.js <span class="note">— Japanese translations</span></div>
+    <br>
+    <div class="dir">server/</div>
+    <div class="indent1 file">main.py <span class="note">— all API endpoints, Pydantic models, CORS config</span></div>
+    <div class="indent1 file">mock_data.py <span class="note">— JSON loading, apply_filters() utility</span></div>
+    <div class="indent1 dir">data/</div>
+    <div class="indent2 file">inventory.json, orders.json, demand_forecasts.json</div>
+    <div class="indent2 file">backlog.json, purchase_orders.json, spending_*.json, tasks.json</div>
+    <br>
+    <div class="dir">tests/</div>
+    <div class="indent1 dir">backend/ <span class="note">— pytest tests for API endpoints</span></div>
+    <div class="indent1 dir">e2e/ <span class="note">— Playwright browser tests (happy path + Reports filter coverage)</span></div>
+  </div>
+
+  <footer>
+    Prepared by [Your Firm Name] · Based on direct code review of commit history and source files · April 2026<br>
+    This document supersedes the previous vendor's handoff notes where the two conflict.
+  </footer>
+
+</div>
+</body>
+</html>

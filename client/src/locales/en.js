@@ -6,6 +6,7 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -185,6 +186,62 @@ export default {
       change: 'Change',
       trend: 'Trend',
       period: 'Period'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    description: 'Purchase order recommendations based on stock levels and demand forecasts',
+    budgetCeiling: 'Budget Ceiling',
+    totalCost: 'Total Cost',
+    remaining: 'Remaining',
+    withinBudget: 'Within Budget',
+    overBudget: 'Over Budget',
+    noRecommendations: 'No restocking needed for the selected filters.',
+    table: {
+      sku: 'SKU',
+      name: 'Item Name',
+      warehouse: 'Warehouse',
+      onHand: 'On Hand',
+      reorderPoint: 'Reorder Point',
+      forecasted: 'Forecasted Demand',
+      recommendedQty: 'Recommended Qty',
+      unitCost: 'Unit Cost',
+      lineCost: 'Line Cost',
+      trend: 'Trend',
+      urgency: 'Urgency'
+    },
+    urgency: {
+      critical: 'Critical',
+      low: 'Low'
+    }
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    quarterlyPerformance: 'Quarterly Performance',
+    monthlyTrend: 'Monthly Revenue Trend',
+    momAnalysis: 'Month-over-Month Analysis',
+    table: {
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    },
+    stats: {
+      totalRevenueYTD: 'Total Revenue (YTD)',
+      avgMonthlyRevenue: 'Avg Monthly Revenue',
+      totalOrdersYTD: 'Total Orders (YTD)',
+      bestQuarter: 'Best Performing Quarter'
     }
   },
 
