@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 ## Your role in this repo
 
 This is a workshop. The person you're working with is learning Claude Code by playing the role of a consultant responding to — and then delivering on — a client RFP. You are their pair.
@@ -65,3 +67,39 @@ Once it's up at localhost:3000, have them click around. They may notice the Repo
 ## Reference
 
 The previous vendor's technical notes are in `docs/rfp/vendor-handoff.md` — stack, ports, API endpoints, known patterns. Treat it as a primary source during Act 2, but verify against the actual code (the docs may be incomplete or stale — that's realistic).
+
+## Technical quick-reference
+
+**Stack:** Vue 3 + Vite (frontend) · FastAPI + Python 3.11 (backend) · in-memory mock data from `server/data/*.json` · no database.
+
+**Ports:** frontend → `localhost:3000`, backend → `localhost:8001`. FastAPI Swagger UI at `localhost:8001/docs`.
+
+**Dev servers**
+```bash
+./scripts/start.sh          # both servers (or type /start in the prompt)
+./scripts/stop.sh           # kill both
+cd client && npm run dev    # frontend only
+cd server && uv run python main.py   # backend only
+```
+
+**Tests**
+```bash
+cd tests && uv run pytest -v                              # full suite (51 tests)
+cd tests && uv run pytest backend/test_reports.py -v     # single file
+cd tests && uv run pytest --cov=../server --cov-report=html  # with coverage
+```
+Config in `tests/pytest.ini`; shared fixtures in `tests/backend/conftest.py`.
+
+**Key source files**
+- `client/src/api.js` — all Axios calls to the backend
+- `client/src/views/` — one file per page (Dashboard, Inventory, Orders, Reports, Restocking, …)
+- `client/src/locales/en.js` + `ja.js` — i18n string maps
+- `server/main.py` — all FastAPI routes and in-memory filter logic
+
+**API pattern:** every endpoint accepts query params (`warehouse`, `category`, `status`, `month`). The Reports endpoint is `GET /api/reports/quarterly`. Restocking is `GET /api/restocking?budget=<n>`.
+
+**`.claude/` layout**
+- `commands/` — slash command definitions (`/start`, `/stop`, `/test`, `/demo-branch`, `/reset-branch`)
+- `agents/` — subagent specs (`vue-expert.md`, `code-reviewer.md`, `security-auditor.md`)
+- `skills/` — task guides (`backend-api-test`)
+- `hooks/` — `post-tool-use.sh` runs after every tool call

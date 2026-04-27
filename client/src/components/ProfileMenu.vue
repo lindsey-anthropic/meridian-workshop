@@ -59,6 +59,18 @@
 
       <div class="dropdown-divider"></div>
 
+      <div class="dropdown-item theme-row" @mousedown.prevent="toggleTheme">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        {{ t('profile.darkMode') }}
+        <div class="theme-switch" :class="{ on: isDark }">
+          <div class="theme-switch-knob"></div>
+        </div>
+      </div>
+
+      <div class="dropdown-divider"></div>
+
       <button
         class="dropdown-item logout"
         @mousedown.prevent="handleLogout"
@@ -77,9 +89,11 @@
 import { ref, computed } from 'vue'
 import { useAuth } from '../composables/useAuth'
 import { useI18n } from '../composables/useI18n'
+import { useTheme } from '../composables/useTheme'
 
 const { currentUser, logout, getInitials } = useAuth()
 const { t } = useI18n()
+const { isDark, toggleTheme } = useTheme()
 
 const isDropdownOpen = ref(false)
 const emit = defineEmits(['show-profile-details', 'show-tasks'])
@@ -125,8 +139,8 @@ const handleLogout = () => {
   align-items: center;
   gap: 0.625rem;
   padding: 0.5rem 0.875rem;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -134,7 +148,7 @@ const handleLogout = () => {
 }
 
 .profile-button:hover {
-  background: #f8fafc;
+  background: var(--bg-muted);
   border-color: #cbd5e1;
 }
 
@@ -155,7 +169,7 @@ const handleLogout = () => {
 .profile-name {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .chevron {
@@ -172,8 +186,8 @@ const handleLogout = () => {
   top: calc(100% + 0.5rem);
   right: 0;
   min-width: 280px;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   z-index: 1000;
@@ -185,7 +199,7 @@ const handleLogout = () => {
   display: flex;
   gap: 0.875rem;
   align-items: center;
-  background: #f8fafc;
+  background: var(--bg-muted);
 }
 
 .avatar-large {
@@ -210,14 +224,14 @@ const handleLogout = () => {
 
 .user-name {
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text-primary);
   font-size: 0.938rem;
   margin-bottom: 0.25rem;
 }
 
 .user-email {
   font-size: 0.813rem;
-  color: #64748b;
+  color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -225,7 +239,7 @@ const handleLogout = () => {
 
 .dropdown-divider {
   height: 1px;
-  background: #e2e8f0;
+  background: var(--border-color);
   margin: 0.5rem 0;
 }
 
@@ -243,11 +257,11 @@ const handleLogout = () => {
   font-family: inherit;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #334155;
+  color: var(--text-primary);
 }
 
 .dropdown-item:hover {
-  background: #f8fafc;
+  background: var(--bg-muted);
 }
 
 .dropdown-item svg {
@@ -265,6 +279,42 @@ const handleLogout = () => {
 
 .dropdown-item.logout:hover {
   background: #fef2f2;
+}
+
+.theme-row {
+  cursor: pointer;
+  justify-content: flex-start;
+}
+
+.theme-switch {
+  margin-left: auto;
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: #cbd5e1;
+  position: relative;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.theme-switch.on {
+  background: #2563eb;
+}
+
+.theme-switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.theme-switch.on .theme-switch-knob {
+  transform: translateX(16px);
 }
 
 .task-badge {

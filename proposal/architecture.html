@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Components — Current-State Architecture Overview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
+  .page { max-width: 1100px; margin: 0 auto; padding: 40px 32px; }
+  h1 { font-size: 1.75rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+  .subtitle { color: #64748b; font-size: 0.95rem; margin-bottom: 40px; }
+  h2 { font-size: 1.2rem; font-weight: 700; color: #0f172a; margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; }
+  h3 { font-size: 1rem; font-weight: 600; color: #334155; margin: 20px 0 10px; }
+  p { color: #475569; margin-bottom: 12px; font-size: 0.9rem; }
+
+  /* Stack diagram */
+  .stack-diagram { display: flex; flex-direction: column; gap: 4px; margin: 24px 0; }
+  .layer { display: flex; align-items: center; border-radius: 8px; padding: 14px 20px; gap: 16px; }
+  .layer-label { font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; width: 120px; flex-shrink: 0; }
+  .layer-content { flex: 1; }
+  .layer-title { font-weight: 600; font-size: 0.95rem; }
+  .layer-detail { font-size: 0.8rem; opacity: 0.8; margin-top: 2px; }
+  .layer-port { font-size: 0.75rem; font-weight: 600; background: rgba(0,0,0,0.12); padding: 2px 8px; border-radius: 4px; margin-left: auto; flex-shrink: 0; }
+  .arrow { text-align: center; color: #94a3b8; font-size: 1.2rem; }
+
+  .layer.browser { background: #dbeafe; color: #1e40af; }
+  .layer.frontend { background: #dcfce7; color: #166534; }
+  .layer.api-client { background: #ecfdf5; color: #14532d; }
+  .layer.backend { background: #fef9c3; color: #713f12; }
+  .layer.data { background: #fce7f3; color: #831843; }
+
+  /* Views grid */
+  .views-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin: 16px 0; }
+  .view-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; }
+  .view-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .view-name { font-weight: 700; font-size: 0.9rem; color: #0f172a; }
+  .badge { font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .badge-ok { background: #dcfce7; color: #166534; }
+  .badge-warn { background: #fef9c3; color: #713f12; }
+  .badge-error { background: #fee2e2; color: #991b1b; }
+  .view-endpoints { font-size: 0.78rem; color: #64748b; margin-bottom: 6px; }
+  .view-filters { font-size: 0.78rem; color: #475569; }
+  .filter-tag { display: inline-block; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 3px; padding: 1px 6px; margin: 2px 2px 0 0; font-size: 0.72rem; }
+
+  /* Endpoints table */
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.82rem; }
+  th { background: #f1f5f9; color: #475569; font-weight: 600; text-align: left; padding: 8px 12px; border-bottom: 2px solid #e2e8f0; }
+  td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; color: #334155; vertical-align: top; }
+  tr:hover td { background: #fafafa; }
+  code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.8rem; background: #f1f5f9; padding: 1px 5px; border-radius: 3px; color: #0f172a; }
+
+  /* Filter flow */
+  .filter-flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 16px 0; font-size: 0.85rem; }
+  .filter-box { background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 14px; text-align: center; }
+  .filter-box strong { display: block; font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px; }
+  .filter-box span { font-weight: 600; color: #0f172a; font-size: 0.82rem; }
+  .filter-arrow { color: #94a3b8; font-size: 1.1rem; }
+
+  /* Issues */
+  .issues-list { list-style: none; margin: 12px 0; }
+  .issue-item { display: flex; gap: 12px; padding: 10px 14px; background: white; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 8px; align-items: flex-start; }
+  .issue-sev { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; }
+  .sev-high { background: #fee2e2; color: #991b1b; }
+  .sev-med { background: #fef9c3; color: #713f12; }
+  .sev-low { background: #f1f5f9; color: #475569; }
+  .issue-text { font-size: 0.85rem; color: #334155; }
+  .issue-text strong { color: #0f172a; }
+
+  /* Data layer */
+  .data-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; margin: 12px 0; }
+  .data-card { background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 14px; }
+  .data-card-name { font-weight: 700; font-size: 0.85rem; color: #0f172a; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .data-card-fields { font-size: 0.75rem; color: #64748b; }
+  .field { display: inline-block; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 3px; padding: 1px 6px; margin: 2px 2px 0 0; }
+
+  /* Summary scorecard */
+  .scorecard { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin: 16px 0; }
+  .score-item { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; text-align: center; }
+  .score-value { font-size: 2rem; font-weight: 800; }
+  .score-label { font-size: 0.78rem; color: #64748b; margin-top: 4px; }
+  .score-green { color: #16a34a; }
+  .score-yellow { color: #ca8a04; }
+  .score-red { color: #dc2626; }
+
+  footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 0.78rem; color: #94a3b8; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Meridian Components — Current-State Architecture</h1>
+  <p class="subtitle">Preliminary assessment prepared as part of proposal response to RFP MC-2026-0417 &nbsp;·&nbsp; [Firm Name] &nbsp;·&nbsp; April 2026</p>
+
+  <!-- Summary scorecard -->
+  <h2>Assessment Summary</h2>
+  <div class="scorecard">
+    <div class="score-item">
+      <div class="score-value score-green">6</div>
+      <div class="score-label">Views fully functional</div>
+    </div>
+    <div class="score-item">
+      <div class="score-value score-red">1</div>
+      <div class="score-label">View with critical defects (Reports)</div>
+    </div>
+    <div class="score-item">
+      <div class="score-value score-green">13</div>
+      <div class="score-label">Backend API endpoints</div>
+    </div>
+    <div class="score-item">
+      <div class="score-value score-yellow">7</div>
+      <div class="score-label">Known architectural issues</div>
+    </div>
+    <div class="score-item">
+      <div class="score-value score-green">2</div>
+      <div class="score-label">Languages supported (EN, JA)</div>
+    </div>
+    <div class="score-item">
+      <div class="score-value score-red">0</div>
+      <div class="score-label">Automated tests</div>
+    </div>
+  </div>
+
+  <!-- System stack -->
+  <h2>System Stack</h2>
+  <p>The application is a two-tier web system: a Vue 3 single-page application on the frontend communicating with a Python FastAPI backend over HTTP. All data is served from JSON files loaded into memory at server startup — there is no database.</p>
+
+  <div class="stack-diagram">
+    <div class="layer browser">
+      <div class="layer-label">Browser</div>
+      <div class="layer-content">
+        <div class="layer-title">Operator's Web Browser</div>
+        <div class="layer-detail">Chrome, Firefox, Safari — no client install required</div>
+      </div>
+      <div class="layer-port">localhost:3000</div>
+    </div>
+    <div class="arrow">↕</div>
+    <div class="layer frontend">
+      <div class="layer-label">Frontend</div>
+      <div class="layer-content">
+        <div class="layer-title">Vue 3 SPA — Composition API + Vite</div>
+        <div class="layer-detail">7 views · FilterBar · LanguageSwitcher · 6 modal components · useFilters / useI18n composables</div>
+      </div>
+      <div class="layer-port">localhost:3000</div>
+    </div>
+    <div class="arrow">↕ HTTP / axios</div>
+    <div class="layer api-client">
+      <div class="layer-label">API Client</div>
+      <div class="layer-content">
+        <div class="layer-title">client/src/api.js — centralized axios wrapper</div>
+        <div class="layer-detail">16 functions · builds query strings from filter state · base URL: http://localhost:8001/api</div>
+      </div>
+    </div>
+    <div class="arrow">↕ HTTP / JSON</div>
+    <div class="layer backend">
+      <div class="layer-label">Backend</div>
+      <div class="layer-content">
+        <div class="layer-title">Python FastAPI — server/main.py</div>
+        <div class="layer-detail">13 endpoints · Pydantic response models · server-side filter helpers · CORS wildcard (dev only)</div>
+      </div>
+      <div class="layer-port">localhost:8001</div>
+    </div>
+    <div class="arrow">↕ in-memory (loaded at startup)</div>
+    <div class="layer data">
+      <div class="layer-label">Data Layer</div>
+      <div class="layer-content">
+        <div class="layer-title">JSON flat files — server/data/ (7 files)</div>
+        <div class="layer-detail">inventory · orders · demand_forecasts · backlog_items · spending · transactions · purchase_orders</div>
+      </div>
+      <div class="layer-port">no persistence</div>
+    </div>
+  </div>
+
+  <!-- Frontend views -->
+  <h2>Frontend Views</h2>
+  <p>All views except Reports use Vue 3 Composition API with <code>setup()</code> and reactive composables. Views watch filter state and re-fetch data automatically on any filter change.</p>
+
+  <div class="views-grid">
+    <div class="view-card">
+      <div class="view-card-header">
+        <span class="view-name">Dashboard</span>
+        <span class="badge badge-warn">Partially broken</span>
+      </div>
+      <div class="view-endpoints">Calls: getDashboardSummary · getOrders · getInventory · getBacklog</div>
+      <div class="view-filters">Filters: <span class="filter-tag">Period</span><span class="filter-tag">Warehouse</span><span class="filter-tag">Category</span><span class="filter-tag">Status</span></div>
+      <p style="margin-top:8px;font-size:0.78rem;color:#b45309;">⚠ References PurchaseOrderModal component which does not exist — "Create PO" button non-functional.</p>
+    </div>
+    <div class="view-card">
+      <div class="view-card-header">
+        <span class="view-name">Inventory</span>
+        <span class="badge badge-ok">Functional</span>
+      </div>
+      <div class="view-endpoints">Calls: getInventory</div>
+      <div class="view-filters">Filters: <span class="filter-tag">Warehouse</span><span class="filter-tag">Category</span></div>
+    </div>
+    <div class="view-card">
+      <div class="view-card-header">
+        <span class="view-name">Orders</span>
+        <span class="badge badge-ok">Functional</span>
+      </div>
+      <div class="view-endpoints">Calls: getOrders</div>
+      <div class="view-filters">Filters: <span class="filter-tag">Period</span><span class="filter-tag">Warehouse</span><span class="filter-tag">Category</span><span class="filter-tag">Status</span></div>
+    </div>
+    <div class="view-card">
+      <div class="view-card-header">
+        <span class="view-name">Demand</span>
+        <span class="badge badge-ok">Functional</span>
+      </div>
+      <div class="view-endpoints">Calls: getDemandForecasts · getInventory</div>
+      <div class="view-filters">Filters: <span class="filter-tag">Warehouse</span><span class="filter-tag">Category</span></div>
+    </div>
+    <div class="view-card">
+      <div class="view-card-header">
+        <span class="view-name">Spending</span>
+        <span class="badge badge-ok">Functional</span>
+      </div>
+      <div class="view-endpoints">Calls: getSpendingSummary · getMonthlySpending · getCategorySpending · getTransactions · getOrders</div>
+      <div class="view-filters">Filters: <span class="filter-tag">Period</span> <span style="font-size:0.75rem;color:#94a3b8;">(cost chart unfiltered)</span></div>
+    </div>
+    <div class="view-card">
+      <div class="view-card-header">
+        <span class="view-name">Backlog</span>
+        <span class="badge badge-ok">Functional</span>
+      </div>
+      <div class="view-endpoints">Calls: getBacklog · getInventory</div>
+      <div class="view-filters">Filters: <span class="filter-tag">Warehouse</span><span class="filter-tag">Category</span></div>
+    </div>
+    <div class="view-card" style="border-color:#fca5a5;">
+      <div class="view-card-header">
+        <span class="view-name">Reports</span>
+        <span class="badge badge-error">Critical defects</span>
+      </div>
+      <div class="view-endpoints">Calls: direct axios to /api/reports/quarterly · /api/reports/monthly-trends</div>
+      <div class="view-filters" style="color:#dc2626;">Filters: none — no filter integration</div>
+      <p style="margin-top:8px;font-size:0.78rem;color:#dc2626;">⛔ Uses Options API (only view not on Composition API). Direct axios calls bypass api.js. No i18n support. No filter wiring.</p>
+    </div>
+  </div>
+
+  <!-- Filter system -->
+  <h2>Filter System</h2>
+  <p>Four global filters are managed by the <code>useFilters</code> composable as singleton reactive refs. All views import the same composable — filter state is shared across the entire application. Each filter maps to a query parameter name on the backend.</p>
+
+  <div class="filter-flow">
+    <div class="filter-box"><strong>UI Select</strong><span>FilterBar.vue</span></div>
+    <div class="filter-arrow">→</div>
+    <div class="filter-box"><strong>Composable</strong><span>useFilters.js</span></div>
+    <div class="filter-arrow">→</div>
+    <div class="filter-box"><strong>getCurrentFilters()</strong><span>{ warehouse, category, status, month }</span></div>
+    <div class="filter-arrow">→</div>
+    <div class="filter-box"><strong>api.js</strong><span>URLSearchParams (skips "all")</span></div>
+    <div class="filter-arrow">→</div>
+    <div class="filter-box"><strong>FastAPI</strong><span>apply_filters() helper</span></div>
+  </div>
+
+  <table>
+    <thead><tr><th>Filter</th><th>Variable</th><th>Query Param</th><th>Valid Values</th><th>Views Using</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Time Period</strong></td><td><code>selectedPeriod</code></td><td><code>month</code></td><td>all, 2025-01 … 2025-12</td><td>Dashboard, Orders, Spending</td></tr>
+      <tr><td><strong>Warehouse</strong></td><td><code>selectedLocation</code></td><td><code>warehouse</code></td><td>all, San Francisco, London, Tokyo</td><td>Dashboard, Inventory, Orders, Backlog, Demand</td></tr>
+      <tr><td><strong>Category</strong></td><td><code>selectedCategory</code></td><td><code>category</code></td><td>all, sensors, actuators, controllers, circuit boards, power supplies</td><td>Dashboard, Inventory, Orders, Backlog, Demand</td></tr>
+      <tr><td><strong>Order Status</strong></td><td><code>selectedStatus</code></td><td><code>status</code></td><td>all, delivered, shipped, processing, backordered</td><td>Dashboard, Orders only</td></tr>
+    </tbody>
+  </table>
+
+  <!-- Backend API -->
+  <h2>Backend API Endpoints</h2>
+  <p>All endpoints are served by <code>server/main.py</code> (FastAPI). Filtering is performed server-side by helper functions <code>apply_filters()</code> and <code>filter_by_month()</code>. Quarter format is supported: <code>Q1-2025</code> maps to months 01–03.</p>
+
+  <table>
+    <thead><tr><th>Method</th><th>Path</th><th>Query Params</th><th>Returns</th></tr></thead>
+    <tbody>
+      <tr><td>GET</td><td><code>/api/inventory</code></td><td>warehouse, category</td><td>List of inventory items</td></tr>
+      <tr><td>GET</td><td><code>/api/inventory/{id}</code></td><td>—</td><td>Single item or 404</td></tr>
+      <tr><td>GET</td><td><code>/api/orders</code></td><td>warehouse, category, status, month</td><td>List of orders</td></tr>
+      <tr><td>GET</td><td><code>/api/orders/{id}</code></td><td>—</td><td>Single order or 404</td></tr>
+      <tr><td>GET</td><td><code>/api/demand</code></td><td>—</td><td>All demand forecasts (unfiltered)</td></tr>
+      <tr><td>GET</td><td><code>/api/backlog</code></td><td>—</td><td>Backlog items + purchase order flag</td></tr>
+      <tr><td>GET</td><td><code>/api/dashboard/summary</code></td><td>warehouse, category, status, month</td><td>KPI summary object</td></tr>
+      <tr><td>GET</td><td><code>/api/spending/summary</code></td><td>—</td><td>Cost breakdown by type</td></tr>
+      <tr><td>GET</td><td><code>/api/spending/monthly</code></td><td>—</td><td>12 months of spending data</td></tr>
+      <tr><td>GET</td><td><code>/api/spending/categories</code></td><td>—</td><td>Spending by category</td></tr>
+      <tr><td>GET</td><td><code>/api/spending/transactions</code></td><td>—</td><td>All transactions</td></tr>
+      <tr><td>GET</td><td><code>/api/reports/quarterly</code></td><td>—</td><td>Quarterly performance (calculated)</td></tr>
+      <tr><td>GET</td><td><code>/api/reports/monthly-trends</code></td><td>—</td><td>Monthly revenue trend (calculated)</td></tr>
+      <tr><td>POST</td><td><code>/api/purchase-orders</code></td><td>—</td><td>Created purchase order</td></tr>
+    </tbody>
+  </table>
+
+  <!-- Data layer -->
+  <h2>Data Layer</h2>
+  <p>Seven JSON files in <code>server/data/</code> are loaded into memory by <code>server/mock_data.py</code> at startup. All filtering happens in memory at request time. Data is not persisted — any writes (e.g., creating a purchase order) are lost on server restart.</p>
+
+  <div class="data-grid">
+    <div class="data-card">
+      <div class="data-card-name">📦 inventory.json</div>
+      <div class="data-card-fields">
+        <span class="field">id</span><span class="field">sku</span><span class="field">name</span><span class="field">category</span><span class="field">warehouse</span><span class="field">quantity_on_hand</span><span class="field">reorder_point</span><span class="field">unit_cost</span><span class="field">location</span>
+      </div>
+    </div>
+    <div class="data-card">
+      <div class="data-card-name">🛒 orders.json</div>
+      <div class="data-card-fields">
+        <span class="field">id</span><span class="field">order_number</span><span class="field">customer</span><span class="field">items[]</span><span class="field">status</span><span class="field">warehouse</span><span class="field">category</span><span class="field">order_date</span><span class="field">total_value</span>
+      </div>
+    </div>
+    <div class="data-card">
+      <div class="data-card-name">📈 demand_forecasts.json</div>
+      <div class="data-card-fields">
+        <span class="field">id</span><span class="field">item_sku</span><span class="field">item_name</span><span class="field">current_demand</span><span class="field">forecasted_demand</span><span class="field">trend</span><span class="field">period</span>
+      </div>
+    </div>
+    <div class="data-card">
+      <div class="data-card-name">⚠️ backlog_items.json</div>
+      <div class="data-card-fields">
+        <span class="field">id</span><span class="field">order_id</span><span class="field">item_sku</span><span class="field">item_name</span><span class="field">quantity_needed</span><span class="field">quantity_available</span><span class="field">days_delayed</span><span class="field">priority</span>
+      </div>
+    </div>
+    <div class="data-card">
+      <div class="data-card-name">💰 spending.json</div>
+      <div class="data-card-fields">
+        <span class="field">spending_summary{}</span><span class="field">monthly_spending[]</span><span class="field">category_spending[]</span>
+        <div style="margin-top:6px;font-size:0.72rem;color:#94a3b8;">Nested structure — not a flat array</div>
+      </div>
+    </div>
+    <div class="data-card">
+      <div class="data-card-name">🧾 transactions.json</div>
+      <div class="data-card-fields">
+        <span class="field">id</span><span class="field">description</span><span class="field">vendor</span><span class="field">date</span><span class="field">amount</span>
+      </div>
+    </div>
+    <div class="data-card">
+      <div class="data-card-name">📋 purchase_orders.json</div>
+      <div class="data-card-fields">
+        <span class="field">id</span><span class="field">backlog_item_id</span><span class="field">supplier_name</span><span class="field">quantity</span><span class="field">unit_cost</span><span class="field">expected_delivery_date</span><span class="field">status</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Known issues -->
+  <h2>Known Issues &amp; Technical Debt</h2>
+  <p>The following issues were identified through code analysis. They are listed in priority order and map directly to the remediation work scoped in R1.</p>
+
+  <ul class="issues-list">
+    <li class="issue-item">
+      <span class="issue-sev sev-high">HIGH</span>
+      <div class="issue-text"><strong>Missing PurchaseOrderModal component</strong> — Dashboard.vue imports <code>PurchaseOrderModal</code> which does not exist. The "Create PO" button on the Dashboard will throw a runtime error. Affects: Dashboard view.</div>
+    </li>
+    <li class="issue-item">
+      <span class="issue-sev sev-high">HIGH</span>
+      <div class="issue-text"><strong>Reports.vue uses Options API with direct axios calls</strong> — The only view not migrated to Composition API. Bypasses <code>api.js</code> entirely with hardcoded <code>http://localhost:8001</code> URLs. No filter integration, no i18n, no error handling beyond <code>console.log</code>. Affects: Reports view.</div>
+    </li>
+    <li class="issue-item">
+      <span class="issue-sev sev-high">HIGH</span>
+      <div class="issue-text"><strong>Reports module has no filter support</strong> — Reports page renders static YTD data regardless of any filter selection. Period, Warehouse, Category, and Status filters have no effect. Affects: Reports view.</div>
+    </li>
+    <li class="issue-item">
+      <span class="issue-sev sev-med">MED</span>
+      <div class="issue-text"><strong>Reports module has no i18n coverage</strong> — All labels are hardcoded English strings ("Quarterly Performance", "Monthly Revenue Trend", column headers). Japanese-locale users see English only. Affects: Reports view — Tokyo warehouse team.</div>
+    </li>
+    <li class="issue-item">
+      <span class="issue-sev sev-med">MED</span>
+      <div class="issue-text"><strong>No loading state on filter change</strong> — Views re-fetch data silently when filters change. No spinner or skeleton — operators receive no visual feedback that a request is in progress. Affects: all views.</div>
+    </li>
+    <li class="issue-item">
+      <span class="issue-sev sev-low">LOW</span>
+      <div class="issue-text"><strong>Filter value casing inconsistency</strong> — Filter options pass lowercase values ("circuit boards", "delivered") while JSON data uses title case ("Circuit Boards", "Delivered"). The backend comparison is case-insensitive, so results are correct, but the inconsistency is a maintenance risk. Affects: api.js, mock_data.py.</div>
+    </li>
+    <li class="issue-item">
+      <span class="issue-sev sev-low">LOW</span>
+      <div class="issue-text"><strong>No pagination on large list views</strong> — Orders and Inventory render all results in a single DOM pass. For the current dataset this is acceptable; for production-scale data it becomes a performance risk. Affects: Inventory, Orders views.</div>
+    </li>
+  </ul>
+
+  <!-- i18n -->
+  <h2>Internationalization</h2>
+  <p>The application ships a custom i18n composable (<code>useI18n.js</code>) with English and Japanese locale files. Currency is automatically bound to locale (USD for English, JPY for Japanese). Translation lookup uses dot-notation key paths with English fallback.</p>
+
+  <table>
+    <thead><tr><th>Module</th><th>English</th><th>Japanese</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Navigation</td><td>✓</td><td>✓</td><td></td></tr>
+      <tr><td>Dashboard</td><td>✓</td><td>✓</td><td></td></tr>
+      <tr><td>Inventory</td><td>✓</td><td>✓</td><td></td></tr>
+      <tr><td>Orders</td><td>✓</td><td>✓</td><td></td></tr>
+      <tr><td>Demand</td><td>✓</td><td>✓</td><td></td></tr>
+      <tr><td>Spending / Finance</td><td>✓</td><td>✓</td><td></td></tr>
+      <tr><td>Backlog</td><td>✓</td><td>✓</td><td></td></tr>
+      <tr><td><strong>Reports</strong></td><td>✓ (hardcoded)</td><td><strong>✗ Missing</strong></td><td>No i18n keys — all strings hardcoded in template</td></tr>
+    </tbody>
+  </table>
+
+  <footer>
+    Prepared by [Firm Name] as part of proposal response to RFP MC-2026-0417 · April 2026 ·
+    Based on code analysis of the source package provided by Meridian Components.
+    This document reflects the state of the codebase at time of review; actual delivery will include a refreshed audit at project kickoff.
+  </footer>
+
+</div>
+</body>
+</html>
