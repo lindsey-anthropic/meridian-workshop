@@ -1,0 +1,70 @@
+/* Design tokens for the Meridian dashboard.
+ *
+ * Naming convention:
+ *   --color-{role}[-{variant}]
+ *
+ * Roles:
+ *   - page-bg, paper, surface-muted: layered surfaces
+ *   - ink:   text, on light surfaces (faint < muted < soft < strong < ink)
+ *   - rule:  borders and dividers (rule < rule-strong)
+ *   - accent: primary brand color (softest < soft < light < accent < hover < dark)
+ *   - success / warning / danger: status families (softest → text)
+ *
+ * Adding a dark theme: override these variables under
+ *   :root[data-theme="dark"] { ... }
+ * Components reference tokens, never literals — so a theme swap is one block.
+ */
+
+:root {
+  /* Surfaces */
+  --color-page-bg: #f8fafc;
+  --color-paper: #ffffff;
+  --color-surface-muted: #f1f5f9;
+
+  /* Ink (text) */
+  --color-ink-faint: #94a3b8;
+  --color-ink-muted: #64748b;
+  --color-ink-soft: #475569;
+  --color-ink-strong: #334155;
+  --color-ink-bold: #1e293b;
+  --color-ink: #0f172a;
+
+  /* Rules / borders */
+  --color-rule: #e2e8f0;
+  --color-rule-strong: #cbd5e1;
+
+  /* Accent (primary brand) */
+  --color-accent-softest: #eff6ff;
+  --color-accent-soft: #dbeafe;
+  --color-accent-light: #60a5fa;
+  --color-accent: #3b82f6;
+  --color-accent-hover: #2563eb;
+  --color-accent-dark: #1e40af;
+
+  /* Status: success (green/emerald) */
+  --color-success-softest: #dcfce7;
+  --color-success-soft: #d1fae5;
+  --color-success: #10b981;
+  --color-success-strong: #16a34a;
+  --color-success-bold: #15803d;
+  --color-success-text: #166534;
+  --color-success-text-strong: #065f46;
+  --color-success-deep: #059669;
+
+  /* Status: warning (amber) */
+  --color-warning-softest: #fffbeb;
+  --color-warning-soft: #fef3c7;
+  --color-warning-light: #fed7aa;
+  --color-warning: #f59e0b;
+  --color-warning-bold: #b45309;
+  --color-warning-text: #92400e;
+
+  /* Status: danger (red) */
+  --color-danger-softest: #fef2f2;
+  --color-danger-soft: #fee2e2;
+  --color-danger-light: #fecaca;
+  --color-danger: #ef4444;
+  --color-danger-strong: #dc2626;
+  --color-danger-bold: #b91c1c;
+  --color-danger-text: #991b1b;
+}

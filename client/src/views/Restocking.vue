@@ -307,7 +307,7 @@ export default {
 }
 
 .budget-row {
-  background: white;
+  background: var(--color-paper);
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -324,27 +324,27 @@ export default {
 .budget-label-text {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--color-ink-soft);
 }
 
 .budget-input-wrapper {
   display: flex;
   align-items: center;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-rule-strong);
   border-radius: 8px;
-  background: #f8fafc;
+  background: var(--color-page-bg);
   overflow: hidden;
   transition: border-color 0.15s;
 }
 
 .budget-input-wrapper:focus-within {
-  border-color: #3b82f6;
-  background: white;
+  border-color: var(--color-accent);
+  background: var(--color-paper);
 }
 
 .currency-prefix {
   padding: 0 0.5rem 0 0.75rem;
-  color: #64748b;
+  color: var(--color-ink-muted);
   font-size: 1.125rem;
   font-weight: 600;
 }
@@ -356,7 +356,7 @@ export default {
   background: transparent;
   font-size: 1.125rem;
   padding: 0.625rem 0.75rem 0.625rem 0;
-  color: #0f172a;
+  color: var(--color-ink);
   font-weight: 600;
 }
 
@@ -368,27 +368,27 @@ export default {
 }
 
 .stat-card {
-  background: white;
+  background: var(--color-paper);
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid var(--color-accent);
 }
 
 .stat-label {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--color-ink-muted);
   margin-bottom: 0.5rem;
 }
 
 .stat-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-ink);
 }
 
 .card {
-  background: white;
+  background: var(--color-paper);
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -397,7 +397,7 @@ export default {
 
 .card.empty {
   text-align: center;
-  color: #64748b;
+  color: var(--color-ink-muted);
   padding: 3rem 1.5rem;
   font-size: 0.95rem;
 }
@@ -412,13 +412,13 @@ export default {
 .card-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--color-ink);
   margin: 0;
 }
 
 .btn-export {
-  background: #3b82f6;
-  color: white;
+  background: var(--color-accent);
+  color: var(--color-paper);
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 6px;
@@ -429,11 +429,11 @@ export default {
 }
 
 .btn-export:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--color-accent-hover);
 }
 
 .btn-export:disabled {
-  background: #cbd5e1;
+  background: var(--color-rule-strong);
   cursor: not-allowed;
 }
 
@@ -448,31 +448,31 @@ export default {
 }
 
 .restocking-table th {
-  background: #f8fafc;
+  background: var(--color-page-bg);
   padding: 0.75rem;
   text-align: left;
   font-weight: 600;
-  color: #64748b;
-  border-bottom: 2px solid #e2e8f0;
+  color: var(--color-ink-muted);
+  border-bottom: 2px solid var(--color-rule);
   white-space: nowrap;
 }
 
 .restocking-table td {
   padding: 0.75rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-rule);
 }
 
 .restocking-table tr:hover {
-  background: #f8fafc;
+  background: var(--color-page-bg);
 }
 
 .restocking-table .rationale-cell {
-  color: #475569;
+  color: var(--color-ink-soft);
   font-size: 0.85rem;
 }
 
 .skipped-card {
-  border-left: 4px solid #f59e0b;
+  border-left: 4px solid var(--color-warning);
 }
 
 .skipped-list {
@@ -483,8 +483,8 @@ export default {
 
 .skipped-list li {
   padding: 0.5rem 0;
-  border-bottom: 1px solid #e2e8f0;
-  color: #475569;
+  border-bottom: 1px solid var(--color-rule);
+  color: var(--color-ink-soft);
   font-size: 0.9rem;
 }
 
@@ -493,7 +493,7 @@ export default {
 }
 
 .skipped-reason {
-  color: #92400e;
+  color: var(--color-warning-text);
   font-style: italic;
   margin-left: 0.5rem;
 }
@@ -501,12 +501,12 @@ export default {
 .loading {
   text-align: center;
   padding: 3rem;
-  color: #64748b;
+  color: var(--color-ink-muted);
 }
 
 .error {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--color-danger-soft);
+  color: var(--color-danger-text);
   padding: 1rem;
   border-radius: 8px;
   margin: 1rem 0;
