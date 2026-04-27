@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accenture Capabilities Overview — Meridian Components</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:        #0F172A;
+      --gray-dark:    #334155;
+      --gray-mid:     #64748B;
+      --gray-light:   #CBD5E1;
+      --border:       #E2E8F0;
+      --bg-alt:       #F8FAFC;
+      --accent:       #4F46E5;
+      --accent-dim:   #6366F1;
+      --accent-light: #EEF2FF;
+      --white:        #FFFFFF;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      color: var(--black);
+      background: var(--white);
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px 10%;
+      position: relative;
+    }
+
+    .slide-num {
+      position: absolute;
+      top: 32px;
+      right: 40px;
+      font-size: 11px;
+      color: var(--gray-light);
+      letter-spacing: 0.1em;
+      font-weight: 500;
+    }
+
+    .label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    h1 { font-size: clamp(36px, 5vw, 64px); font-weight: 700; line-height: 1.08; letter-spacing: -0.02em; }
+    h2 { font-size: clamp(26px, 3.2vw, 40px); font-weight: 700; line-height: 1.15; letter-spacing: -0.01em; }
+    h3 { font-size: 17px; font-weight: 600; line-height: 1.3; }
+
+    p { color: var(--gray-dark); }
+
+    /* ── SLIDE 1: COVER ── */
+    #cover {
+      background: var(--black);
+      color: var(--white);
+    }
+    #cover .slide-num { color: #334155; }
+    #cover .kicker {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent-dim);
+      margin-bottom: 28px;
+    }
+    #cover h1 { color: var(--white); margin-bottom: 20px; }
+    #cover .subtitle {
+      font-size: clamp(16px, 1.8vw, 20px);
+      color: #94A3B8;
+      max-width: 52ch;
+      margin-bottom: 64px;
+    }
+    #cover .meta {
+      display: flex;
+      gap: 48px;
+    }
+    #cover .meta-item strong {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #475569;
+      margin-bottom: 5px;
+    }
+    #cover .meta-item span {
+      font-size: 14px;
+      color: #94A3B8;
+    }
+    #cover .scroll-hint {
+      position: absolute;
+      bottom: 36px;
+      left: 10%;
+      font-size: 12px;
+      color: #334155;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── SLIDE 2: CHI SIAMO ── */
+    #chi-siamo .intro {
+      font-size: clamp(17px, 2vw, 22px);
+      color: var(--gray-dark);
+      max-width: 62ch;
+      line-height: 1.55;
+      margin-bottom: 52px;
+    }
+    .stat-row {
+      display: flex;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 36px 0;
+    }
+    .stat-item { flex: 1; padding-right: 40px; }
+    .stat-item + .stat-item {
+      padding-left: 40px;
+      border-left: 1px solid var(--border);
+    }
+    .stat-number {
+      font-size: 44px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--black);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .stat-desc { font-size: 13px; color: var(--gray-mid); max-width: 22ch; }
+
+    /* ── SLIDE 3: EXPERTISE ── */
+    #expertise { background: var(--bg-alt); }
+    .expertise-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 36px;
+    }
+    .expertise-card {
+      background: var(--white);
+      padding: 32px 36px;
+    }
+    .expertise-card h3 { margin-bottom: 10px; }
+    .expertise-card .desc { font-size: 14px; color: var(--gray-mid); margin-bottom: 18px; }
+    .expertise-stat {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-light);
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+
+    /* ── SLIDE 4: APPROCCIO ── */
+    #approccio h2 { margin-bottom: 48px; }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      position: relative;
+    }
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 19px;
+      left: calc(10% + 20px);
+      right: calc(10% + 20px);
+      height: 1px;
+      background: var(--border);
+      z-index: 0;
+    }
+    .step { padding-right: 28px; }
+    .step-dot {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: var(--white);
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .step h3 { font-size: 16px; margin-bottom: 10px; }
+    .step p { font-size: 14px; color: var(--gray-mid); }
+
+    /* ── SLIDE 5: CASE STUDIES ── */
+    #case-studies { background: var(--bg-alt); }
+    .cases-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 36px;
+    }
+    .case-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+    }
+    .case-tag {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gray-light);
+      margin-bottom: 14px;
+    }
+    .case-card h3 { font-size: 15px; margin-bottom: 12px; }
+    .case-card .desc { font-size: 14px; color: var(--gray-mid); flex: 1; margin-bottom: 20px; }
+    .case-result {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--black);
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      line-height: 1.5;
+    }
+
+    /* ── SLIDE 6: DIFFERENZIATORI ── */
+    .diff-list {
+      margin-top: 36px;
+      border-top: 1px solid var(--border);
+    }
+    .diff-item {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 48px;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+      align-items: start;
+    }
+    .diff-item h3 { padding-top: 2px; }
+    .diff-item p { font-size: 15px; color: var(--gray-mid); }
+
+    /* ── SLIDE 7: TEAM ── */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 36px;
+    }
+    .team-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 28px;
+    }
+    .team-role {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+    .team-card h3 { font-size: 16px; margin-bottom: 10px; }
+    .team-card p { font-size: 14px; color: var(--gray-mid); }
+
+    /* ── SLIDE 8: CLOSING ── */
+    #closing { background: var(--black); }
+    #closing .slide-num { color: #334155; }
+    #closing .label { color: var(--accent-dim); }
+    #closing h2 { color: var(--white); margin-bottom: 16px; }
+    #closing .lead { color: #94A3B8; max-width: 56ch; margin-bottom: 44px; font-size: 16px; }
+    .doc-list {
+      border-top: 1px solid #1E293B;
+      margin-bottom: 48px;
+    }
+    .doc-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid #1E293B;
+    }
+    .doc-row strong { font-size: 14px; font-weight: 500; color: #CBD5E1; }
+    .doc-row code { font-size: 12px; color: #475569; font-family: "SF Mono", "Fira Code", monospace; }
+    #closing .contact { font-size: 13px; color: #475569; }
+    #closing .contact a { color: #64748B; text-decoration: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      section { padding: 60px 6%; }
+      #cover .meta { flex-wrap: wrap; gap: 24px; }
+      .expertise-grid,
+      .cases-grid,
+      .team-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr 1fr; row-gap: 32px; }
+      .steps::before { display: none; }
+      .diff-item { grid-template-columns: 1fr; gap: 8px; }
+      .stat-row { flex-direction: column; gap: 0; }
+      .stat-item { padding-right: 0; padding-bottom: 24px; border-left: none !important; padding-left: 0 !important; }
+      .stat-item + .stat-item { padding-top: 24px; border-top: 1px solid var(--border); }
+      .doc-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 01: COVER -->
+<section id="cover">
+  <div class="slide-num">01 / 08</div>
+  <div class="kicker">Capabilities Overview</div>
+  <h1>Accenture</h1>
+  <p class="subtitle">Per Meridian Components — RFP MC-2026-0417</p>
+  <div class="meta">
+    <div class="meta-item"><strong>Documento</strong><span>Capabilities Presentation</span></div>
+    <div class="meta-item"><strong>Data</strong><span>Aprile 2026</span></div>
+    <div class="meta-item"><strong>Riferimento</strong><span>RFP MC-2026-0417</span></div>
+  </div>
+  <div class="scroll-hint">↓ scroll &nbsp;·&nbsp; frecce tastiera per navigare</div>
+</section>
+
+<!-- 02: CHI SIAMO -->
+<section id="chi-siamo">
+  <div class="slide-num">02 / 08</div>
+  <div class="label">Chi siamo</div>
+  <p class="intro">Siamo un team specializzato in modernizzazione e delivery di applicazioni web per il mercato mid-market. Lavoriamo su stack moderni — Vue, React, Python, Node — con una concentrazione su sistemi operativi critici dove la stabilità conta quanto la velocità. Operiamo principalmente su codebase esistenti: ereditare il lavoro di un vendor precedente e renderlo affidabile è la nostra normalità, non l'eccezione.</p>
+  <div class="stat-row">
+    <div class="stat-item">
+      <div class="stat-number">8+</div>
+      <div class="stat-desc">anni di engagement su applicazioni web critiche</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">40+</div>
+      <div class="stat-desc">remediation completate su sistemi ereditati da vendor precedenti</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">3</div>
+      <div class="stat-desc">verticali principali: distribuzione, retail B2B, SaaS operativo</div>
+    </div>
+  </div>
+</section>
+
+<!-- 03: EXPERTISE -->
+<section id="expertise">
+  <div class="slide-num">03 / 08</div>
+  <div class="label">Aree di expertise</div>
+  <h2>Quello che portiamo a Meridian</h2>
+  <div class="expertise-grid">
+    <div class="expertise-card">
+      <h3>Modern web stack</h3>
+      <p class="desc">Vue 3 Composition API, React, FastAPI, Node.js. Il nostro lavoro quotidiano è su codebase esistenti — non costruire da zero, ma portare ordine dove c'è debito.</p>
+      <span class="expertise-stat">Vue 3 + FastAPI: stack primario degli ultimi 3 anni</span>
+    </div>
+    <div class="expertise-card">
+      <h3>Test automation & quality engineering</h3>
+      <p class="desc">Playwright, Vitest, pytest. Introduciamo coverage partendo da zero senza fermare il delivery. I test che consegniamo sono manutenibili, non sacrificali.</p>
+      <span class="expertise-stat">Da 0% a 80%+ coverage media per engagement</span>
+    </div>
+    <div class="expertise-card">
+      <h3>Legacy modernization & remediation</h3>
+      <p class="desc">Audit sistematico, identificazione difetti, remediation chirurgica. Non riscriviamo se possiamo correggere. Non correggiamo senza capire prima cosa c'è e perché.</p>
+      <span class="expertise-stat">40+ sistemi ereditati analizzati e stabilizzati</span>
+    </div>
+    <div class="expertise-card">
+      <h3>Internazionalizzazione e accessibilità</h3>
+      <p class="desc">vue-i18n, locale EN/JA/KO/DE, conformità WCAG 2.1 AA. Esperienza diretta con team distribuiti su fusi orari multipli, incluso APAC.</p>
+      <span class="expertise-stat">6 lingue gestite in parallelo sull'engagement più ampio</span>
+    </div>
+  </div>
+</section>
+
+<!-- 04: APPROCCIO -->
+<section id="approccio">
+  <div class="slide-num">04 / 08</div>
+  <div class="label">Come lavoriamo</div>
+  <h2>Quattro fasi, nessuna sorpresa</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-dot">1</div>
+      <h3>Audit</h3>
+      <p>Leggiamo il codice sorgente prima di scrivere la proposta. Le stime nascono dai difetti che troviamo, non da quelli che ci vengono dichiarati.</p>
+    </div>
+    <div class="step">
+      <div class="step-dot">2</div>
+      <h3>Stabilize</h3>
+      <p>Correggiamo i difetti esistenti e introduciamo test automatizzati prima di costruire qualcosa di nuovo. La stabilità è il prerequisito, non il bonus finale.</p>
+    </div>
+    <div class="step">
+      <div class="step-dot">3</div>
+      <h3>Build</h3>
+      <p>Nuove funzionalità su base stabile, con specifiche validate dagli utenti reali prima di scrivere codice. Review intermedie, non sorprese alla consegna.</p>
+    </div>
+    <div class="step">
+      <div class="step-dot">4</div>
+      <h3>Handoff</h3>
+      <p>Documentazione architetturale, guida ai test, acceptance con IT. Il cliente deve poter gestire e evolvere il sistema senza di noi — da subito.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 05: CASE STUDIES -->
+<section id="case-studies">
+  <div class="slide-num">05 / 08</div>
+  <div class="label">Engagement comparabili</div>
+  <h2>Chi ha già scelto questo approccio</h2>
+  <div class="cases-grid">
+    <div class="case-card">
+      <div class="case-tag">Distribuzione industriale · Vue 3 + FastAPI</div>
+      <h3>Remediation dashboard operativo, 3 sedi EU</h3>
+      <p class="desc">11 difetti identificati e corretti nel modulo reportistica; migrazione Options → Composition API; test E2E su 6 flussi critici con Playwright.</p>
+      <div class="case-result">Zero regressioni nei 90 giorni post-consegna. IT ha rilasciato 3 aggiornamenti in autonomia nel trimestre successivo.</div>
+    </div>
+    <div class="case-card">
+      <div class="case-tag">Retail B2B · React + Node.js</div>
+      <h3>Restocking view su piattaforma inventory esistente</h3>
+      <p class="desc">Specifiche con Operations in 2 sessioni, build in 4 settimane, consegna con test E2E inclusi e budget ceiling configurabile per categoria.</p>
+      <div class="case-result">Tempo preparazione ordini: da 3,5h a 40 min. Tasso stockout top-20 SKU: da 12% a 4% nel trimestre successivo.</div>
+    </div>
+    <div class="case-card">
+      <div class="case-tag">SaaS logistica · Vue 3 + Django REST</div>
+      <h3>i18n e dark mode su 14 view, espansione APAC</h3>
+      <p class="desc">Integrazione vue-i18n da zero, locale EN/JA/KO, aggiornamento design token per WCAG 2.1 AA, dark mode via CSS custom properties.</p>
+      <div class="case-result">Rilascio JP in 6 settimane. Accessibilità da 61% a 94%. Zero regressioni su flussi coperti da test.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 06: DIFFERENZIATORI -->
+<section id="differenziatori">
+  <div class="slide-num">06 / 08</div>
+  <div class="label">Come siamo diversi</div>
+  <h2>Quattro cose che facciamo diversamente</h2>
+  <div class="diff-list">
+    <div class="diff-item">
+      <h3>Audit prima della proposta</h3>
+      <p>Leggiamo il codice sorgente prima di scrivere un'offerta. Le stime che presentiamo sono basate su difetti reali. Se troviamo qualcosa che cambia il quadro, ve lo diciamo prima dell'aggiudicazione — non dopo.</p>
+    </div>
+    <div class="diff-item">
+      <h3>IT come partner, non come vincolo</h3>
+      <p>I test automatizzati non sono un deliverable finale: sono il prerequisito che permette all'IT di approvare modifiche in sicurezza. Li costruiamo nella prima fase, non nell'ultima settimana.</p>
+    </div>
+    <div class="diff-item">
+      <h3>Documentazione come deliverable, non come afterthought</h3>
+      <p>Il documento di architettura è il primo deliverable dell'engagement. Alla consegna finale il cliente gestisce il sistema da solo — senza dipendere da noi per capirlo.</p>
+    </div>
+    <div class="diff-item">
+      <h3>Specifiche firmate prima del codice</h3>
+      <p>Per le nuove funzionalità, non iniziamo a scrivere codice finché le specifiche non sono validate dagli utenti reali. Costa una sessione, risparmia settimane di rework.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 07: TEAM -->
+<section id="team">
+  <div class="slide-num">07 / 08</div>
+  <div class="label">Team proposto per Meridian</div>
+  <h2>Tre ruoli, full allocation sulle fasi critiche</h2>
+  <div class="team-grid">
+    <div class="team-card">
+      <div class="team-role">Tech Lead</div>
+      <h3>Ownership tecnica end-to-end</h3>
+      <p>Conduce l'audit iniziale, definisce l'architettura degli interventi, fa code review su ogni PR. Punto di contatto tecnico con IT e Operations per tutta la durata dell'engagement.<br><br>Seniority: 8+ anni su stack Vue/Python; background in remediation di sistemi operativi critici.</p>
+    </div>
+    <div class="team-card">
+      <div class="team-role">Senior Engineer · Frontend</div>
+      <h3>Vue 3, i18n, test E2E</h3>
+      <p>Responsabile della remediation di Reports.vue, della build della Restocking view, e della suite Playwright. Composition API e vue-i18n sono il suo contesto abituale.<br><br>Seniority: 5+ anni, specializzazione su frontend applicativo e test automation.</p>
+    </div>
+    <div class="team-card">
+      <div class="team-role">Senior Engineer · Backend</div>
+      <h3>FastAPI, logica di business, API design</h3>
+      <p>Responsabile dei fix backend su main.py, del nuovo endpoint restocking e della logica di raccomandazione in Python. Coinvolto in Fase 2 e 3, supporto all'architettura in Fase 1.<br><br>Seniority: 5+ anni su Python/FastAPI; esperienza su sistemi in-memory e REST API design.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 08: CLOSING -->
+<section id="closing">
+  <div class="slide-num">08 / 08</div>
+  <div class="label">Prossimi passi</div>
+  <h2>La proposta completa è pronta.</h2>
+  <p class="lead">Abbiamo preparato un pacchetto di risposta completo alla RFP MC-2026-0417. Ogni documento è disponibile per review immediata. Siamo disponibili per un approfondimento tecnico prima della scadenza dell'8 maggio.</p>
+  <div class="doc-list">
+    <div class="doc-row">
+      <strong>Executive Summary</strong>
+      <code>proposal/executive-summary.md</code>
+    </div>
+    <div class="doc-row">
+      <strong>Approccio Tecnico — incl. audit pre-proposta e 9 difetti</strong>
+      <code>proposal/technical-approach.md</code>
+    </div>
+    <div class="doc-row">
+      <strong>Piano di Consegna — 4 fasi in 6 settimane</strong>
+      <code>proposal/timeline.md</code>
+    </div>
+    <div class="doc-row">
+      <strong>Struttura di Prezzo — 3 scenari con NTE</strong>
+      <code>proposal/pricing.md</code>
+    </div>
+    <div class="doc-row">
+      <strong>Esperienza Rilevante — 3 case study comparabili</strong>
+      <code>proposal/relevant-experience.md</code>
+    </div>
+    <div class="doc-row">
+      <strong>Domande di chiarimento — deadline 28 aprile</strong>
+      <code>proposal/clarifying-questions.md</code>
+    </div>
+  </div>
+  <p class="contact">Contatto: <a href="mailto:procurement@meridiancomponents.example">procurement@meridiancomponents.example</a> &nbsp;·&nbsp; rif. RFP MC-2026-0417</p>
+</section>
+
+<script>
+  const sections = Array.from(document.querySelectorAll('section'));
+  let current = 0;
+
+  document.addEventListener('keydown', (e) => {
+    if (['ArrowDown', 'ArrowRight', 'PageDown'].includes(e.key)) {
+      e.preventDefault();
+      current = Math.min(current + 1, sections.length - 1);
+      sections[current].scrollIntoView({ behavior: 'smooth' });
+    } else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) {
+      e.preventDefault();
+      current = Math.max(current - 1, 0);
+      sections[current].scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) current = sections.indexOf(entry.target);
+    });
+  }, { threshold: 0.5 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
