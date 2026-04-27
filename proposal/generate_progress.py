@@ -104,9 +104,9 @@ tx(s1, "ACCENTURE&CT CONSULTING  ·  MERIDIAN COMPONENTS",
 rule(s1, 0.6, 1.0, 1.8)
 tx(s1, "ENGAGEMENT PROGRESS REPORT", 0.6, 1.1, 10, 0.4,
    size=11, bold=True, color=BLUE)
-tx(s1, "Sprint Review\nR1 · R2 · R3", 0.6, 1.6, 10, 1.8,
+tx(s1, "Sprint Review\nR1 · R2 · R3 · R4", 0.6, 1.6, 10, 1.8,
    size=44, bold=True, color=WHITE)
-tx(s1, "Three of four required deliverables complete.\nR4 architecture documentation in progress.",
+tx(s1, "All four required deliverables complete.\nEngagement base scope delivered on schedule.",
    0.6, 3.8, 9, 0.9, size=18, color=GRAY)
 tx(s1, "April 27, 2026", 0.6, 6.8, 5, 0.35, size=12, color=DARK_GR)
 
@@ -125,8 +125,8 @@ cards = [
      ["/api/restocking endpoint", "Budget ceiling + priority rank", "New Restocking.vue", "EN + JA locale keys"]),
     ("R3", "Automated\nTests",       "COMPLETE",     GREEN,  GR_BG,
      ["Playwright e2e suite", "59 / 59 tests passing", "All views covered", "Filters + edge cases"]),
-    ("R4", "Architecture\nDocs",     "IN PROGRESS",  YELLOW, YL_BG,
-     ["HTML diagram", "Component map", "API endpoint list", "Meridian IT handoff"]),
+    ("R4", "Architecture\nDocs",     "COMPLETE",     GREEN,  GR_BG,
+     ["HTML architecture diagram", "15-endpoint API reference", "Mock data layer docs", "IT handoff notes"]),
 ]
 
 x = 0.55
@@ -230,49 +230,62 @@ for name, count, desc in suites:
         x += 4.25
 
 # ════════════════════════════════════════════════════════════════════════════
-# Slide 6 — R4 + next steps
+# Slide 6 — R4 detail
 # ════════════════════════════════════════════════════════════════════════════
 s6 = slide(); bg(s6)
-badge(s6, "IN PROGRESS", 0.6, 0.45, YELLOW, YL_BG)
-tx(s6, "R4 · Architecture Documentation  +  Next Steps", 0.6, 0.9, 12, 0.5,
-   size=11, bold=True, color=BLUE)
-tx(s6, "One deliverable remaining.", 0.6, 1.35, 9, 0.7, size=34, bold=True, color=WHITE)
+badge(s6, "COMPLETE", 0.6, 0.45, GREEN, GR_BG)
+tx(s6, "R4 · Architecture Documentation", 0.6, 0.9, 10, 0.5, size=11, bold=True, color=BLUE)
+tx(s6, "Full current-state docs\ndelivered to Meridian IT.", 0.6, 1.35, 11, 1.0, size=32, bold=True, color=WHITE)
 
-# R4 card
-rect(s6, 0.6, 2.45, 5.9, 3.7, BG_MID, border=RGBColor(0x33, 0x41, 0x55))
-tx(s6, "R4 — What we're building", 0.8, 2.6, 5.5, 0.4, size=14, bold=True, color=BLUE)
 r4_items = [
-    "HTML architecture diagram (component map + data flow)",
-    "API endpoint reference with request/response shapes",
-    "Mock-data layer documentation for Meridian IT",
-    "Handoff notes: how to extend the app post-engagement",
+    ("Tech stack overview",       "Vue 3 + Vite / FastAPI + Pydantic / JSON mock data. Ports, run commands, CORS notes."),
+    ("SVG component map",         "Browser → api.js → FastAPI endpoints → mock data layer. Composables, data flow arrows, legend."),
+    ("API endpoint reference",    "15 endpoints: method, path, all query params, JSON response shape. Restocking ★ flagged as new."),
+    ("IT handoff notes",          "How to add endpoints, add views, replace JSON with a real DB, run the Playwright suite."),
 ]
-tb = s6.shapes.add_textbox(Inches(0.8), Inches(3.1), Inches(5.5), Inches(2.8))
-tf = tb.text_frame; tf.word_wrap = True
-for i, item in enumerate(r4_items):
-    p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
-    p.space_before = Pt(7)
-    r = p.add_run(); r.text = f"→  {item}"
-    r.font.size = Pt(13); r.font.color.rgb = LIGHT
+x = 0.6
+for title, desc in r4_items:
+    rect(s6, x, 2.7, 2.9, 2.3, BG_MID, border=RGBColor(0x33, 0x41, 0x55))
+    tx(s6, title, x+0.15, 2.8,  2.6, 0.45, size=13, bold=True, color=BLUE)
+    tx(s6, desc,  x+0.15, 3.28, 2.6, 1.4,  size=12, color=LIGHT)
+    x += 3.07
 
-# Next steps card
-rect(s6, 6.8, 2.45, 5.9, 3.7, BG_MID, border=RGBColor(0x33, 0x41, 0x55))
-tx(s6, "Remaining work + optional", 7.0, 2.6, 5.5, 0.4, size=14, bold=True, color=BLUE)
-next_items = [
-    "R4: Architecture HTML + handoff doc  (next)",
-    "D1: UI refresh  (optional, weeks 11–12)",
-    "D2: Full i18n expansion  (optional)",
-    "D3: Dark mode prototype on branch  (optional)",
-    "PR merge + Meridian IT walkthrough",
+# ════════════════════════════════════════════════════════════════════════════
+# Slide 7 — Engagement complete + optional next steps
+# ════════════════════════════════════════════════════════════════════════════
+s7 = slide(); bg(s7)
+tx(s7, "ACCENTURE&CT CONSULTING  ·  MERIDIAN COMPONENTS",
+   0.6, 0.5, 12, 0.4, size=11, bold=True, color=DARK_GR)
+rule(s7, 0.6, 1.0, 1.8)
+tx(s7, "BASE ENGAGEMENT · COMPLETE", 0.6, 1.1, 10, 0.4, size=11, bold=True, color=BLUE)
+tx(s7, "R1 · R2 · R3 · R4\nAll delivered.", 0.6, 1.55, 8, 1.6, size=44, bold=True, color=WHITE)
+
+# Completed summary strip
+rect(s7, 0.6, 3.3, 12.1, 0.6, GR_BG, border=RGBColor(0x16, 0x65, 0x34))
+items_done = ["R1  Reports fixed", "R2  Restocking view", "R3  59/59 tests", "R4  Architecture docs"]
+xi = 0.9
+for item in items_done:
+    tx(s7, "✓  " + item, xi, 3.38, 2.7, 0.42, size=13, bold=True, color=GREEN)
+    xi += 3.0
+
+# Optional next steps
+rect(s7, 0.6, 4.15, 12.1, 2.65, BG_MID, border=RGBColor(0x33, 0x41, 0x55))
+tx(s7, "Optional extensions — available now", 0.8, 4.3, 11, 0.4, size=14, bold=True, color=BLUE)
+optionals = [
+    ("D1 · UI Refresh",          "Weeks 11–12", "$12,000", "Visual modernisation, spacing, colour system, mobile-responsive layout."),
+    ("D2 · i18n Expansion",      "Week 13",     "$8,000",  "Additional languages beyond EN/JA. Locale-aware number/date formatting."),
+    ("D3 · Dark Mode",           "Week 13",     "$8,000",  "CSS variable theming. Prototype on a worktree branch, merge when approved."),
 ]
-tb = s6.shapes.add_textbox(Inches(7.0), Inches(3.1), Inches(5.5), Inches(2.8))
-tf = tb.text_frame; tf.word_wrap = True
-for i, item in enumerate(next_items):
-    p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
-    p.space_before = Pt(7)
-    r = p.add_run(); r.text = f"→  {item}"
-    r.font.size = Pt(13)
-    r.font.color.rgb = BLUE if item.startswith("→  R4") else LIGHT
+xi = 0.8
+for label, timing, fee, desc in optionals:
+    tx(s7, label,  xi,      4.82, 3.6, 0.32, size=13, bold=True, color=WHITE)
+    tx(s7, timing, xi,      5.15, 1.8, 0.28, size=11, color=GRAY)
+    tx(s7, fee,    xi+1.9,  5.15, 1.6, 0.28, size=11, bold=True, color=BLUE)
+    tx(s7, desc,   xi,      5.48, 3.6, 0.55, size=11, color=LIGHT)
+    xi += 4.0
+
+tx(s7, "RFP #MC-2026-0417  ·  April 27, 2026  ·  Feature branch ready for PR review",
+   0.6, 7.1, 12, 0.35, size=11, color=DARK_GR)
 
 prs.save("progress-report.pptx")
 print("Done: progress-report.pptx")
