@@ -108,7 +108,7 @@ tx(s1, "Sprint Review\nR1 · R2 · R3 · R4 + D1 · D2 · D3", 0.6, 1.6, 12, 1.8
    size=38, bold=True, color=WHITE)
 tx(s1, "All required deliverables + all optional enhancements complete.",
    0.6, 3.8, 9, 0.9, size=18, color=GRAY)
-tx(s1, "April 27, 2026  ·  branch: feature/meridian-engagement",
+tx(s1, "April 27, 2026  ·  branch: feature/meridian-engagement  ·  PR #29",
    0.6, 6.8, 12, 0.35, size=12, color=DARK_GR)
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -273,7 +273,7 @@ for req, title, label, col, bg_col, buls in optionals_cards:
     req_card(s7, req, title, label, col, bg_col, buls, x, card_w=3.8)
     x += 3.97
 
-tx(s7, "branch: feature/meridian-engagement  ·  RFP #MC-2026-0417  ·  April 27, 2026",
+tx(s7, "branch: feature/meridian-engagement  ·  PR #29  ·  RFP #MC-2026-0417  ·  April 27, 2026",
    0.6, 7.1, 12, 0.35, size=11, color=DARK_GR)
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -297,7 +297,7 @@ for title, desc in d1_items:
     tx(s8, desc,  x+0.15, 3.28, 2.6, 1.4,  size=12, color=LIGHT)
     x += 3.07
 
-tx(s8, "branch: feature/meridian-engagement  ·  commit: 272787c",
+tx(s8, "branch: feature/meridian-engagement  ·  PR #29  ·  commit: 272787c",
    0.6, 7.1, 12, 0.35, size=11, color=DARK_GR)
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -342,7 +342,7 @@ for key, val in samples:
     tx(s9, val,  10.2, y9,       2.5, 0.28, size=11, bold=True, color=WHITE)
     y9 += 0.4
 
-tx(s9, "branch: feature/meridian-engagement  ·  commit: 272787c",
+tx(s9, "branch: feature/meridian-engagement  ·  PR #29  ·  commit: 272787c",
    0.6, 7.1, 12, 0.35, size=11, color=DARK_GR)
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -371,6 +371,7 @@ pr_info = [
     ("Branch",    "feature/meridian-engagement  →  main"),
     ("Commits",   "272787c  Deliver D1+D2+D3: CSS variables, Italian locale, dark mode toggle\na0e7e5d  Update progress deck: all four R deliverables COMPLETE\n645b5f2  R4: Add architecture documentation\n8004785  Complete R1–R3 Meridian engagement deliverables"),
     ("Changed",   "15 files  ·  App.vue, FilterBar.vue, LanguageSwitcher.vue, useI18n.js,\nit.js (new), Restocking.vue (new), main.py, api.js, e2e test suite"),
+    ("PR",        "github.com/lindsey-anthropic/meridian-workshop/pull/29"),
     ("Repo",      "github.com/lindsey-anthropic/meridian-workshop"),
 ]
 y10 = 4.78
@@ -379,7 +380,7 @@ for label, val in pr_info:
     tx(s10, val,         2.15, y10, 9.8, 0.45, size=12, color=LIGHT)
     y10 += 0.5
 
-tx(s10, "RFP #MC-2026-0417  ·  April 27, 2026",
+tx(s10, "RFP #MC-2026-0417  ·  PR #29  ·  April 27, 2026",
    0.6, 7.1, 12, 0.35, size=11, color=DARK_GR)
 
 prs.save("progress-report.pptx")
