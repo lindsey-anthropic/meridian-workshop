@@ -1,0 +1,17 @@
+{
+  "_comment": "CALIBRATE: workshop assumptions. Real engagement replaces these in week-1 VP Operations calibration session per proposal section 3.2 / A2.",
+  "defaults": {
+    "lead_time_days": 14,
+    "cost_of_stockout_per_unit_per_day": 0.50,
+    "unit_margin_ratio": 0.25,
+    "preferred_supplier": "Generic Supplier Co."
+  },
+  "by_category": {
+    "Circuit Boards":  { "lead_time_days": 21, "cost_of_stockout_per_unit_per_day": 1.20, "unit_margin_ratio": 0.30, "preferred_supplier": "ElectroSource Ltd." },
+    "Sensors":         { "lead_time_days": 10, "cost_of_stockout_per_unit_per_day": 0.80, "unit_margin_ratio": 0.35, "preferred_supplier": "SensorWorks Inc." },
+    "Actuators":       { "lead_time_days": 18, "cost_of_stockout_per_unit_per_day": 1.50, "unit_margin_ratio": 0.28, "preferred_supplier": "Motion Dynamics" },
+    "Controllers":     { "lead_time_days": 14, "cost_of_stockout_per_unit_per_day": 0.90, "unit_margin_ratio": 0.32, "preferred_supplier": "ControlTech" },
+    "Power Supplies":  { "lead_time_days": 12, "cost_of_stockout_per_unit_per_day": 0.60, "unit_margin_ratio": 0.22, "preferred_supplier": "PowerCore Systems" }
+  },
+  "by_sku": {}
+}
