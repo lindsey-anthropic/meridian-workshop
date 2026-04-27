@@ -30,6 +30,7 @@
           </router-link>
         </nav>
         <LanguageSwitcher />
+        <ThemeSwitcher />
         <ProfileMenu
           @show-profile-details="showProfileDetails = true"
           @show-tasks="showTasks = true"
@@ -67,6 +68,7 @@ import ProfileMenu from './components/ProfileMenu.vue'
 import ProfileDetailsModal from './components/ProfileDetailsModal.vue'
 import TasksModal from './components/TasksModal.vue'
 import LanguageSwitcher from './components/LanguageSwitcher.vue'
+import ThemeSwitcher from './components/ThemeSwitcher.vue'
 
 export default {
   name: 'App',
@@ -75,7 +77,8 @@ export default {
     ProfileMenu,
     ProfileDetailsModal,
     TasksModal,
-    LanguageSwitcher
+    LanguageSwitcher,
+    ThemeSwitcher
   },
   setup() {
     const { currentUser } = useAuth()
