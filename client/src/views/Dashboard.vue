@@ -210,18 +210,18 @@
                   </td>
                   <td>
                     <button
-                      v-if="!item.purchase_order_id"
+                      v-if="!item.has_purchase_order"
                       @click.stop="openPOModal(item)"
                       class="po-button create"
                     >
-                      Create PO
+                      {{ t('dashboard.inventoryShortages.createPO') }}
                     </button>
                     <button
                       v-else
                       @click.stop="viewPO(item)"
                       class="po-button view"
                     >
-                      View PO
+                      {{ t('dashboard.inventoryShortages.viewPO') }}
                     </button>
                   </td>
                 </tr>
@@ -304,12 +304,14 @@ import { useI18n } from '../composables/useI18n'
 import { formatCurrency } from '../utils/currency'
 import ProductDetailModal from '../components/ProductDetailModal.vue'
 import BacklogDetailModal from '../components/BacklogDetailModal.vue'
+import PurchaseOrderModal from '../components/PurchaseOrderModal.vue'
 
 export default {
   name: 'Dashboard',
   components: {
     ProductDetailModal,
     BacklogDetailModal,
+    PurchaseOrderModal,
   },
   setup() {
     const { t, currentCurrency, translateProductName, translateWarehouse } = useI18n()
@@ -523,8 +525,8 @@ export default {
                 productMap[sku].firstOrderDate = order.order_date
               }
             }
-            productMap[sku].unitsOrdered += item.quantity
-            productMap[sku].revenue += item.quantity * item.unit_price
+            productMap[sku].unitsOrdered += (item.quantity ?? 0)
+            productMap[sku].revenue += (item.quantity ?? 0) * (item.unit_price ?? 0)
           })
         }
       })

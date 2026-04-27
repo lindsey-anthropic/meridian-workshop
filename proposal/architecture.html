@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Components — Architecture Overview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; }
+
+  .page { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+
+  h1 { font-size: 1.75rem; font-weight: 700; color: #0f172a; }
+  .meta { color: #64748b; font-size: 0.875rem; margin-top: 0.25rem; margin-bottom: 2.5rem; }
+
+  h2 { font-size: 1rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
+
+  /* ── Layers ─────────────────────────────────────────── */
+  .layers { display: flex; flex-direction: column; gap: 1.5rem; }
+
+  .layer { border-radius: 12px; padding: 1.25rem 1.5rem; border: 1px solid; }
+  .layer-browser  { background: #eff6ff; border-color: #bfdbfe; }
+  .layer-frontend { background: #f0fdf4; border-color: #bbf7d0; }
+  .layer-backend  { background: #fefce8; border-color: #fde68a; }
+  .layer-data     { background: #fdf4ff; border-color: #e9d5ff; }
+
+  .layer-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.875rem; }
+  .layer-browser  .layer-label { color: #1d4ed8; }
+  .layer-frontend .layer-label { color: #15803d; }
+  .layer-backend  .layer-label { color: #a16207; }
+  .layer-data     .layer-label { color: #7e22ce; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .chip { padding: 0.3rem 0.75rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; white-space: nowrap; }
+  .chip-view    { background: #dcfce7; color: #14532d; }
+  .chip-comp    { background: #dbeafe; color: #1e3a8a; }
+  .chip-hook    { background: #fce7f3; color: #831843; }
+  .chip-util    { background: #e0e7ff; color: #312e81; }
+  .chip-ep      { background: #fef9c3; color: #713f12; }
+  .chip-ep-post { background: #fed7aa; color: #7c2d12; }
+  .chip-file    { background: #f3e8ff; color: #581c87; }
+  .chip-browser { background: #dbeafe; color: #1e3a8a; }
+
+  .subsection { margin-bottom: 0.875rem; }
+  .subsection:last-child { margin-bottom: 0; }
+  .subsection-title { font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 0.4rem; }
+
+  /* ── Arrow ──────────────────────────────────────────── */
+  .arrow { text-align: center; color: #94a3b8; font-size: 1.25rem; line-height: 1; }
+  .arrow-label { font-size: 0.75rem; color: #94a3b8; margin-top: 0.2rem; }
+
+  /* ── Data flow ──────────────────────────────────────── */
+  .flow { margin-top: 2.5rem; }
+  .flow-steps { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin-top: 0.75rem; }
+  .flow-step { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.5rem 0.875rem; font-size: 0.8rem; color: #334155; }
+  .flow-step strong { display: block; font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.1rem; }
+  .flow-arrow { color: #94a3b8; padding: 0 0.4rem; font-size: 1rem; }
+
+  /* ── API table ──────────────────────────────────────── */
+  .api-table { margin-top: 2.5rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; background: white; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0; }
+  th { background: #f8fafc; padding: 0.6rem 0.875rem; text-align: left; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  td { padding: 0.5rem 0.875rem; border-bottom: 1px solid #f1f5f9; color: #334155; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .method { font-weight: 700; font-size: 0.7rem; padding: 0.2rem 0.45rem; border-radius: 4px; }
+  .get  { background: #dcfce7; color: #14532d; }
+  .post { background: #fed7aa; color: #7c2d12; }
+  .del  { background: #fecaca; color: #7f1d1d; }
+  .patch { background: #e0e7ff; color: #312e81; }
+  code { font-family: 'SF Mono', Consolas, monospace; font-size: 0.78rem; background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; }
+
+  /* ── Notes ──────────────────────────────────────────── */
+  .notes { margin-top: 2.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .note-card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem 1.5rem; }
+  .note-card h3 { font-size: 0.875rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem; }
+  .note-card ul { padding-left: 1.1rem; }
+  .note-card li { font-size: 0.8rem; color: #475569; margin-bottom: 0.35rem; line-height: 1.5; }
+  .note-card li strong { color: #0f172a; }
+
+  @media (max-width: 700px) {
+    .notes { grid-template-columns: 1fr; }
+    .flow-steps { flex-direction: column; align-items: flex-start; }
+    .flow-arrow { transform: rotate(90deg); padding: 0.2rem 0; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Meridian Components — Inventory Dashboard</h1>
+  <p class="meta">Architecture Overview &nbsp;·&nbsp; Prepared April 2026 &nbsp;·&nbsp; For handoff to Meridian IT</p>
+
+  <!-- ── Stack Layers ── -->
+  <h2>System Layers</h2>
+  <div class="layers">
+
+    <div class="layer layer-browser">
+      <div class="layer-label">Browser — localhost:3000</div>
+      <div class="chips">
+        <span class="chip chip-browser">Chrome / Edge / Firefox</span>
+        <span class="chip chip-browser">Vue 3 SPA (no server-side rendering)</span>
+        <span class="chip chip-browser">localStorage: active locale (en / ja)</span>
+      </div>
+    </div>
+
+    <div class="arrow">↕<div class="arrow-label">HTTP / CORS (Axios)</div></div>
+
+    <div class="layer layer-frontend">
+      <div class="layer-label">Frontend — Vue 3 + Vite (port 3000)</div>
+
+      <div class="subsection">
+        <div class="subsection-title">Views (pages)</div>
+        <div class="chips">
+          <span class="chip chip-view">Dashboard</span>
+          <span class="chip chip-view">Inventory</span>
+          <span class="chip chip-view">Orders</span>
+          <span class="chip chip-view">Spending</span>
+          <span class="chip chip-view">Demand Forecast</span>
+          <span class="chip chip-view">Reports</span>
+          <span class="chip chip-view">Backlog</span>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Shared components</div>
+        <div class="chips">
+          <span class="chip chip-comp">FilterBar</span>
+          <span class="chip chip-comp">LanguageSwitcher</span>
+          <span class="chip chip-comp">ProfileMenu</span>
+          <span class="chip chip-comp">TasksModal</span>
+          <span class="chip chip-comp">ProfileDetailsModal</span>
+          <span class="chip chip-comp">BacklogDetailModal</span>
+          <span class="chip chip-comp">InventoryDetailModal</span>
+          <span class="chip chip-comp">ProductDetailModal</span>
+          <span class="chip chip-comp">CostDetailModal</span>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Composables (singleton state)</div>
+        <div class="chips">
+          <span class="chip chip-hook">useFilters — period, location, category, status</span>
+          <span class="chip chip-hook">useI18n — locale, t(), currency</span>
+          <span class="chip chip-hook">useAuth — current user, profile</span>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">API client</div>
+        <div class="chips">
+          <span class="chip chip-util">api.js — all Axios calls centralised here</span>
+          <span class="chip chip-util">utils/currency.js — formatting helpers</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow">↕<div class="arrow-label">JSON over HTTP — allow_origins: * (dev)</div></div>
+
+    <div class="layer layer-backend">
+      <div class="layer-label">Backend — FastAPI + Uvicorn (port 8001)</div>
+      <div class="subsection">
+        <div class="subsection-title">GET endpoints</div>
+        <div class="chips">
+          <span class="chip chip-ep">/api/inventory</span>
+          <span class="chip chip-ep">/api/inventory/{id}</span>
+          <span class="chip chip-ep">/api/orders</span>
+          <span class="chip chip-ep">/api/orders/{id}</span>
+          <span class="chip chip-ep">/api/demand</span>
+          <span class="chip chip-ep">/api/backlog</span>
+          <span class="chip chip-ep">/api/dashboard/summary</span>
+          <span class="chip chip-ep">/api/spending/summary</span>
+          <span class="chip chip-ep">/api/spending/monthly</span>
+          <span class="chip chip-ep">/api/spending/categories</span>
+          <span class="chip chip-ep">/api/spending/transactions</span>
+          <span class="chip chip-ep">/api/reports/quarterly</span>
+          <span class="chip chip-ep">/api/reports/monthly-trends</span>
+          <span class="chip chip-ep">/api/purchase-orders/{backlog_item_id}</span>
+          <span class="chip chip-ep">/api/tasks</span>
+        </div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Write endpoints</div>
+        <div class="chips">
+          <span class="chip chip-ep-post">POST /api/purchase-orders</span>
+          <span class="chip chip-ep-post">POST /api/tasks</span>
+          <span class="chip chip-ep-post">PATCH /api/tasks/{id}</span>
+          <span class="chip chip-ep-post">DELETE /api/tasks/{id}</span>
+        </div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Request handling</div>
+        <div class="chips">
+          <span class="chip chip-util">Pydantic models — input/output validation</span>
+          <span class="chip chip-util">apply_filters() — warehouse, category, status</span>
+          <span class="chip chip-util">filter_by_month() — YYYY-MM or Q#-YYYY</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow">↕<div class="arrow-label">In-memory (loaded at startup, no persistence between restarts)</div></div>
+
+    <div class="layer layer-data">
+      <div class="layer-label">Data layer — server/data/ (JSON files)</div>
+      <div class="chips">
+        <span class="chip chip-file">inventory.json — stock levels, 3 warehouses</span>
+        <span class="chip chip-file">orders.json — 300+ orders, Jan–Dec 2025</span>
+        <span class="chip chip-file">backlog_items.json — unfulfilled shortages</span>
+        <span class="chip chip-file">demand_forecasts.json — SKU demand projections</span>
+        <span class="chip chip-file">spending.json — cost breakdown by month</span>
+        <span class="chip chip-file">transactions.json — recent spend records</span>
+        <span class="chip chip-file">purchase_orders.json — POs (session-only writes)</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Filter data flow ── -->
+  <div class="flow">
+    <h2>Filter Data Flow</h2>
+    <div class="flow-steps">
+      <div class="flow-step"><strong>User</strong>FilterBar dropdown</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><strong>Composable</strong>useFilters (singleton ref)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><strong>View</strong>watch() triggers reload</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><strong>api.js</strong>URLSearchParams built</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><strong>FastAPI</strong>apply_filters() on orders[]</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><strong>Vue</strong>ref updated → re-render</div>
+    </div>
+  </div>
+
+  <!-- ── API reference ── -->
+  <div class="api-table">
+    <h2>API Quick Reference</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Filters accepted</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="method get">GET</span></td><td><code>/api/inventory</code></td><td>warehouse, category</td><td></td></tr>
+        <tr><td><span class="method get">GET</span></td><td><code>/api/orders</code></td><td>warehouse, category, status, month</td><td></td></tr>
+        <tr><td><span class="method get">GET</span></td><td><code>/api/dashboard/summary</code></td><td>warehouse, category, status, month</td><td>Aggregated KPIs</td></tr>
+        <tr><td><span class="method get">GET</span></td><td><code>/api/backlog</code></td><td>—</td><td>Returns <code>has_purchase_order</code> flag</td></tr>
+        <tr><td><span class="method get">GET</span></td><td><code>/api/demand</code></td><td>—</td><td></td></tr>
+        <tr><td><span class="method get">GET</span></td><td><code>/api/spending/*</code></td><td>—</td><td>summary, monthly, categories, transactions</td></tr>
+        <tr><td><span class="method get">GET</span></td><td><code>/api/reports/quarterly</code></td><td>warehouse, category, month</td><td>Always includes <code>fulfillment_rate</code></td></tr>
+        <tr><td><span class="method get">GET</span></td><td><code>/api/reports/monthly-trends</code></td><td>warehouse, category, month</td><td></td></tr>
+        <tr><td><span class="method post">POST</span></td><td><code>/api/purchase-orders</code></td><td>—</td><td>Session-only; resets on restart</td></tr>
+        <tr><td><span class="method get">GET</span></td><td><code>/api/purchase-orders/{backlog_item_id}</code></td><td>—</td><td></td></tr>
+        <tr><td><span class="method get">GET</span></td><td><code>/api/tasks</code></td><td>—</td><td>Session-only store</td></tr>
+        <tr><td><span class="method post">POST</span></td><td><code>/api/tasks</code></td><td>—</td><td></td></tr>
+        <tr><td><span class="method patch">PATCH</span></td><td><code>/api/tasks/{id}</code></td><td>—</td><td>Toggles pending ↔ completed</td></tr>
+        <tr><td><span class="method del">DELETE</span></td><td><code>/api/tasks/{id}</code></td><td>—</td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Notes ── -->
+  <div class="notes">
+    <div class="note-card">
+      <h3>Known Limitations</h3>
+      <ul>
+        <li><strong>No database.</strong> All data loads from JSON files at startup. Writes (tasks, purchase orders) are in-memory only and reset on server restart.</li>
+        <li><strong>No authentication.</strong> The app has a mock user via <code>useAuth()</code> but no real auth layer. CORS is open (<code>allow_origins=["*"]</code>).</li>
+        <li><strong>Spending endpoints have no filter support.</strong> Warehouse/category filters do not apply to the Finance view.</li>
+        <li><strong>Data covers 2025 only.</strong> Quarter and month filters are scoped to 2025 data.</li>
+      </ul>
+    </div>
+    <div class="note-card">
+      <h3>Running Locally</h3>
+      <ul>
+        <li><strong>Backend:</strong> <code>cd server &amp;&amp; python main.py</code> → port 8001</li>
+        <li><strong>Frontend:</strong> <code>cd client &amp;&amp; npm run dev</code> → port 3000</li>
+        <li><strong>API docs:</strong> <code>http://localhost:8001/docs</code> (FastAPI Swagger UI)</li>
+        <li><strong>Python deps:</strong> fastapi, uvicorn, pydantic (see <code>server/requirements.txt</code>)</li>
+        <li><strong>Node deps:</strong> Vue 3, Vite, Axios, Vue Router (see <code>client/package.json</code>)</li>
+      </ul>
+    </div>
+    <div class="note-card">
+      <h3>i18n &amp; Localisation</h3>
+      <ul>
+        <li>Supported locales: <strong>English (en)</strong>, <strong>Japanese (ja)</strong></li>
+        <li>Active locale persisted in <code>localStorage</code> as <code>app-locale</code></li>
+        <li>Currency auto-switches: USD (en) → JPY (ja)</li>
+        <li>Translation files: <code>client/src/locales/en.js</code>, <code>ja.js</code></li>
+        <li>Warehouse staff in Tokyo: i18n extends to all views and labels</li>
+      </ul>
+    </div>
+    <div class="note-card">
+      <h3>Filter Parameter Reference</h3>
+      <ul>
+        <li><strong>warehouse:</strong> <code>San Francisco</code>, <code>London</code>, <code>Tokyo</code> (or omit)</li>
+        <li><strong>category:</strong> <code>sensors</code>, <code>actuators</code>, <code>controllers</code>, <code>circuit boards</code>, <code>power supplies</code> (case-insensitive)</li>
+        <li><strong>status:</strong> <code>Delivered</code>, <code>Shipped</code>, <code>Processing</code>, <code>Backordered</code></li>
+        <li><strong>month:</strong> <code>YYYY-MM</code> (e.g. <code>2025-03</code>) or <code>Q1-2025</code> through <code>Q4-2025</code></li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

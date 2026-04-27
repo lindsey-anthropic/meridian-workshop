@@ -6,6 +6,8 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    reports: 'Reports',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -52,10 +54,15 @@ export default {
       quantityNeeded: 'Quantity Needed',
       quantityAvailable: 'Quantity Available',
       shortage: 'Shortage',
+      shortageAmount: 'Shortage Amount',
       daysDelayed: 'Days Delayed',
       priority: 'Priority',
       unitsShort: 'units short',
-      days: 'days'
+      days: 'days',
+      expectedDate: 'Expected Date',
+      createPO: 'Create PO',
+      viewPO: 'View PO',
+      modalTitle: 'Inventory Shortage Details'
     },
     topProducts: {
       title: 'Top Products by Revenue',
@@ -68,7 +75,9 @@ export default {
       unitsOrdered: 'Units Ordered',
       firstOrder: 'First Order',
       inStock: 'In Stock',
-      lowStock: 'Low Stock'
+      lowStock: 'Low Stock',
+      modalTitle: 'Product Details',
+      currentStock: 'Current Stock'
     }
   },
 
@@ -188,6 +197,58 @@ export default {
     }
   },
 
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    quarterlyPerformance: 'Quarterly Performance',
+    monthlyRevenueTrend: 'Monthly Revenue Trend',
+    monthOverMonth: 'Month-over-Month Analysis',
+    totalRevenueYTD: 'Total Revenue (YTD)',
+    avgMonthlyRevenue: 'Avg Monthly Revenue',
+    totalOrdersYTD: 'Total Orders (YTD)',
+    bestPerformingQuarter: 'Best Performing Quarter',
+    table: {
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    description: 'Items below reorder point, ranked by urgency',
+    budgetLabel: 'Budget Ceiling',
+    budgetPlaceholder: 'No limit',
+    totalItems: 'Items to Restock',
+    totalCost: 'Total Estimated Cost',
+    withinBudget: 'Within Budget',
+    noBelowReorder: 'All items are above reorder point.',
+    table: {
+      item: 'Item',
+      warehouse: 'Warehouse',
+      onHand: 'On Hand',
+      reorderPoint: 'Reorder Point',
+      recommendedQty: 'Recommended Qty',
+      estCost: 'Est. Cost',
+      trend: 'Demand Trend',
+      action: 'Action'
+    },
+    trend: {
+      increasing: 'Increasing',
+      stable: 'Stable',
+      decreasing: 'Decreasing'
+    }
+  },
+
   // Filters
   filters: {
     timePeriod: 'Time Period',
@@ -304,6 +365,23 @@ export default {
     noTasks: 'No tasks yet. Add your first task above!'
   },
 
+  // Purchase Order Modal
+  po: {
+    createTitle: 'Create Purchase Order',
+    viewTitle: 'Purchase Order Details',
+    supplier: 'Supplier',
+    supplierPlaceholder: 'Enter supplier name',
+    quantity: 'Quantity',
+    unitCost: 'Unit Cost',
+    expectedDelivery: 'Expected Delivery',
+    notes: 'Notes',
+    notesPlaceholder: 'Optional notes',
+    status: 'Status',
+    submit: 'Create PO',
+    errorSupplier: 'Supplier name is required.',
+    errorDate: 'Expected delivery date is required.'
+  },
+
   // Language
   language: {
     english: 'English',
@@ -323,6 +401,11 @@ export default {
     search: 'Search',
     filter: 'Filter',
     export: 'Export',
-    items: 'items'
+    items: 'items',
+    units: 'units',
+    days: 'days',
+    priority: 'Priority',
+    ofTotal: '% of total',
+    costBreakdown: 'Cost Breakdown'
   }
 }
