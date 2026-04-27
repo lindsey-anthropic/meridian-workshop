@@ -125,10 +125,15 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { api } from '../api'
+import { useFilters } from '../composables/useFilters'
 
 export default {
   name: 'Reports',
+  setup() {
+    const { selectedPeriod, selectedLocation, selectedCategory, selectedStatus } = useFilters()
+    return { selectedPeriod, selectedLocation, selectedCategory, selectedStatus }
+  },
   data() {
     return {
       loading: true,
@@ -141,39 +146,41 @@ export default {
       bestQuarter: ''
     }
   },
+  watch: {
+    selectedPeriod() { this.loadData() },
+    selectedLocation() { this.loadData() },
+    selectedCategory() { this.loadData() },
+    selectedStatus() { this.loadData() }
+  },
   mounted() {
-    console.log('Reports component mounted')
     this.loadData()
   },
   methods: {
     async loadData() {
-      console.log('Loading reports data...')
       try {
         this.loading = true
+        this.error = null
 
-        // Fetch quarterly data
-        console.log('Fetching quarterly data...')
-        const quarterlyResponse = await axios.get('http://localhost:8001/api/reports/quarterly')
-        this.quarterlyData = quarterlyResponse.data
-        console.log('Quarterly data:', this.quarterlyData)
+        const filters = {
+          warehouse: this.selectedLocation,
+          category: this.selectedCategory,
+          status: this.selectedStatus,
+          month: this.selectedPeriod
+        }
 
-        // Fetch monthly data
-        console.log('Fetching monthly data...')
-        const monthlyResponse = await axios.get('http://localhost:8001/api/reports/monthly-trends')
-        this.monthlyData = monthlyResponse.data
-        console.log('Monthly data:', this.monthlyData)
+        const [quarterlyData, monthlyData] = await Promise.all([
+          api.getReportsQuarterly(filters),
+          api.getReportsMonthly(filters)
+        ])
 
-        // Calculate summary stats
-        console.log('Calculating summary stats...')
+        this.quarterlyData = quarterlyData
+        this.monthlyData = monthlyData
         this.calculateSummaryStats()
-        console.log('Summary stats calculated')
 
       } catch (err) {
-        console.log('Error loading reports:', err)
         this.error = 'Failed to load reports: ' + err.message
       } finally {
         this.loading = false
-        console.log('Loading complete')
       }
     },
 

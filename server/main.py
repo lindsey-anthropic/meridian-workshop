@@ -228,12 +228,23 @@ def get_recent_transactions():
     return recent_transactions
 
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None
+):
     """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
+    filtered = orders
+    if warehouse and warehouse != 'all':
+        filtered = [o for o in filtered if o.get('warehouse') == warehouse]
+    if category and category != 'all':
+        filtered = [o for o in filtered if o.get('category', '').lower() == category.lower()]
+    if status and status != 'all':
+        filtered = [o for o in filtered if o.get('status', '').lower() == status.lower()]
+
     quarters = {}
 
-    for order in orders:
+    for order in filtered:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -274,13 +285,29 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
     """Get month-over-month trends"""
+    filtered = orders
+    if warehouse and warehouse != 'all':
+        filtered = [o for o in filtered if o.get('warehouse') == warehouse]
+    if category and category != 'all':
+        filtered = [o for o in filtered if o.get('category', '').lower() == category.lower()]
+    if status and status != 'all':
+        filtered = [o for o in filtered if o.get('status', '').lower() == status.lower()]
+
     months = {}
 
-    for order in orders:
+    for order in filtered:
         order_date = order.get('order_date', '')
         if not order_date:
+            continue
+
+        if month and month != 'all' and not order_date.startswith(month):
             continue
 
         # Extract month (format: YYYY-MM-DD)
@@ -303,6 +330,107 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+class RestockOrderRequest(BaseModel):
+    item_sku: str
+    item_name: str
+    quantity: int
+    unit_cost: float
+    warehouse: str
+
+restock_orders = []
+
+@app.post("/api/restock/orders", status_code=201)
+def create_restock_order(request: RestockOrderRequest):
+    """Create a purchase order from a restock recommendation."""
+    import uuid
+    from datetime import datetime, timedelta
+    order = {
+        'id': str(uuid.uuid4()),
+        'item_sku': request.item_sku,
+        'item_name': request.item_name,
+        'quantity': request.quantity,
+        'unit_cost': request.unit_cost,
+        'total_cost': round(request.quantity * request.unit_cost, 2),
+        'warehouse': request.warehouse,
+        'status': 'Pending',
+        'created_date': datetime.now().strftime('%Y-%m-%d'),
+        'expected_delivery_date': (datetime.now() + timedelta(days=14)).strftime('%Y-%m-%d')
+    }
+    restock_orders.append(order)
+    return order
+
+
+@app.get("/api/restock/recommendations")
+def get_restock_recommendations(
+    budget: Optional[float] = None,
+    warehouse: Optional[str] = None
+):
+    """Recommend purchase orders based on stock levels and demand forecasts."""
+    # Build demand lookup by SKU
+    demand_by_sku = {d['item_sku']: d for d in demand_forecasts}
+
+    # Filter inventory by warehouse if requested
+    filtered_inventory = inventory_items
+    if warehouse and warehouse != 'all':
+        filtered_inventory = [i for i in filtered_inventory if i.get('warehouse') == warehouse]
+
+    recommendations = []
+    for item in filtered_inventory:
+        sku = item.get('sku')
+        qty_on_hand = item.get('quantity_on_hand', 0)
+        reorder_point = item.get('reorder_point', 0)
+        unit_cost = item.get('unit_cost', 0)
+
+        demand = demand_by_sku.get(sku)
+        forecasted_demand = demand['forecasted_demand'] if demand else reorder_point
+
+        # Item needs restocking if below reorder point or forecasted demand exceeds stock
+        needs_restock = qty_on_hand < reorder_point or qty_on_hand < forecasted_demand
+        if not needs_restock:
+            continue
+
+        # Recommend enough to cover forecasted demand plus a 20% buffer
+        qty_recommended = max(reorder_point, forecasted_demand) - qty_on_hand
+        qty_recommended = max(1, round(qty_recommended * 1.2))
+        total_cost = round(qty_recommended * unit_cost, 2)
+
+        # Urgency: critical if below reorder point, warning otherwise
+        urgency = 'critical' if qty_on_hand < reorder_point else 'warning'
+
+        recommendations.append({
+            'sku': sku,
+            'name': item.get('name'),
+            'category': item.get('category'),
+            'warehouse': item.get('warehouse'),
+            'qty_on_hand': qty_on_hand,
+            'reorder_point': reorder_point,
+            'forecasted_demand': forecasted_demand,
+            'qty_recommended': qty_recommended,
+            'unit_cost': unit_cost,
+            'total_cost': total_cost,
+            'urgency': urgency
+        })
+
+    # Sort by urgency (critical first) then by total_cost descending
+    recommendations.sort(key=lambda x: (0 if x['urgency'] == 'critical' else 1, -x['total_cost']))
+
+    # Apply budget ceiling: include items until budget is exhausted
+    if budget is not None:
+        result = []
+        remaining = budget
+        for rec in recommendations:
+            if rec['total_cost'] <= remaining:
+                result.append(rec)
+                remaining -= rec['total_cost']
+        recommendations = result
+
+    return {
+        'recommendations': recommendations,
+        'total_cost': round(sum(r['total_cost'] for r in recommendations), 2),
+        'item_count': len(recommendations)
+    }
+
 
 if __name__ == "__main__":
     import uvicorn
