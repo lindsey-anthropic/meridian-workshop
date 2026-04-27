@@ -6,6 +6,7 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -278,7 +279,8 @@ export default {
   profile: {
     profileDetails: 'Profile Details',
     myTasks: 'My Tasks',
-    logout: 'Logout'
+    logout: 'Logout',
+    darkMode: 'Dark Mode'
   },
 
   // Profile Details Modal
@@ -324,5 +326,62 @@ export default {
     filter: 'Filter',
     export: 'Export',
     items: 'items'
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    loading: 'Loading reports...',
+    quarterlyPerformance: 'Quarterly Performance',
+    monthlyRevenueTrend: 'Monthly Revenue Trend',
+    momAnalysis: 'Month-over-Month Analysis',
+    table: {
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    },
+    stats: {
+      totalRevenueYTD: 'Total Revenue (YTD)',
+      avgMonthlyRevenue: 'Avg Monthly Revenue',
+      totalOrdersYTD: 'Total Orders (YTD)',
+      bestQuarter: 'Best Performing Quarter'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    description: 'Items at or below reorder point with purchase quantity recommendations',
+    budgetCeiling: 'Budget Ceiling',
+    totalItems: 'Items Needing Restock',
+    withinBudget: 'Items Within Budget',
+    totalCost: 'Total Estimated Cost',
+    budgetUsed: 'Budget Used',
+    noForecast: 'No forecast',
+    noItems: 'No items currently need restocking for the selected filters.',
+    table: {
+      sku: 'SKU',
+      itemName: 'Item Name',
+      category: 'Category',
+      warehouse: 'Warehouse',
+      onHand: 'On Hand',
+      reorderPoint: 'Reorder Pt',
+      forecast: 'Forecasted Demand',
+      trend: 'Trend',
+      recommendedQty: 'Recommended Qty',
+      unitCost: 'Unit Cost',
+      estimatedCost: 'Est. Cost',
+      status: 'Status'
+    },
+    withinBudgetLabel: 'Within Budget',
+    overBudgetLabel: 'Over Budget'
   }
 }

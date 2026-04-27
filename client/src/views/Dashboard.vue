@@ -11,8 +11,12 @@
       <div class="kpi-section">
         <h3 class="section-title">{{ t('dashboard.kpi.title') }}</h3>
         <div class="kpi-grid">
-          <div class="kpi-card">
+          <div class="kpi-card kpi-card--blue">
             <div class="kpi-header">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" class="kpi-icon" style="color: #3b82f6">
+                <path d="M8 2a6 6 0 1 0 4.472 10.07" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                <path d="M13.5 7V3.5H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              </svg>
               <span class="kpi-label">{{ t('dashboard.kpi.inventoryTurnover') }}</span>
             </div>
             <div class="kpi-value">4.2</div>
@@ -22,8 +26,12 @@
             </div>
           </div>
 
-          <div class="kpi-card">
+          <div class="kpi-card kpi-card--green">
             <div class="kpi-header">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" class="kpi-icon" style="color: #10b981">
+                <circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5 8.5l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
               <span class="kpi-label">{{ t('dashboard.kpi.ordersFulfilled') }}</span>
             </div>
             <div class="kpi-value">{{ ordersData.fulfilled }}</div>
@@ -33,8 +41,13 @@
             </div>
           </div>
 
-          <div class="kpi-card">
+          <div class="kpi-card kpi-card--violet">
             <div class="kpi-header">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" class="kpi-icon" style="color: #8b5cf6">
+                <rect x="2" y="10" width="3" height="4" rx="1" fill="currentColor"/>
+                <rect x="6.5" y="7" width="3" height="7" rx="1" fill="currentColor"/>
+                <rect x="11" y="3" width="3" height="11" rx="1" fill="currentColor"/>
+              </svg>
               <span class="kpi-label">{{ t('dashboard.kpi.orderFillRate') }}</span>
             </div>
             <div class="kpi-value">{{ fillRate }}%</div>
@@ -44,8 +57,12 @@
             </div>
           </div>
 
-          <div class="kpi-card">
+          <div class="kpi-card kpi-card--amber">
             <div class="kpi-header">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" class="kpi-icon" style="color: #f59e0b">
+                <circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke-width="1.5"/>
+                <text x="8" y="12" text-anchor="middle" font-size="9" font-weight="700" fill="currentColor" font-family="serif">$</text>
+              </svg>
               <span class="kpi-label">{{ t(selectedPeriod === 'all' ? 'dashboard.kpi.revenueYTD' : 'dashboard.kpi.revenueMTD') }}</span>
             </div>
             <div class="kpi-value">{{ formatCurrency(Math.round(summary.total_orders_value), selectedCurrency) }}</div>
@@ -55,8 +72,12 @@
             </div>
           </div>
 
-          <div class="kpi-card">
+          <div class="kpi-card kpi-card--cyan">
             <div class="kpi-header">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" class="kpi-icon" style="color: #06b6d4">
+                <circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M8 4.5V8l2.5 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
               <span class="kpi-label">{{ t('dashboard.kpi.avgProcessingTime') }}</span>
             </div>
             <div class="kpi-value">2.8</div>
@@ -734,6 +755,11 @@ export default {
   margin-bottom: 1rem;
 }
 
+.page-header h2 {
+  border-left: 3px solid #2563eb;
+  padding-left: 0.75rem;
+}
+
 .header-meta {
   font-size: 0.813rem;
   color: #64748b;
@@ -746,7 +772,7 @@ export default {
 .section-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 1rem;
@@ -759,20 +785,38 @@ export default {
 }
 
 .kpi-card {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 1rem;
+  transition: box-shadow 0.2s ease;
 }
+
+.kpi-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.kpi-card--blue  { border-top: 4px solid #3b82f6; }
+.kpi-card--green { border-top: 4px solid #10b981; }
+.kpi-card--violet{ border-top: 4px solid #8b5cf6; }
+.kpi-card--amber { border-top: 4px solid #f59e0b; }
+.kpi-card--cyan  { border-top: 4px solid #06b6d4; }
 
 .kpi-header {
   margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.kpi-icon {
+  flex-shrink: 0;
 }
 
 .kpi-label {
   font-size: 0.813rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.025em;
 }
@@ -780,14 +824,15 @@ export default {
 .kpi-value {
   font-size: 2rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
   letter-spacing: -0.025em;
+  line-height: 1;
 }
 
 .kpi-goal {
   font-size: 0.813rem;
-  color: #64748b;
+  color: var(--text-secondary);
   margin-bottom: 0.75rem;
 }
 
@@ -815,6 +860,14 @@ export default {
   grid-template-columns: repeat(2, 1fr);
   gap: 1.25rem;
   margin-bottom: 1.5rem;
+}
+
+.chart-card {
+  transition: box-shadow 0.2s ease;
+}
+
+.chart-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .chart-card.full-width {
@@ -928,7 +981,7 @@ export default {
 
 .health-metric-label {
   font-size: 0.688rem;
-  color: #64748b;
+  color: var(--text-secondary);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -937,7 +990,7 @@ export default {
 .health-metric-value {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   letter-spacing: -0.025em;
 }
 
@@ -971,14 +1024,14 @@ export default {
   min-width: 120px;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-secondary);
   flex-shrink: 0;
 }
 
 .h-bar-container {
   flex: 1;
   height: 32px;
-  background: #f8fafc;
+  background: var(--bg-muted);
   border-radius: 6px;
   overflow: hidden;
 }
@@ -1010,8 +1063,8 @@ export default {
   justify-content: space-between;
   padding-right: 1rem;
   font-size: 0.75rem;
-  color: #94a3b8;
-  border-right: 1px solid #e2e8f0;
+  color: var(--text-secondary);
+  border-right: 1px solid var(--border-color);
 }
 
 .line-chart-area {
@@ -1077,7 +1130,7 @@ export default {
 .no-data {
   padding: 2rem;
   text-align: center;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.875rem;
 }
 
@@ -1109,7 +1162,7 @@ export default {
 }
 
 .clickable-row:hover {
-  background: #eff6ff !important;
+  background: var(--bg-muted) !important;
 }
 
 /* Tasks Card Styles */

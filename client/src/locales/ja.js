@@ -6,6 +6,7 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    restocking: '補充推奨',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -278,7 +279,8 @@ export default {
   profile: {
     profileDetails: 'プロフィール詳細',
     myTasks: 'マイタスク',
-    logout: 'ログアウト'
+    logout: 'ログアウト',
+    darkMode: 'ダークモード'
   },
 
   // Profile Details Modal
@@ -378,5 +380,62 @@ export default {
     'Premier Industries': 'プレミア工業',
     'Stellar Components Ltd': 'ステラコンポーネンツ',
     'Dynamic Systems Ltd': 'ダイナミックシステムズ'
+  },
+
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期パフォーマンス指標と月次トレンドの表示',
+    loading: 'レポート読み込み中...',
+    quarterlyPerformance: '四半期パフォーマンス',
+    monthlyRevenueTrend: '月次収益トレンド',
+    momAnalysis: '前月比分析',
+    table: {
+      quarter: '四半期',
+      totalOrders: '総注文数',
+      totalRevenue: '総収益',
+      avgOrderValue: '平均注文額',
+      fulfillmentRate: '履行率',
+      month: '月',
+      orders: '注文数',
+      revenue: '収益',
+      change: '変化',
+      growthRate: '成長率'
+    },
+    stats: {
+      totalRevenueYTD: '総収益（年初来）',
+      avgMonthlyRevenue: '平均月次収益',
+      totalOrdersYTD: '総注文数（年初来）',
+      bestQuarter: '最高パフォーマンス四半期'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: '補充推奨',
+    description: '発注点以下の品目と推奨発注数量',
+    budgetCeiling: '予算上限',
+    totalItems: '補充が必要な品目数',
+    withinBudget: '予算内品目数',
+    totalCost: '推定総コスト',
+    budgetUsed: '予算使用額',
+    noForecast: '予測なし',
+    noItems: '選択したフィルターで補充が必要な品目はありません。',
+    table: {
+      sku: 'SKU',
+      itemName: '品目名',
+      category: 'カテゴリ',
+      warehouse: '倉庫',
+      onHand: '在庫数',
+      reorderPoint: '発注点',
+      forecast: '需要予測',
+      trend: 'トレンド',
+      recommendedQty: '推奨発注数',
+      unitCost: '単価',
+      estimatedCost: '推定コスト',
+      status: 'ステータス'
+    },
+    withinBudgetLabel: '予算内',
+    overBudgetLabel: '予算超過'
   }
 }
