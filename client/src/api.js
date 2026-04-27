@@ -74,6 +74,27 @@ export const api = {
     return response.data
   },
 
+  async getQuarterlyReports() {
+    const response = await axios.get(`${API_BASE_URL}/reports/quarterly`)
+    return response.data
+  },
+
+  async getMonthlyTrends() {
+    const response = await axios.get(`${API_BASE_URL}/reports/monthly-trends`)
+    return response.data
+  },
+
+  async getRecommendations(filters = {}) {
+    const params = new URLSearchParams()
+    if (filters.warehouse && filters.warehouse !== 'all') params.append('warehouse', filters.warehouse)
+    if (filters.category && filters.category !== 'all') params.append('category', filters.category)
+    if (filters.budget !== undefined && filters.budget !== null && filters.budget !== '') {
+      params.append('budget', filters.budget)
+    }
+    const response = await axios.get(`${API_BASE_URL}/recommendations?${params.toString()}`)
+    return response.data
+  },
+
   async getTasks() {
     const response = await axios.get(`${API_BASE_URL}/tasks`)
     return response.data
@@ -99,8 +120,8 @@ export const api = {
     return response.data
   },
 
-  async getPurchaseOrderByBacklogItem(backlogItemId) {
-    const response = await axios.get(`${API_BASE_URL}/purchase-orders/${backlogItemId}`)
+  async getPurchaseOrder(id) {
+    const response = await axios.get(`${API_BASE_URL}/purchase-orders/${id}`)
     return response.data
   }
 }

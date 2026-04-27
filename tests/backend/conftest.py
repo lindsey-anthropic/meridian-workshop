@@ -21,6 +21,15 @@ def client():
         yield test_client
 
 
+@pytest.fixture(autouse=True)
+def _snapshot_purchase_orders():
+    """Snapshot and restore mock_data.purchase_orders so POST tests don't leak state."""
+    from mock_data import purchase_orders
+    snapshot = list(purchase_orders)
+    yield
+    purchase_orders[:] = snapshot
+
+
 @pytest.fixture
 def sample_inventory_item():
     """Sample inventory item for testing."""

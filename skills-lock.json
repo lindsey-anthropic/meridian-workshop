@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "skills": {
+    "html-slides": {
+      "source": "smithery.ai",
+      "sourceType": "well-known",
+      "computedHash": "9a786ec5fec7dd0609805fca51cebaeaa84f73d007901581b4e058f13ea771a8"
+    },
+    "prompt-engineering": {
+      "source": "smithery.ai",
+      "sourceType": "well-known",
+      "computedHash": "6487eaa8f5180351ecfe65c44aa8f2612df8929682490fba793be1dcf5af0f6a"
+    },
+    "rfp-evaluate": {
+      "source": "smithery.ai",
+      "sourceType": "well-known",
+      "computedHash": "bbd6937f3ba2d3808f6d8592ccaf586a869d8998e09189ed1f10cb56a7fd15e6"
+    }
+  }
+}

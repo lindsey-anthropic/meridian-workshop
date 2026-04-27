@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    name: Backend pytest + Playwright critical flows
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install Python dependencies
+        run: uv pip install --system -r requirements.txt
+
+      - name: Install frontend dependencies
+        working-directory: client
+        run: npm install
+
+      - name: Install e2e dependencies
+        working-directory: tests/e2e
+        run: npm install
+
+      - name: Install Playwright browsers
+        working-directory: tests/e2e
+        run: npx playwright install --with-deps chromium
+
+      - name: Start backend (FastAPI on port 8001)
+        working-directory: server
+        run: nohup python main.py > ../backend.log 2>&1 &
+
+      - name: Start frontend (Vite on port 3000)
+        working-directory: client
+        run: nohup npm run dev > ../frontend.log 2>&1 &
+
+      - name: Wait for both servers
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8001/docs > /dev/null && curl -sf http://localhost:3000 > /dev/null; then
+              echo "Both servers are up."
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Servers did not become ready in 60 seconds." >&2
+          echo "--- backend.log ---" >&2
+          cat backend.log >&2 || true
+          echo "--- frontend.log ---" >&2
+          cat frontend.log >&2 || true
+          exit 1
+
+      - name: Run backend pytest suite
+        working-directory: tests
+        run: pytest backend/ --tb=short
+
+      - name: Run Playwright critical-flow suite
+        working-directory: tests/e2e
+        env:
+          CI: 'true'
+        run: npx playwright test
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: tests/e2e/playwright-report/
+          retention-days: 7
+
+      - name: Upload server logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-logs
+          path: |
+            backend.log
+            frontend.log
+          retention-days: 7

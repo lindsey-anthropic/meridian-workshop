@@ -13,6 +13,9 @@
           <router-link to="/inventory" :class="{ active: $route.path === '/inventory' }">
             {{ t('nav.inventory') }}
           </router-link>
+          <router-link to="/restocking" :class="{ active: $route.path === '/restocking' }">
+            {{ t('nav.restocking') }}
+          </router-link>
           <router-link to="/orders" :class="{ active: $route.path === '/orders' }">
             {{ t('nav.orders') }}
           </router-link>
@@ -23,7 +26,7 @@
             {{ t('nav.demandForecast') }}
           </router-link>
           <router-link to="/reports" :class="{ active: $route.path === '/reports' }">
-            Reports
+            {{ t('nav.reports') }}
           </router-link>
         </nav>
         <LanguageSwitcher />
@@ -33,7 +36,7 @@
         />
       </div>
     </header>
-    <FilterBar />
+    <FilterBar v-if="$route.path !== '/reports'" />
     <main class="main-content">
       <router-view />
     </main>

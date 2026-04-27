@@ -35,7 +35,7 @@ fi
 # Start backend server in background
 echo -e "${GREEN}Starting backend server on http://localhost:8001${NC}"
 cd "$PROJECT_ROOT/server"
-uv run python3 main.py > /tmp/inventory-backend.log 2>&1 &
+uv run python main.py > /tmp/inventory-backend.log 2>&1 &
 BACKEND_PID=$!
 
 # Wait a moment for backend to start

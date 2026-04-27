@@ -1,8 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from datetime import datetime, timezone
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders
+from services.recommendations import compute_recommendations
 
 app = FastAPI(title="Factory Inventory Management System")
 
@@ -103,7 +105,9 @@ class BacklogItem(BaseModel):
 
 class PurchaseOrder(BaseModel):
     id: str
-    backlog_item_id: str
+    backlog_item_id: Optional[str] = None
+    sku: Optional[str] = None
+    warehouse: Optional[str] = None
     supplier_name: str
     quantity: int
     unit_cost: float
@@ -119,6 +123,43 @@ class CreatePurchaseOrderRequest(BaseModel):
     unit_cost: float
     expected_delivery_date: str
     notes: Optional[str] = None
+
+class CreatePurchaseOrderFromRecommendationRequest(BaseModel):
+    sku: str
+    warehouse: str
+    quantity: int
+    unit_cost: float
+    supplier_name: str
+    expected_delivery_date: str
+    notes: Optional[str] = None
+
+class Recommendation(BaseModel):
+    id: str
+    sku: str
+    name: str
+    category: str
+    warehouse: str
+    quantity_on_hand: int
+    threshold: float
+    shortage_units: float
+    recommended_quantity: int
+    unit_cost: float
+    estimated_cost: float
+    criticality: float
+    margin: float
+    status: str
+    po_issued: bool
+    preferred_supplier: str
+    lead_time_days: int
+
+class RecommendationsResponse(BaseModel):
+    recommendations: List[Recommendation]
+    budget: Optional[float] = None
+    total_recommended_cost: float
+    total_deferred_cost: float
+    budget_utilization: Optional[float] = None
+    warehouse: Optional[str] = None
+    category: Optional[str] = None
 
 # API endpoints
 @app.get("/")
@@ -303,6 +344,85 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+@app.get("/api/recommendations", response_model=RecommendationsResponse)
+def get_recommendations(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    budget: Optional[float] = Query(None, ge=0),
+):
+    """Restocking recommendations with budget-aware allocation (RFP R2)."""
+    filtered_inventory = apply_filters(inventory_items, warehouse, category)
+    recs = compute_recommendations(filtered_inventory, demand_forecasts, purchase_orders, budget)
+
+    total_recommended = sum(r["estimated_cost"] for r in recs if r["status"] == "recommended")
+    total_deferred = sum(r["estimated_cost"] for r in recs if r["status"] == "deferred")
+    utilization = (total_recommended / budget) if (budget is not None and budget > 0) else None
+
+    return {
+        "recommendations": recs,
+        "budget": budget,
+        "total_recommended_cost": round(total_recommended, 2),
+        "total_deferred_cost": round(total_deferred, 2),
+        "budget_utilization": round(utilization, 4) if utilization is not None else None,
+        "warehouse": warehouse,
+        "category": category,
+    }
+
+@app.post("/api/purchase-orders", response_model=PurchaseOrder, status_code=201)
+def create_purchase_order(payload: dict):
+    """Create a purchase order. Accepts either a recommendation-driven shape
+    (sku + warehouse) or a backlog-driven shape (backlog_item_id)."""
+    try:
+        if "sku" in payload and "warehouse" in payload:
+            req = CreatePurchaseOrderFromRecommendationRequest(**payload)
+            new_po = {
+                "id": f"PO-{len(purchase_orders) + 1:04d}",
+                "backlog_item_id": None,
+                "sku": req.sku,
+                "warehouse": req.warehouse,
+                "supplier_name": req.supplier_name,
+                "quantity": req.quantity,
+                "unit_cost": req.unit_cost,
+                "expected_delivery_date": req.expected_delivery_date,
+                "status": "Pending",
+                "created_date": datetime.now(timezone.utc).date().isoformat(),
+                "notes": req.notes,
+            }
+        elif "backlog_item_id" in payload:
+            req = CreatePurchaseOrderRequest(**payload)
+            new_po = {
+                "id": f"PO-{len(purchase_orders) + 1:04d}",
+                "backlog_item_id": req.backlog_item_id,
+                "sku": None,
+                "warehouse": None,
+                "supplier_name": req.supplier_name,
+                "quantity": req.quantity,
+                "unit_cost": req.unit_cost,
+                "expected_delivery_date": req.expected_delivery_date,
+                "status": "Pending",
+                "created_date": datetime.now(timezone.utc).date().isoformat(),
+                "notes": req.notes,
+            }
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="Must provide either (sku + warehouse) or backlog_item_id",
+            )
+    except ValidationError as e:
+        raise HTTPException(status_code=422, detail=e.errors())
+    purchase_orders.append(new_po)
+    return new_po
+
+@app.get("/api/purchase-orders/{po_id}", response_model=PurchaseOrder)
+def get_purchase_order(po_id: str):
+    """Look up a PO by id; fall back to matching backlog_item_id."""
+    po = next((p for p in purchase_orders if p["id"] == po_id), None)
+    if not po:
+        po = next((p for p in purchase_orders if p.get("backlog_item_id") == po_id), None)
+    if not po:
+        raise HTTPException(status_code=404, detail=f"Purchase order {po_id} not found")
+    return po
 
 if __name__ == "__main__":
     import uvicorn
