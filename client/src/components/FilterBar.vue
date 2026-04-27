@@ -43,7 +43,7 @@
           </select>
         </div>
 
-        <div class="filter-group">
+        <div v-if="!hideFilters.includes('status')" class="filter-group">
           <label>{{ t('filters.orderStatus') }}</label>
           <select v-model="selectedStatus" class="filter-select">
             <option value="all">{{ t('filters.all') }}</option>
@@ -75,6 +75,12 @@ import { useI18n } from '../composables/useI18n'
 
 export default {
   name: 'FilterBar',
+  props: {
+    hideFilters: {
+      type: Array,
+      default: () => []
+    }
+  },
   setup() {
     const {
       selectedPeriod,

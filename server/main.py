@@ -120,6 +120,19 @@ class CreatePurchaseOrderRequest(BaseModel):
     expected_delivery_date: str
     notes: Optional[str] = None
 
+class RestockingRecommendation(BaseModel):
+    sku: str
+    name: str
+    category: str
+    warehouse: str
+    quantity_on_hand: int
+    reorder_point: int
+    forecasted_demand: int
+    recommended_qty: int
+    unit_cost: float
+    estimated_cost: float
+    urgency: str
+
 # API endpoints
 @app.get("/")
 def root():
@@ -227,15 +240,79 @@ def get_recent_transactions():
     """Get recent transactions"""
     return recent_transactions
 
-@app.get("/api/reports/quarterly")
-def get_quarterly_reports():
-    """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
-    quarters = {}
+@app.get("/api/restocking", response_model=List[RestockingRecommendation])
+def get_restocking(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
+    """Get restocking recommendations based on stock levels and demand forecasts."""
+    filtered_inventory = inventory_items
 
-    for order in orders:
+    if warehouse and warehouse != 'all':
+        filtered_inventory = [i for i in filtered_inventory if i.get('warehouse') == warehouse]
+    if category and category != 'all':
+        filtered_inventory = [i for i in filtered_inventory if i.get('category', '').lower() == category.lower()]
+
+    forecast_by_sku = {f['item_sku']: f for f in demand_forecasts}
+
+    urgency_order = {'critical': 0, 'high': 1, 'medium': 2}
+    result = []
+
+    for item in filtered_inventory:
+        sku = item['sku']
+        forecast = forecast_by_sku.get(sku)
+        forecasted_demand = forecast['forecasted_demand'] if forecast else 0
+
+        qty_on_hand = item['quantity_on_hand']
+        reorder_point = item['reorder_point']
+        unit_cost = item['unit_cost']
+
+        recommended_qty = max(0, forecasted_demand + reorder_point - qty_on_hand)
+        if recommended_qty == 0:
+            continue
+
+        estimated_cost = round(recommended_qty * unit_cost, 2)
+
+        if qty_on_hand == 0 or qty_on_hand < reorder_point * 0.5:
+            urgency = 'critical'
+        elif qty_on_hand < reorder_point:
+            urgency = 'high'
+        else:
+            urgency = 'medium'
+
+        result.append({
+            'sku': sku,
+            'name': item['name'],
+            'category': item['category'],
+            'warehouse': item['warehouse'],
+            'quantity_on_hand': qty_on_hand,
+            'reorder_point': reorder_point,
+            'forecasted_demand': forecasted_demand,
+            'recommended_qty': recommended_qty,
+            'unit_cost': unit_cost,
+            'estimated_cost': estimated_cost,
+            'urgency': urgency
+        })
+
+    result.sort(key=lambda x: (urgency_order[x['urgency']], -x['estimated_cost']))
+    return result
+
+@app.get("/api/reports/quarterly")
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
+    """Get quarterly performance reports with optional filtering."""
+    filtered = orders
+
+    if warehouse and warehouse != 'all':
+        filtered = [o for o in filtered if o.get('warehouse') == warehouse]
+    if category and category != 'all':
+        filtered = [o for o in filtered if o.get('category', '').lower() == category.lower()]
+
+    quarters = {}
+    for order in filtered:
         order_date = order.get('order_date', '')
-        # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
             quarter = 'Q1-2025'
         elif '2025-04' in order_date or '2025-05' in order_date or '2025-06' in order_date:
@@ -261,7 +338,6 @@ def get_quarterly_reports():
         if order.get('status') == 'Delivered':
             quarters[quarter]['delivered_orders'] += 1
 
-    # Calculate averages and fulfillment rate
     result = []
     for q, data in quarters.items():
         if data['total_orders'] > 0:
@@ -269,37 +345,46 @@ def get_quarterly_reports():
             data['fulfillment_rate'] = round((data['delivered_orders'] / data['total_orders']) * 100, 1)
         result.append(data)
 
-    # Sort by quarter
     result.sort(key=lambda x: x['quarter'])
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
-    """Get month-over-month trends"""
-    months = {}
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    month: Optional[str] = None
+):
+    """Get month-over-month trends with optional filtering."""
+    filtered = orders
 
-    for order in orders:
+    if warehouse and warehouse != 'all':
+        filtered = [o for o in filtered if o.get('warehouse') == warehouse]
+    if category and category != 'all':
+        filtered = [o for o in filtered if o.get('category', '').lower() == category.lower()]
+
+    months = {}
+    for order in filtered:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
 
-        # Extract month (format: YYYY-MM-DD)
-        month = order_date[:7]  # Gets YYYY-MM
+        order_month = order_date[:7]
+        if month and month != 'all' and order_month != month:
+            continue
 
-        if month not in months:
-            months[month] = {
-                'month': month,
+        if order_month not in months:
+            months[order_month] = {
+                'month': order_month,
                 'order_count': 0,
                 'revenue': 0,
                 'delivered_count': 0
             }
 
-        months[month]['order_count'] += 1
-        months[month]['revenue'] += order.get('total_value', 0)
+        months[order_month]['order_count'] += 1
+        months[order_month]['revenue'] += order.get('total_value', 0)
         if order.get('status') == 'Delivered':
-            months[month]['delivered_count'] += 1
+            months[order_month]['delivered_count'] += 1
 
-    # Convert to list and sort
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
