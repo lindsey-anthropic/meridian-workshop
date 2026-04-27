@@ -104,11 +104,12 @@ tx(s1, "ACCENTURE&CT CONSULTING  ·  MERIDIAN COMPONENTS",
 rule(s1, 0.6, 1.0, 1.8)
 tx(s1, "ENGAGEMENT PROGRESS REPORT", 0.6, 1.1, 10, 0.4,
    size=11, bold=True, color=BLUE)
-tx(s1, "Sprint Review\nR1 · R2 · R3 · R4", 0.6, 1.6, 10, 1.8,
-   size=44, bold=True, color=WHITE)
-tx(s1, "All four required deliverables complete.\nEngagement base scope delivered on schedule.",
+tx(s1, "Sprint Review\nR1 · R2 · R3 · R4 + D1 · D2 · D3", 0.6, 1.6, 12, 1.8,
+   size=38, bold=True, color=WHITE)
+tx(s1, "All required deliverables + all optional enhancements complete.",
    0.6, 3.8, 9, 0.9, size=18, color=GRAY)
-tx(s1, "April 27, 2026", 0.6, 6.8, 5, 0.35, size=12, color=DARK_GR)
+tx(s1, "April 27, 2026  ·  branch: feature/meridian-engagement",
+   0.6, 6.8, 12, 0.35, size=12, color=DARK_GR)
 
 # ════════════════════════════════════════════════════════════════════════════
 # Slide 2 — Status overview (4 cards)
@@ -127,6 +128,15 @@ cards = [
      ["Playwright e2e suite", "59 / 59 tests passing", "All views covered", "Filters + edge cases"]),
     ("R4", "Architecture\nDocs",     "COMPLETE",     GREEN,  GR_BG,
      ["HTML architecture diagram", "15-endpoint API reference", "Mock data layer docs", "IT handoff notes"]),
+]
+
+optionals_cards = [
+    ("D1", "CSS Variables\n& UI Refresh",  "COMPLETE", GREEN, GR_BG,
+     ["CSS custom properties :root", "All hardcoded colours replaced", "FilterBar.vue updated", "Themeable from one block"]),
+    ("D2", "Italian\nLocale",              "COMPLETE", GREEN, GR_BG,
+     ["it.js — full translation", "EUR currency for 'it'", "translateWarehouse: Londra", "3-language switcher"]),
+    ("D3", "Dark Mode\nToggle",            "COMPLETE", GREEN, GR_BG,
+     ["Sun/moon button in nav", ".dark class on <html>", "CSS var overrides", "localStorage persistence"]),
 ]
 
 x = 0.55
@@ -251,40 +261,125 @@ for title, desc in r4_items:
     x += 3.07
 
 # ════════════════════════════════════════════════════════════════════════════
-# Slide 7 — Engagement complete + optional next steps
+# Slide 7 — D1+D2+D3 status cards
 # ════════════════════════════════════════════════════════════════════════════
 s7 = slide(); bg(s7)
-tx(s7, "ACCENTURE&CT CONSULTING  ·  MERIDIAN COMPONENTS",
-   0.6, 0.5, 12, 0.4, size=11, bold=True, color=DARK_GR)
-rule(s7, 0.6, 1.0, 1.8)
-tx(s7, "BASE ENGAGEMENT · COMPLETE", 0.6, 1.1, 10, 0.4, size=11, bold=True, color=BLUE)
-tx(s7, "R1 · R2 · R3 · R4\nAll delivered.", 0.6, 1.55, 8, 1.6, size=44, bold=True, color=WHITE)
+tx(s7, "OPTIONAL ENHANCEMENTS", 0.6, 0.55, 10, 0.35, size=11, bold=True, color=BLUE)
+tx(s7, "D1 · D2 · D3 — all delivered", 0.6, 1.0, 10, 0.6, size=28, bold=True, color=WHITE)
+rule(s7, 0.6, 0.95, 2.6)
 
-# Completed summary strip
-rect(s7, 0.6, 3.3, 12.1, 0.6, GR_BG, border=RGBColor(0x16, 0x65, 0x34))
-items_done = ["R1  Reports fixed", "R2  Restocking view", "R3  59/59 tests", "R4  Architecture docs"]
-xi = 0.9
-for item in items_done:
-    tx(s7, "✓  " + item, xi, 3.38, 2.7, 0.42, size=13, bold=True, color=GREEN)
-    xi += 3.0
+x = 0.85
+for req, title, label, col, bg_col, buls in optionals_cards:
+    req_card(s7, req, title, label, col, bg_col, buls, x, card_w=3.8)
+    x += 3.97
 
-# Optional next steps
-rect(s7, 0.6, 4.15, 12.1, 2.65, BG_MID, border=RGBColor(0x33, 0x41, 0x55))
-tx(s7, "Optional extensions — available now", 0.8, 4.3, 11, 0.4, size=14, bold=True, color=BLUE)
-optionals = [
-    ("D1 · UI Refresh",          "Weeks 11–12", "$12,000", "Visual modernisation, spacing, colour system, mobile-responsive layout."),
-    ("D2 · i18n Expansion",      "Week 13",     "$8,000",  "Additional languages beyond EN/JA. Locale-aware number/date formatting."),
-    ("D3 · Dark Mode",           "Week 13",     "$8,000",  "CSS variable theming. Prototype on a worktree branch, merge when approved."),
+tx(s7, "branch: feature/meridian-engagement  ·  RFP #MC-2026-0417  ·  April 27, 2026",
+   0.6, 7.1, 12, 0.35, size=11, color=DARK_GR)
+
+# ════════════════════════════════════════════════════════════════════════════
+# Slide 8 — D1 detail: CSS variables + dark mode
+# ════════════════════════════════════════════════════════════════════════════
+s8 = slide(); bg(s8, BG_MID)
+badge(s8, "COMPLETE", 0.6, 0.45, GREEN, GR_BG)
+tx(s8, "D1 + D3 · CSS Variables & Dark Mode", 0.6, 0.9, 10, 0.5, size=11, bold=True, color=BLUE)
+tx(s8, "Full theme system.\nOne-click dark mode.", 0.6, 1.35, 11, 1.0, size=32, bold=True, color=WHITE)
+
+d1_items = [
+    (":root CSS variables",     "14 custom properties — --bg, --surface, --border, --text-primary, --accent, etc. All layout and colour tokens centralised."),
+    (".dark class override",    "Applied to <html> element. Full dark palette defined in one block; flips the entire app including charts, cards, tables."),
+    ("App.vue refactored",      "All hardcoded hex values replaced with var(--*) calls. FilterBar.vue scoped styles also updated."),
+    ("Toggle + persistence",    "Sun/moon SVG button in nav. isDark ref seeds from localStorage on mount; preference survives page reload."),
 ]
-xi = 0.8
-for label, timing, fee, desc in optionals:
-    tx(s7, label,  xi,      4.82, 3.6, 0.32, size=13, bold=True, color=WHITE)
-    tx(s7, timing, xi,      5.15, 1.8, 0.28, size=11, color=GRAY)
-    tx(s7, fee,    xi+1.9,  5.15, 1.6, 0.28, size=11, bold=True, color=BLUE)
-    tx(s7, desc,   xi,      5.48, 3.6, 0.55, size=11, color=LIGHT)
-    xi += 4.0
+x = 0.6
+for title, desc in d1_items:
+    rect(s8, x, 2.7, 2.9, 2.3, BG, border=RGBColor(0x33, 0x41, 0x55))
+    tx(s8, title, x+0.15, 2.8,  2.6, 0.45, size=13, bold=True, color=BLUE)
+    tx(s8, desc,  x+0.15, 3.28, 2.6, 1.4,  size=12, color=LIGHT)
+    x += 3.07
 
-tx(s7, "RFP #MC-2026-0417  ·  April 27, 2026  ·  Feature branch ready for PR review",
+tx(s8, "branch: feature/meridian-engagement  ·  commit: 272787c",
+   0.6, 7.1, 12, 0.35, size=11, color=DARK_GR)
+
+# ════════════════════════════════════════════════════════════════════════════
+# Slide 9 — D2 detail: Italian locale
+# ════════════════════════════════════════════════════════════════════════════
+s9 = slide(); bg(s9)
+badge(s9, "COMPLETE", 0.6, 0.45, GREEN, GR_BG)
+tx(s9, "D2 · Italian Locale (i18n Expansion)", 0.6, 0.9, 10, 0.5, size=11, bold=True, color=BLUE)
+tx(s9, "Third language live.\nEN · JA · IT.", 0.6, 1.35, 11, 1.0, size=32, bold=True, color=WHITE)
+
+# Left: what was added
+rect(s9, 0.6, 2.7, 6.0, 4.0, BG_MID, border=RGBColor(0x33, 0x41, 0x55))
+tx(s9, "Files added / modified", 0.8, 2.85, 5.6, 0.4, size=14, bold=True, color=BLUE)
+d2_files = [
+    "client/src/locales/it.js — full translation (403 lines)",
+    "useI18n.js — import it, EUR currency for 'it' locale",
+    "useI18n.js — translateWarehouse: London → 'Londra'",
+    "LanguageSwitcher.vue — 'Italiano' added to languageNames",
+]
+tb9 = s9.shapes.add_textbox(Inches(0.8), Inches(3.35), Inches(5.6), Inches(3.0))
+tf9 = tb9.text_frame; tf9.word_wrap = True
+for i, item in enumerate(d2_files):
+    p = tf9.paragraphs[0] if i == 0 else tf9.add_paragraph()
+    p.space_before = Pt(8)
+    r = p.add_run(); r.text = f"→  {item}"
+    r.font.size = Pt(13); r.font.color.rgb = LIGHT
+
+# Right: translated samples
+rect(s9, 6.85, 2.7, 6.1, 4.0, BG_MID, border=RGBColor(0x33, 0x41, 0x55))
+tx(s9, "Sample translations", 7.05, 2.85, 5.7, 0.4, size=14, bold=True, color=BLUE)
+samples = [
+    ("nav.overview",        "Panoramica"),
+    ("nav.restocking",      "Rifornimento"),
+    ("dashboard.kpi.title", "Indicatori Chiave di Performance"),
+    ("filters.location",    "Sede"),
+    ("status.inStock",      "Disponibile"),
+    ("priority.high",       "Alta"),
+]
+y9 = 3.38
+for key, val in samples:
+    tx(s9, key,  7.05, y9,       3.0, 0.28, size=11, color=GRAY)
+    tx(s9, val,  10.2, y9,       2.5, 0.28, size=11, bold=True, color=WHITE)
+    y9 += 0.4
+
+tx(s9, "branch: feature/meridian-engagement  ·  commit: 272787c",
+   0.6, 7.1, 12, 0.35, size=11, color=DARK_GR)
+
+# ════════════════════════════════════════════════════════════════════════════
+# Slide 10 — Engagement complete + PR
+# ════════════════════════════════════════════════════════════════════════════
+s10 = slide(); bg(s10)
+tx(s10, "ACCENTURE&CT CONSULTING  ·  MERIDIAN COMPONENTS",
+   0.6, 0.5, 12, 0.4, size=11, bold=True, color=DARK_GR)
+rule(s10, 0.6, 1.0, 1.8)
+tx(s10, "FULL ENGAGEMENT · COMPLETE", 0.6, 1.1, 10, 0.4, size=11, bold=True, color=BLUE)
+tx(s10, "R1 · R2 · R3 · R4\n+ D1 · D2 · D3", 0.6, 1.55, 8, 1.6, size=40, bold=True, color=WHITE)
+
+# Full delivery strip
+rect(s10, 0.6, 3.35, 12.1, 0.55, GR_BG, border=RGBColor(0x16, 0x65, 0x34))
+all_done = ["R1  Reports", "R2  Restocking", "R3  59/59 tests", "R4  Arch docs", "D1  CSS vars", "D2  Italiano", "D3  Dark mode"]
+xi = 0.75
+for item in all_done:
+    tx(s10, "✓  " + item, xi, 3.42, 1.65, 0.38, size=11, bold=True, color=GREEN)
+    xi += 1.73
+
+# PR / branch info box
+rect(s10, 0.6, 4.1, 12.1, 2.6, BG_MID, border=RGBColor(0x33, 0x41, 0x55))
+tx(s10, "Pull Request ready for review", 0.8, 4.25, 11, 0.4, size=14, bold=True, color=BLUE)
+
+pr_info = [
+    ("Branch",    "feature/meridian-engagement  →  main"),
+    ("Commits",   "272787c  Deliver D1+D2+D3: CSS variables, Italian locale, dark mode toggle\na0e7e5d  Update progress deck: all four R deliverables COMPLETE\n645b5f2  R4: Add architecture documentation\n8004785  Complete R1–R3 Meridian engagement deliverables"),
+    ("Changed",   "15 files  ·  App.vue, FilterBar.vue, LanguageSwitcher.vue, useI18n.js,\nit.js (new), Restocking.vue (new), main.py, api.js, e2e test suite"),
+    ("Repo",      "github.com/lindsey-anthropic/meridian-workshop"),
+]
+y10 = 4.78
+for label, val in pr_info:
+    tx(s10, label + ":", 0.8,  y10, 1.2, 0.35, size=12, bold=True, color=GRAY)
+    tx(s10, val,         2.15, y10, 9.8, 0.45, size=12, color=LIGHT)
+    y10 += 0.5
+
+tx(s10, "RFP #MC-2026-0417  ·  April 27, 2026",
    0.6, 7.1, 12, 0.35, size=11, color=DARK_GR)
 
 prs.save("progress-report.pptx")
