@@ -6180,5 +6180,180 @@
     "expected_delivery": "2025-11-19T12:30:00",
     "total_value": 9125.0,
     "actual_delivery": "2025-11-18T12:30:00"
+  },
+  {
+    "id": "251",
+    "order_number": "ORD-2026-0001",
+    "customer": "MegaCorp Industries",
+    "items": [
+      {
+        "sku": "TMP-201",
+        "name": "Temperature Sensor Module",
+        "quantity": 150,
+        "unit_price": 42.5
+      }
+    ],
+    "status": "Delivered",
+    "warehouse": "San Francisco",
+    "category": "Sensors",
+    "order_date": "2026-01-07T09:00:00",
+    "expected_delivery": "2026-01-18T09:00:00",
+    "total_value": 6375.0,
+    "actual_delivery": "2026-01-17T09:00:00"
+  },
+  {
+    "id": "252",
+    "order_number": "ORD-2026-0002",
+    "customer": "TechBuild Industries",
+    "items": [
+      {
+        "sku": "MCU-401",
+        "name": "Programmable Logic Controller",
+        "quantity": 40,
+        "unit_price": 320.0
+      }
+    ],
+    "status": "Processing",
+    "warehouse": "London",
+    "category": "Controllers",
+    "order_date": "2026-01-15T14:30:00",
+    "expected_delivery": "2026-01-29T14:30:00",
+    "total_value": 12800.0
+  },
+  {
+    "id": "253",
+    "order_number": "ORD-2026-0003",
+    "customer": "Advanced Electronics Systems",
+    "items": [
+      {
+        "sku": "SRV-301",
+        "name": "Servo Motor 50Nm",
+        "quantity": 60,
+        "unit_price": 185.0
+      }
+    ],
+    "status": "Delivered",
+    "warehouse": "Tokyo",
+    "category": "Actuators",
+    "order_date": "2026-02-03T08:45:00",
+    "expected_delivery": "2026-02-17T08:45:00",
+    "total_value": 11100.0,
+    "actual_delivery": "2026-02-16T08:45:00"
+  },
+  {
+    "id": "254",
+    "order_number": "ORD-2026-0004",
+    "customer": "Premier Industries",
+    "items": [
+      {
+        "sku": "PCB-001",
+        "name": "Single Layer PCB Assembly",
+        "quantity": 200,
+        "unit_price": 28.0
+      }
+    ],
+    "status": "Shipped",
+    "warehouse": "San Francisco",
+    "category": "Circuit Boards",
+    "order_date": "2026-02-18T11:00:00",
+    "expected_delivery": "2026-03-04T11:00:00",
+    "total_value": 5600.0
+  },
+  {
+    "id": "255",
+    "order_number": "ORD-2026-0005",
+    "customer": "FastAssembly Ltd",
+    "items": [
+      {
+        "sku": "PSU-501",
+        "name": "5V 10A Switching Power Supply",
+        "quantity": 80,
+        "unit_price": 95.0
+      }
+    ],
+    "status": "Delivered",
+    "warehouse": "London",
+    "category": "Power Supplies",
+    "order_date": "2026-03-05T10:15:00",
+    "expected_delivery": "2026-03-19T10:15:00",
+    "total_value": 7600.0,
+    "actual_delivery": "2026-03-18T10:15:00"
+  },
+  {
+    "id": "256",
+    "order_number": "ORD-2026-0006",
+    "customer": "Acme Manufacturing Corp",
+    "items": [
+      {
+        "sku": "TMP-201",
+        "name": "Temperature Sensor Module",
+        "quantity": 300,
+        "unit_price": 42.5
+      }
+    ],
+    "status": "Processing",
+    "warehouse": "Tokyo",
+    "category": "Sensors",
+    "order_date": "2026-03-12T13:00:00",
+    "expected_delivery": "2026-03-26T13:00:00",
+    "total_value": 12750.0
+  },
+  {
+    "id": "257",
+    "order_number": "ORD-2026-0007",
+    "customer": "Stellar Components Ltd",
+    "items": [
+      {
+        "sku": "MCU-401",
+        "name": "Programmable Logic Controller",
+        "quantity": 25,
+        "unit_price": 320.0
+      }
+    ],
+    "status": "Delivered",
+    "warehouse": "San Francisco",
+    "category": "Controllers",
+    "order_date": "2026-03-20T09:30:00",
+    "expected_delivery": "2026-04-03T09:30:00",
+    "total_value": 8000.0,
+    "actual_delivery": "2026-04-02T09:30:00"
+  },
+  {
+    "id": "258",
+    "order_number": "ORD-2026-0008",
+    "customer": "Dynamic Systems Ltd",
+    "items": [
+      {
+        "sku": "SRV-302",
+        "name": "Linear Actuator 200mm",
+        "quantity": 45,
+        "unit_price": 210.0
+      }
+    ],
+    "status": "Processing",
+    "warehouse": "London",
+    "category": "Actuators",
+    "order_date": "2026-04-02T14:00:00",
+    "expected_delivery": "2026-04-16T14:00:00",
+    "total_value": 9450.0
+  },
+  {
+    "id": "259",
+    "order_number": "ORD-2026-0009",
+    "customer": "Superior Manufacturing",
+    "items": [
+      {
+        "sku": "PCB-001",
+        "name": "Single Layer PCB Assembly",
+        "quantity": 350,
+        "unit_price": 28.0
+      }
+    ],
+    "status": "Shipped",
+    "warehouse": "Tokyo",
+    "category": "Circuit Boards",
+    "order_date": "2026-04-10T08:00:00",
+    "expected_delivery": "2026-04-24T08:00:00",
+    "total_value": 9800.0
   }
 ]
