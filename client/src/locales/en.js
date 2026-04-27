@@ -324,5 +324,29 @@ export default {
     filter: 'Filter',
     export: 'Export',
     items: 'items'
+  },
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    loading: 'Loading reports...',
+    quarterlyPerformance: 'Quarterly Performance',
+    monthlyRevenueTrend: 'Monthly Revenue Trend',
+    momAnalysis: 'Month-over-Month Analysis',
+    totalRevenueYTD: 'Total Revenue (YTD)',
+    avgMonthlyRevenue: 'Avg Monthly Revenue',
+    totalOrdersYTD: 'Total Orders (YTD)',
+    bestPerformingQuarter: 'Best Performing Quarter',
+    table: {
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    }
   }
 }
