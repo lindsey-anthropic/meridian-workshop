@@ -1,0 +1,278 @@
+from pptx import Presentation
+from pptx.util import Inches, Pt
+from pptx.dml.color import RGBColor
+from pptx.enum.text import PP_ALIGN
+
+# ── Palette ──────────────────────────────────────────────────────────────────
+BG       = RGBColor(0x0f, 0x17, 0x2a)
+BG_MID   = RGBColor(0x1e, 0x29, 0x3b)
+BLUE     = RGBColor(0x38, 0xbd, 0xf8)
+WHITE    = RGBColor(0xf8, 0xfa, 0xfc)
+GRAY     = RGBColor(0x94, 0xa3, 0xb8)
+DARK_GR  = RGBColor(0x47, 0x55, 0x69)
+LIGHT    = RGBColor(0xcb, 0xd5, 0xe1)
+GREEN    = RGBColor(0x22, 0xc5, 0x5e)
+YELLOW   = RGBColor(0xf5, 0x9e, 0x0b)
+RED      = RGBColor(0xef, 0x44, 0x44)
+GR_BG    = RGBColor(0x05, 0x2e, 0x16)
+YL_BG    = RGBColor(0x2d, 0x1f, 0x07)
+GY_BG    = RGBColor(0x1e, 0x29, 0x3b)
+
+prs = Presentation()
+prs.slide_width  = Inches(13.33)
+prs.slide_height = Inches(7.5)
+blank = prs.slide_layouts[6]
+
+
+def slide():
+    return prs.slides.add_slide(blank)
+
+
+def bg(s, color=BG):
+    s.background.fill.solid()
+    s.background.fill.fore_color.rgb = color
+
+
+def tx(s, text, x, y, w, h, size=16, bold=False, italic=False,
+        color=LIGHT, align=PP_ALIGN.LEFT):
+    tb = s.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
+    tf = tb.text_frame
+    tf.word_wrap = True
+    p = tf.paragraphs[0]
+    p.alignment = align
+    r = p.add_run()
+    r.text = text
+    r.font.size = Pt(size)
+    r.font.bold = bold
+    r.font.italic = italic
+    r.font.color.rgb = color
+
+
+def rule(s, x1, y, x2):
+    ln = s.shapes.add_connector(1, Inches(x1), Inches(y), Inches(x2), Inches(y))
+    ln.line.color.rgb = BLUE
+    ln.line.width = Pt(2)
+
+
+def rect(s, x, y, w, h, fill, border=None):
+    sh = s.shapes.add_shape(1, Inches(x), Inches(y), Inches(w), Inches(h))
+    sh.fill.solid()
+    sh.fill.fore_color.rgb = fill
+    if border:
+        sh.line.color.rgb = border
+        sh.line.width = Pt(0.75)
+    else:
+        sh.line.fill.background()
+    return sh
+
+
+def badge(s, label, x, y, color, bg_color):
+    rect(s, x, y, 1.9, 0.32, bg_color)
+    tx(s, label, x + 0.08, y + 0.03, 1.75, 0.28,
+       size=10, bold=True, color=color, align=PP_ALIGN.CENTER)
+
+
+def req_card(s, req, title, status_label, status_color, status_bg,
+             bullets, x, card_w=2.9):
+    """Draw one requirement status card."""
+    card_h = 4.2
+    y0 = 2.6
+    rect(s, x, y0, card_w, card_h, BG_MID, border=RGBColor(0x33, 0x41, 0x55))
+    tx(s, req,   x+0.18, y0+0.18, card_w-0.3, 0.38, size=11, bold=True, color=BLUE)
+    tx(s, title, x+0.18, y0+0.58, card_w-0.3, 0.55, size=15, bold=True, color=WHITE)
+    badge(s, status_label, x+0.18, y0+1.18, status_color, status_bg)
+    # bullets
+    tb = s.shapes.add_textbox(
+        Inches(x+0.18), Inches(y0+1.68), Inches(card_w-0.3), Inches(2.2))
+    tf = tb.text_frame
+    tf.word_wrap = True
+    for i, b in enumerate(bullets):
+        p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+        p.space_before = Pt(5)
+        r = p.add_run()
+        r.text = f"• {b}"
+        r.font.size = Pt(12)
+        r.font.color.rgb = LIGHT
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# Slide 1 — Title
+# ════════════════════════════════════════════════════════════════════════════
+s1 = slide(); bg(s1)
+tx(s1, "ACCENTURE&CT CONSULTING  ·  MERIDIAN COMPONENTS",
+   0.6, 0.5, 12, 0.4, size=11, bold=True, color=DARK_GR)
+rule(s1, 0.6, 1.0, 1.8)
+tx(s1, "ENGAGEMENT PROGRESS REPORT", 0.6, 1.1, 10, 0.4,
+   size=11, bold=True, color=BLUE)
+tx(s1, "Sprint Review\nR1 · R2 · R3", 0.6, 1.6, 10, 1.8,
+   size=44, bold=True, color=WHITE)
+tx(s1, "Three of four required deliverables complete.\nR4 architecture documentation in progress.",
+   0.6, 3.8, 9, 0.9, size=18, color=GRAY)
+tx(s1, "April 27, 2026", 0.6, 6.8, 5, 0.35, size=12, color=DARK_GR)
+
+# ════════════════════════════════════════════════════════════════════════════
+# Slide 2 — Status overview (4 cards)
+# ════════════════════════════════════════════════════════════════════════════
+s2 = slide(); bg(s2)
+tx(s2, "DELIVERY STATUS", 0.6, 0.55, 10, 0.35, size=11, bold=True, color=BLUE)
+tx(s2, "R1 – R4 at a glance", 0.6, 1.0, 10, 0.6, size=28, bold=True, color=WHITE)
+rule(s2, 0.6, 0.95, 2.6)
+
+cards = [
+    ("R1", "Reports\nRemediation",  "COMPLETE",     GREEN,  GR_BG,
+     ["Options → Composition API", "Filters wired (warehouse/category)", "API endpoints patched", "Zero console errors"]),
+    ("R2", "Restocking\nView",       "COMPLETE",     GREEN,  GR_BG,
+     ["/api/restocking endpoint", "Budget ceiling + priority rank", "New Restocking.vue", "EN + JA locale keys"]),
+    ("R3", "Automated\nTests",       "COMPLETE",     GREEN,  GR_BG,
+     ["Playwright e2e suite", "59 / 59 tests passing", "All views covered", "Filters + edge cases"]),
+    ("R4", "Architecture\nDocs",     "IN PROGRESS",  YELLOW, YL_BG,
+     ["HTML diagram", "Component map", "API endpoint list", "Meridian IT handoff"]),
+]
+
+x = 0.55
+for req, title, label, col, bg_col, buls in cards:
+    req_card(s2, req, title, label, col, bg_col, buls, x, card_w=2.9)
+    x += 3.07
+
+# ════════════════════════════════════════════════════════════════════════════
+# Slide 3 — R1 detail
+# ════════════════════════════════════════════════════════════════════════════
+s3 = slide(); bg(s3, BG_MID)
+badge(s3, "COMPLETE", 0.6, 0.45, GREEN, GR_BG)
+tx(s3, "R1 · Reports Remediation", 0.6, 0.9, 10, 0.5, size=11, bold=True, color=BLUE)
+tx(s3, "All defects resolved.\nZero console errors.", 0.6, 1.35, 11, 1.0, size=32, bold=True, color=WHITE)
+
+defects = [
+    ("Options API → Composition API", "Full rewrite of Reports.vue to Composition API pattern consistent with the rest of the codebase. Reactive state, watchers, computed properties."),
+    ("Filters fully wired",           "Warehouse and Category params added to /api/reports/quarterly and /api/reports/monthly-trends. Watch on both filters triggers data reload."),
+    ("i18n gaps closed",              "All labels, headings, and table columns routed through t() calls. English and Japanese locale keys complete."),
+    ("Console noise eliminated",      "No console.log calls, no uncaught errors, no stray warnings on page load or filter change."),
+]
+x = 0.6
+for title, desc in defects:
+    rect(s3, x, 2.7, 2.9, 2.3, BG, border=RGBColor(0x33, 0x41, 0x55))
+    tx(s3, title, x+0.15, 2.8, 2.6, 0.45, size=13, bold=True, color=BLUE)
+    tx(s3, desc,  x+0.15, 3.3, 2.6, 1.4,  size=12, color=LIGHT)
+    x += 3.07
+
+# ════════════════════════════════════════════════════════════════════════════
+# Slide 4 — R2 detail
+# ════════════════════════════════════════════════════════════════════════════
+s4 = slide(); bg(s4)
+badge(s4, "COMPLETE", 0.6, 0.45, GREEN, GR_BG)
+tx(s4, "R2 · Restocking Recommendations", 0.6, 0.9, 10, 0.5, size=11, bold=True, color=BLUE)
+tx(s4, "New view live.\nBudget ceiling + demand scoring.", 0.6, 1.35, 11, 1.0, size=32, bold=True, color=WHITE)
+
+# Left: how it works
+rect(s4, 0.6, 2.7, 6.0, 4.0, BG_MID, border=RGBColor(0x33, 0x41, 0x55))
+tx(s4, "How it works", 0.8, 2.85, 5.6, 0.4, size=14, bold=True, color=BLUE)
+items = [
+    "Stock gap = reorder_point − quantity_on_hand",
+    "Priority score: gap + bonus for 'increasing' demand trend",
+    "Budget ceiling: greedy selection, within_budget flag per row",
+    "Operator applies budget via button (not on every keystroke)",
+    "Filters: warehouse + category reload recommendations",
+    "Status column appears only when budget > 0",
+]
+tb = s4.shapes.add_textbox(Inches(0.8), Inches(3.35), Inches(5.6), Inches(3.0))
+tf = tb.text_frame; tf.word_wrap = True
+for i, item in enumerate(items):
+    p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+    p.space_before = Pt(6)
+    r = p.add_run(); r.text = f"→  {item}"
+    r.font.size = Pt(13); r.font.color.rgb = LIGHT
+
+# Right: stat cards mini-preview
+rect(s4, 6.85, 2.7, 6.1, 4.0, BG_MID, border=RGBColor(0x33, 0x41, 0x55))
+tx(s4, "Summary stats delivered", 7.05, 2.85, 5.7, 0.4, size=14, bold=True, color=BLUE)
+stats = [("Items at Risk", "23 SKUs understocked"),
+         ("Total Restock Cost", "Full cost if all ordered"),
+         ("Within Budget", "Items within ceiling"),
+         ("Budget Remaining", "Unspent allocation")]
+y = 3.4
+for label, desc in stats:
+    tx(s4, f"■  {label}", 7.05, y, 5.7, 0.3, size=13, bold=True, color=BLUE)
+    tx(s4, desc, 7.05, y+0.3, 5.7, 0.3, size=12, color=GRAY)
+    y += 0.72
+
+# ════════════════════════════════════════════════════════════════════════════
+# Slide 5 — R3 detail
+# ════════════════════════════════════════════════════════════════════════════
+s5 = slide(); bg(s5, BG_MID)
+badge(s5, "COMPLETE", 0.6, 0.45, GREEN, GR_BG)
+tx(s5, "R3 · Automated Browser Tests", 0.6, 0.9, 10, 0.5, size=11, bold=True, color=BLUE)
+tx(s5, "59 / 59 tests passing.", 0.6, 1.35, 8, 0.8, size=36, bold=True, color=WHITE)
+tx(s5, "59", 10.5, 1.2, 2.5, 1.5, size=72, bold=True, color=GREEN, align=PP_ALIGN.CENTER)
+tx(s5, "passing", 10.5, 2.7, 2.5, 0.4, size=14, color=GRAY, align=PP_ALIGN.CENTER)
+
+suites = [
+    ("navigation.spec.js",  "3 tests",  "Nav bar, route loading, active link"),
+    ("filters.spec.js",     "5 tests",  "All 4 controls, options, reset"),
+    ("dashboard.spec.js",   "6 tests",  "Title, KPIs, Order Health, charts, filters"),
+    ("inventory.spec.js",   "6 tests",  "Table, columns, Location/Category filters"),
+    ("orders.spec.js",      "5 tests",  "Table, columns, Status/Location/Period filters"),
+    ("reports.spec.js",     "8 tests",  "Quarterly table, MoM, bar chart, stats, filters"),
+    ("restocking.spec.js",  "9 tests",  "Budget input, stat cards, table, Status column logic"),
+    ("spending.spec.js",    "6 tests",  "KPI cards, charts, period filter"),
+    ("demand.spec.js",      "7 tests",  "Trend cards, table, filters"),
+]
+x, y = 0.6, 2.65
+col = 0
+for name, count, desc in suites:
+    rect(s5, x, y, 4.1, 0.7, BG, border=RGBColor(0x1e, 0x29, 0x3b))
+    tx(s5, name,  x+0.15, y+0.06, 2.5, 0.3, size=11, bold=True, color=BLUE)
+    tx(s5, count, x+2.8,  y+0.06, 1.1, 0.3, size=11, bold=True, color=GREEN, align=PP_ALIGN.RIGHT)
+    tx(s5, desc,  x+0.15, y+0.36, 3.8, 0.28, size=10, color=GRAY)
+    col += 1
+    if col == 3:
+        col = 0; x = 0.6; y += 0.82
+    else:
+        x += 4.25
+
+# ════════════════════════════════════════════════════════════════════════════
+# Slide 6 — R4 + next steps
+# ════════════════════════════════════════════════════════════════════════════
+s6 = slide(); bg(s6)
+badge(s6, "IN PROGRESS", 0.6, 0.45, YELLOW, YL_BG)
+tx(s6, "R4 · Architecture Documentation  +  Next Steps", 0.6, 0.9, 12, 0.5,
+   size=11, bold=True, color=BLUE)
+tx(s6, "One deliverable remaining.", 0.6, 1.35, 9, 0.7, size=34, bold=True, color=WHITE)
+
+# R4 card
+rect(s6, 0.6, 2.45, 5.9, 3.7, BG_MID, border=RGBColor(0x33, 0x41, 0x55))
+tx(s6, "R4 — What we're building", 0.8, 2.6, 5.5, 0.4, size=14, bold=True, color=BLUE)
+r4_items = [
+    "HTML architecture diagram (component map + data flow)",
+    "API endpoint reference with request/response shapes",
+    "Mock-data layer documentation for Meridian IT",
+    "Handoff notes: how to extend the app post-engagement",
+]
+tb = s6.shapes.add_textbox(Inches(0.8), Inches(3.1), Inches(5.5), Inches(2.8))
+tf = tb.text_frame; tf.word_wrap = True
+for i, item in enumerate(r4_items):
+    p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+    p.space_before = Pt(7)
+    r = p.add_run(); r.text = f"→  {item}"
+    r.font.size = Pt(13); r.font.color.rgb = LIGHT
+
+# Next steps card
+rect(s6, 6.8, 2.45, 5.9, 3.7, BG_MID, border=RGBColor(0x33, 0x41, 0x55))
+tx(s6, "Remaining work + optional", 7.0, 2.6, 5.5, 0.4, size=14, bold=True, color=BLUE)
+next_items = [
+    "R4: Architecture HTML + handoff doc  (next)",
+    "D1: UI refresh  (optional, weeks 11–12)",
+    "D2: Full i18n expansion  (optional)",
+    "D3: Dark mode prototype on branch  (optional)",
+    "PR merge + Meridian IT walkthrough",
+]
+tb = s6.shapes.add_textbox(Inches(7.0), Inches(3.1), Inches(5.5), Inches(2.8))
+tf = tb.text_frame; tf.word_wrap = True
+for i, item in enumerate(next_items):
+    p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+    p.space_before = Pt(7)
+    r = p.add_run(); r.text = f"→  {item}"
+    r.font.size = Pt(13)
+    r.font.color.rgb = BLUE if item.startswith("→  R4") else LIGHT
+
+prs.save("progress-report.pptx")
+print("Done: progress-report.pptx")
