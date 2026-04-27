@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Components — Current-State Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; }
+  header { background: #1e293b; color: white; padding: 2rem 3rem; }
+  header h1 { font-size: 1.6rem; font-weight: 700; }
+  header p { margin-top: .4rem; color: #94a3b8; font-size: .9rem; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 2rem 3rem; }
+  h2 { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: .05em; }
+  h3 { font-size: 1rem; font-weight: 600; color: #334155; margin-bottom: .6rem; }
+
+  /* System diagram */
+  .diagram { display: flex; align-items: stretch; gap: 0; margin: 1.5rem 0 2.5rem; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: white; }
+  .layer { flex: 1; padding: 1.5rem; }
+  .layer + .layer { border-left: 1px solid #e2e8f0; }
+  .layer.client  { background: #eff6ff; }
+  .layer.arrow   { flex: 0 0 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f1f5f9; font-size: .7rem; color: #64748b; gap: .3rem; }
+  .layer.server  { background: #f0fdf4; }
+  .layer.data    { background: #fefce8; }
+  .layer-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .8rem; }
+  .layer.client .layer-label  { color: #2563eb; }
+  .layer.server .layer-label  { color: #16a34a; }
+  .layer.data   .layer-label  { color: #ca8a04; }
+  .port-badge { display: inline-block; background: #1e293b; color: white; font-size: .65rem; font-weight: 600; padding: .15rem .5rem; border-radius: 999px; margin-bottom: .6rem; }
+  .tech-list { list-style: none; }
+  .tech-list li { font-size: .82rem; color: #475569; padding: .2rem 0; display: flex; align-items: center; gap: .4rem; }
+  .tech-list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; }
+  .arrow-line { font-size: 1.2rem; }
+
+  /* Two-col layout */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem; }
+  .card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.4rem; }
+
+  /* Pages list */
+  .page-list { list-style: none; }
+  .page-list li { display: flex; align-items: baseline; gap: .6rem; padding: .3rem 0; font-size: .84rem; border-bottom: 1px solid #f1f5f9; }
+  .page-list li:last-child { border-bottom: none; }
+  .route { font-family: monospace; background: #f1f5f9; padding: .1rem .4rem; border-radius: 4px; font-size: .78rem; color: #0f172a; flex-shrink: 0; }
+  .desc { color: #64748b; }
+
+  /* Endpoints table */
+  .section { margin-bottom: 2.5rem; }
+  table { width: 100%; border-collapse: collapse; background: white; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; font-size: .83rem; }
+  th { background: #f8fafc; padding: .65rem 1rem; text-align: left; font-weight: 600; color: #475569; font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; border-bottom: 1px solid #e2e8f0; }
+  td { padding: .6rem 1rem; border-bottom: 1px solid #f1f5f9; color: #334155; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  code { font-family: monospace; background: #f1f5f9; padding: .1rem .35rem; border-radius: 4px; font-size: .8rem; color: #0f172a; }
+  .method { display: inline-block; background: #dbeafe; color: #1d4ed8; font-size: .7rem; font-weight: 700; padding: .1rem .4rem; border-radius: 4px; }
+
+  /* Composables */
+  .composable-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .composable { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; }
+  .composable h4 { font-size: .82rem; font-weight: 700; color: #2563eb; margin-bottom: .4rem; font-family: monospace; }
+  .composable p { font-size: .78rem; color: #64748b; line-height: 1.5; }
+
+  /* Findings */
+  .findings { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2.5rem; }
+  .finding { background: white; border-left: 4px solid #f59e0b; border-radius: 0 8px 8px 0; padding: 1rem 1.2rem; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+  .finding.good { border-left-color: #22c55e; }
+  .finding h4 { font-size: .82rem; font-weight: 700; margin-bottom: .3rem; }
+  .finding.good h4 { color: #16a34a; }
+  .finding:not(.good) h4 { color: #d97706; }
+  .finding p { font-size: .78rem; color: #64748b; line-height: 1.5; }
+
+  footer { background: #1e293b; color: #64748b; text-align: center; padding: 1.2rem; font-size: .78rem; margin-top: 2rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Meridian Components — Current-State Architecture</h1>
+  <p>Prepared by Accenture engagement team &nbsp;·&nbsp; April 2026 &nbsp;·&nbsp; Deliverable R4</p>
+</header>
+
+<div class="container">
+
+  <!-- System diagram -->
+  <div class="section">
+    <h2>System Overview</h2>
+    <div class="diagram">
+      <div class="layer client">
+        <div class="layer-label">Frontend</div>
+        <div class="port-badge">:3000</div>
+        <ul class="tech-list">
+          <li>Vue 3 (Composition API)</li>
+          <li>Vite dev server</li>
+          <li>Vue Router (SPA)</li>
+          <li>Axios HTTP client</li>
+          <li>Custom composables</li>
+          <li>7 page views</li>
+        </ul>
+      </div>
+      <div class="layer arrow">
+        <span class="arrow-line">→</span>
+        <span>HTTP / JSON</span>
+        <span class="arrow-line">←</span>
+      </div>
+      <div class="layer server">
+        <div class="layer-label">Backend</div>
+        <div class="port-badge">:8001</div>
+        <ul class="tech-list">
+          <li>Python / FastAPI</li>
+          <li>Uvicorn ASGI</li>
+          <li>Pydantic models</li>
+          <li>15 REST endpoints</li>
+          <li>CORS open (dev)</li>
+        </ul>
+      </div>
+      <div class="layer arrow">
+        <span class="arrow-line">→</span>
+        <span>in-memory</span>
+        <span class="arrow-line">←</span>
+      </div>
+      <div class="layer data">
+        <div class="layer-label">Data Layer</div>
+        <div class="port-badge">JSON files</div>
+        <ul class="tech-list">
+          <li>inventory.json</li>
+          <li>orders.json</li>
+          <li>demand_forecasts.json</li>
+          <li>spending.json</li>
+          <li>transactions.json</li>
+          <li>purchase_orders.json</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frontend detail -->
+  <div class="section">
+    <h2>Frontend Detail</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Pages &amp; Routes</h3>
+        <ul class="page-list">
+          <li><span class="route">/</span><span class="desc">Dashboard — KPIs &amp; summary metrics</span></li>
+          <li><span class="route">/inventory</span><span class="desc">Stock levels by warehouse &amp; category</span></li>
+          <li><span class="route">/orders</span><span class="desc">Order status &amp; fulfillment tracking</span></li>
+          <li><span class="route">/spending</span><span class="desc">Financial analytics &amp; transactions</span></li>
+          <li><span class="route">/demand</span><span class="desc">Demand forecasting trends</span></li>
+          <li><span class="route">/reports</span><span class="desc">Quarterly &amp; monthly performance</span></li>
+          <li><span class="route">/restocking</span><span class="desc">Purchase order recommendations</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Key Patterns</h3>
+        <ul class="tech-list" style="gap:.5rem">
+          <li><strong>No Vuex/Pinia</strong> — shared state via Composition API composables</li>
+          <li><strong>Centralized API client</strong> — all calls through <code>src/api.js</code>, base URL hardcoded to <code>localhost:8001</code></li>
+          <li><strong>Global filter bar</strong> — period, warehouse, category, status shared across all pages via <code>useFilters()</code></li>
+          <li><strong>Mock auth</strong> — hardcoded user in <code>useAuth.js</code>, no real session</li>
+          <li><strong>i18n</strong> — custom composable, English &amp; Japanese, locale persisted in localStorage</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-bottom:1rem">Composables (Shared Logic)</h3>
+    <div class="composable-grid">
+      <div class="composable">
+        <h4>useFilters()</h4>
+        <p>Singleton filter state shared across all pages. Period, warehouse, category, and order status. Drives API query parameters on every view.</p>
+      </div>
+      <div class="composable">
+        <h4>useAuth()</h4>
+        <p>Mock authentication. Returns hardcoded user profile (name, email, job title). No real token or session validation.</p>
+      </div>
+      <div class="composable">
+        <h4>useI18n()</h4>
+        <p>Custom i18n composable. Supports en/ja locales with localStorage persistence. Drives currency formatting (USD vs JPY).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- API endpoints -->
+  <div class="section">
+    <h2>Backend API Endpoints</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Purpose</th>
+          <th>Key Filters</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="method">GET</span></td><td><code>/api/inventory</code></td><td>List all inventory items</td><td>warehouse, category</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/inventory/{id}</code></td><td>Single inventory item detail</td><td>—</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/orders</code></td><td>List orders</td><td>warehouse, category, status, month</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/orders/{id}</code></td><td>Single order detail</td><td>—</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/demand</code></td><td>Demand forecast data</td><td>—</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/backlog</code></td><td>Backlog items with PO status</td><td>—</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/dashboard/summary</code></td><td>Dashboard KPIs</td><td>warehouse, category, status, month</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/spending/summary</code></td><td>Spending summary stats</td><td>—</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/spending/monthly</code></td><td>Monthly spend breakdown</td><td>—</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/spending/categories</code></td><td>Spend by category</td><td>—</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/spending/transactions</code></td><td>Recent transactions</td><td>—</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/reports/quarterly</code></td><td>Quarterly performance table</td><td>warehouse, category</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/reports/monthly-trends</code></td><td>Month-over-month analysis</td><td>warehouse, category</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/restocking</code></td><td>Restocking recommendations with urgency scoring</td><td>warehouse, category, budget</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/</code></td><td>Health check</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Findings -->
+  <div class="section">
+    <h2>Notable Findings</h2>
+    <div class="findings">
+      <div class="finding">
+        <h4>No persistent data store</h4>
+        <p>All data lives in JSON files loaded into memory at startup. Any purchase orders created at runtime are lost on server restart. A real database (Postgres, SQLite) is needed for production.</p>
+      </div>
+      <div class="finding">
+        <h4>Hardcoded backend URL</h4>
+        <p><code>api.js</code> has <code>localhost:8001</code> hardcoded. Moving to any other environment requires a code change. Should use an environment variable.</p>
+      </div>
+      <div class="finding">
+        <h4>CORS fully open</h4>
+        <p>FastAPI is configured with <code>allow_origins=["*"]</code>. Acceptable for development; must be locked down before any production deployment.</p>
+      </div>
+      <div class="finding">
+        <h4>Missing endpoints referenced by client</h4>
+        <p><code>/api/tasks</code> and <code>/api/purchase-orders</code> are called by the frontend but not implemented in the backend, causing 404 errors on the dashboard.</p>
+      </div>
+      <div class="finding good">
+        <h4>Clean separation of concerns</h4>
+        <p>Frontend and backend are fully decoupled. All communication is HTTP/JSON. The composable pattern keeps shared state organized without a heavy state management library.</p>
+      </div>
+      <div class="finding good">
+        <h4>Filtering architecture scales well</h4>
+        <p>The global filter bar feeds into a shared composable that passes parameters to every API call. Adding a new filterable view requires minimal plumbing.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>Meridian Components Engagement &nbsp;·&nbsp; Architecture Overview &nbsp;·&nbsp; Accenture &nbsp;·&nbsp; April 2026</footer>
+
+</body>
+</html>
