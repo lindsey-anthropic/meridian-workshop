@@ -198,18 +198,19 @@ export default {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 14px 20px;
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .budget-label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-th);
   white-space: nowrap;
 }
 
@@ -221,17 +222,19 @@ export default {
 
 .budget-prefix {
   font-size: 1rem;
-  color: #64748b;
+  color: var(--text-muted);
   font-weight: 600;
 }
 
 .budget-input {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 6px 12px;
   font-size: 0.875rem;
   width: 180px;
   outline: none;
+  background: var(--bg-surface);
+  color: var(--text-primary);
   transition: border-color 0.15s;
 }
 
@@ -251,9 +254,9 @@ export default {
 .btn-apply:hover { background: #1d4ed8; }
 
 .btn-clear {
-  background: white;
-  color: #64748b;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 7px 16px;
   font-size: 0.875rem;
@@ -261,13 +264,13 @@ export default {
   cursor: pointer;
   transition: all 0.15s;
 }
-.btn-clear:hover { border-color: #94a3b8; color: #334155; }
+.btn-clear:hover { border-color: var(--border-strong); color: var(--text-cell); }
 
 .budget-active {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #2563eb;
-  background: #eff6ff;
+  color: var(--nav-active);
+  background: var(--nav-active-bg);
   padding: 4px 12px;
   border-radius: 99px;
 }
@@ -275,9 +278,9 @@ export default {
 .empty {
   text-align: center;
   padding: 3rem;
-  color: #64748b;
-  background: white;
-  border: 1px solid #e2e8f0;
+  color: var(--text-muted);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: 10px;
 }
 
@@ -286,5 +289,5 @@ export default {
   font-weight: 700;
 }
 
-.muted { color: #94a3b8; }
+.muted { color: var(--text-muted); }
 </style>
