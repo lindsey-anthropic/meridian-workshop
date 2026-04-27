@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Components — Current-State Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; padding: 40px 24px; }
+
+  h1 { font-size: 28px; font-weight: 700; color: #f1f5f9; margin-bottom: 6px; }
+  h2 { font-size: 16px; font-weight: 700; color: #f1f5f9; margin-bottom: 14px; }
+  h3 { font-size: 13px; font-weight: 600; color: #cbd5e1; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  p  { font-size: 14px; color: #94a3b8; line-height: 1.6; }
+
+  .page { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
+
+  .header { border-bottom: 1px solid #1e293b; padding-bottom: 20px; }
+  .header-meta { display: flex; gap: 32px; margin-top: 10px; font-size: 12px; color: #64748b; }
+  .header-meta span { color: #94a3b8; }
+
+  .section { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 28px 32px; }
+
+  /* DATA FLOW DIAGRAM */
+  .flow { display: flex; align-items: stretch; gap: 0; overflow-x: auto; padding: 8px 0 16px; }
+  .flow-node {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: #0f172a; border: 1px solid #334155; border-radius: 8px;
+    padding: 16px 18px; min-width: 140px; text-align: center; flex-shrink: 0;
+  }
+  .flow-node .label { font-size: 13px; font-weight: 600; color: #e2e8f0; margin-bottom: 4px; }
+  .flow-node .sub   { font-size: 11px; color: #64748b; }
+  .flow-arrow { display: flex; align-items: center; padding: 0 8px; color: #334155; font-size: 20px; flex-shrink: 0; }
+  .flow-note  { font-size: 11px; color: #475569; text-align: center; margin-top: 10px; }
+
+  /* LAYER DIAGRAM */
+  .layers { display: flex; flex-direction: column; gap: 8px; }
+  .layer {
+    display: flex; align-items: stretch; gap: 8px; border-radius: 8px; overflow: hidden;
+  }
+  .layer-label {
+    writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg);
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #475569; background: #0f172a; padding: 8px 6px; min-width: 28px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .layer-content { display: flex; gap: 8px; flex: 1; padding: 8px; background: #0f172a; border: 1px solid #1e293b; border-radius: 0 8px 8px 0; flex-wrap: wrap; }
+  .chip {
+    background: #1e293b; border: 1px solid #334155; border-radius: 6px;
+    padding: 8px 14px; font-size: 13px; color: #cbd5e1; white-space: nowrap;
+  }
+  .chip.debt { border-color: #92400e; color: #fbbf24; background: #1c1007; }
+  .chip.missing { border-color: #991b1b; color: #f87171; background: #1c0a0a; }
+  .chip.ok { border-color: #166534; color: #4ade80; background: #052e16; }
+
+  /* API TABLE */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #64748b; padding: 8px 12px; border-bottom: 1px solid #334155; }
+  td { padding: 9px 12px; border-bottom: 1px solid #1e293b; color: #94a3b8; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .status-ok      { color: #4ade80; font-weight: 600; }
+  .status-missing { color: #f87171; font-weight: 600; }
+  .mono { font-family: 'Consolas', monospace; font-size: 12px; color: #7dd3fc; }
+
+  /* DEBT TABLE */
+  .debt-list { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .debt-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 16px; background: #0f172a; border-radius: 6px; border-left: 3px solid #92400e; }
+  .debt-item.critical { border-left-color: #dc2626; }
+  .debt-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #fbbf24; white-space: nowrap; padding-top: 2px; }
+  .debt-tag.critical { color: #f87171; }
+  .debt-body h3 { font-size: 13px; color: #e2e8f0; text-transform: none; letter-spacing: 0; margin-bottom: 3px; }
+  .debt-body p  { font-size: 12px; color: #64748b; }
+
+  /* TWO COL */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 4px; }
+  .box { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 16px 20px; }
+  .box h3 { font-size: 12px; margin-bottom: 10px; }
+  .box ul { list-style: none; padding: 0; }
+  .box ul li { font-size: 13px; color: #64748b; padding: 4px 0; border-bottom: 1px solid #1e293b; display: flex; gap: 8px; }
+  .box ul li:last-child { border-bottom: none; }
+  .box ul li::before { content: '·'; color: #334155; }
+  .box ul li span { color: #94a3b8; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>Meridian Components — Current-State Architecture</h1>
+    <p>Architecture review delivered by Accenture · Week 1 of engagement · April 2026</p>
+    <div class="header-meta">
+      <div>Client: <span>Meridian Components, Inc.</span></div>
+      <div>RFP: <span>MC-2026-0417</span></div>
+      <div>Codebase as-of: <span>November 2024 vendor handoff</span></div>
+      <div>Reviewer: <span>Accenture delivery team</span></div>
+    </div>
+  </div>
+
+  <!-- DATA FLOW -->
+  <div class="section">
+    <h2>Request Data Flow</h2>
+    <p style="margin-bottom: 20px;">How a filter selection travels from the UI through to the backend and back.</p>
+    <div class="flow">
+      <div class="flow-node">
+        <div class="label">FilterBar.vue</div>
+        <div class="sub">User selects Warehouse / Category / Period / Status</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="label">useFilters.js</div>
+        <div class="sub">Singleton composable — global filter state</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="label">api.js</div>
+        <div class="sub">Builds URLSearchParams, skips "all" values</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="label">FastAPI</div>
+        <div class="sub">apply_filters() + filter_by_month() on in-memory lists</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="label">Pydantic</div>
+        <div class="sub">Serialises response to JSON</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">
+        <div class="label">Vue ref()</div>
+        <div class="sub">Reactive re-render of view</div>
+      </div>
+    </div>
+    <p class="flow-note">⚠ Reports.vue bypasses api.js — calls axios directly with hardcoded URLs. Filters have no effect on the Reports view.</p>
+  </div>
+
+  <!-- COMPONENT MAP -->
+  <div class="section">
+    <h2>Component Map</h2>
+    <p style="margin-bottom: 20px;">All layers of the stack, left to right. Highlighted items are technical debt or missing implementations.</p>
+    <div class="layers">
+      <div class="layer">
+        <div class="layer-label" style="color:#7dd3fc">Frontend</div>
+        <div class="layer-content">
+          <div class="chip ok">Dashboard.vue <span style="font-size:10px;color:#64748b">Options API ⚠</span></div>
+          <div class="chip ok">Inventory.vue</div>
+          <div class="chip ok">Orders.vue</div>
+          <div class="chip ok">Demand.vue</div>
+          <div class="chip ok">Spending.vue</div>
+          <div class="chip debt">Reports.vue — Options API, bypasses api.js</div>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-label" style="color:#7dd3fc">Components</div>
+        <div class="layer-content">
+          <div class="chip">FilterBar.vue</div>
+          <div class="chip">LanguageSwitcher.vue</div>
+          <div class="chip">ProfileMenu.vue</div>
+          <div class="chip">ProductDetailModal.vue</div>
+          <div class="chip">InventoryDetailModal.vue</div>
+          <div class="chip">BacklogDetailModal.vue</div>
+          <div class="chip">CostDetailModal.vue</div>
+          <div class="chip">TasksModal.vue</div>
+          <div class="chip missing">PurchaseOrderModal.vue — incomplete</div>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-label" style="color:#7dd3fc">Composables</div>
+        <div class="layer-content">
+          <div class="chip ok">useFilters.js — global filter state</div>
+          <div class="chip ok">useI18n.js — EN/JP translations</div>
+          <div class="chip ok">useAuth.js — mock user (hardcoded)</div>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-label" style="color:#7dd3fc">API Layer</div>
+        <div class="layer-content">
+          <div class="chip ok">api.js — centralised axios wrapper</div>
+          <div class="chip missing">getTasks / createTask / deleteTask / toggleTask — declared but backend absent</div>
+          <div class="chip missing">createPurchaseOrder / getPurchaseOrder — declared but backend absent</div>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-label" style="color:#a78bfa">Backend</div>
+        <div class="layer-content">
+          <div class="chip ok">main.py — FastAPI app</div>
+          <div class="chip ok">mock_data.py — JSON file loader</div>
+          <div class="chip ok">apply_filters() — warehouse / category / status</div>
+          <div class="chip ok">filter_by_month() — direct month or Q1–Q4</div>
+          <div class="chip missing">/api/tasks — not implemented</div>
+          <div class="chip missing">/api/purchase-orders — not implemented</div>
+        </div>
+      </div>
+      <div class="layer">
+        <div class="layer-label" style="color:#a78bfa">Data</div>
+        <div class="layer-content">
+          <div class="chip ok">inventory.json</div>
+          <div class="chip ok">orders.json</div>
+          <div class="chip ok">demand_forecasts.json</div>
+          <div class="chip ok">backlog_items.json</div>
+          <div class="chip ok">spending.json</div>
+          <div class="chip ok">transactions.json</div>
+          <div class="chip debt">purchase_orders.json — empty array</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API SURFACE -->
+  <div class="section">
+    <h2>API Surface</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Endpoint</th>
+          <th>Filters</th>
+          <th>Returns</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">GET /api/inventory</td><td>warehouse, category</td><td>List[InventoryItem]</td><td class="status-ok">✓</td></tr>
+        <tr><td class="mono">GET /api/inventory/{id}</td><td>—</td><td>InventoryItem</td><td class="status-ok">✓</td></tr>
+        <tr><td class="mono">GET /api/orders</td><td>warehouse, category, status, month</td><td>List[Order]</td><td class="status-ok">✓</td></tr>
+        <tr><td class="mono">GET /api/orders/{id}</td><td>—</td><td>Order</td><td class="status-ok">✓</td></tr>
+        <tr><td class="mono">GET /api/demand</td><td>—</td><td>List[DemandForecast]</td><td class="status-ok">✓</td></tr>
+        <tr><td class="mono">GET /api/backlog</td><td>—</td><td>List[BacklogItem]</td><td class="status-ok">✓</td></tr>
+        <tr><td class="mono">GET /api/dashboard/summary</td><td>warehouse, category, status, month</td><td>{metrics}</td><td class="status-ok">✓</td></tr>
+        <tr><td class="mono">GET /api/spending/summary</td><td>—</td><td>{summary}</td><td class="status-ok">✓</td></tr>
+        <tr><td class="mono">GET /api/spending/monthly</td><td>—</td><td>List[{month,…}]</td><td class="status-ok">✓</td></tr>
+        <tr><td class="mono">GET /api/spending/categories</td><td>—</td><td>List[{category,…}]</td><td class="status-ok">✓</td></tr>
+        <tr><td class="mono">GET /api/spending/transactions</td><td>—</td><td>List[Transaction]</td><td class="status-ok">✓</td></tr>
+        <tr><td class="mono">GET /api/reports/quarterly</td><td>— (filters ignored)</td><td>List[{quarter,…}]</td><td class="status-ok">✓</td></tr>
+        <tr><td class="mono">GET /api/reports/monthly-trends</td><td>— (filters ignored)</td><td>List[{month,…}]</td><td class="status-ok">✓</td></tr>
+        <tr><td class="mono">GET /api/tasks</td><td>—</td><td>List[Task]</td><td class="status-missing">✗ not implemented</td></tr>
+        <tr><td class="mono">POST /api/tasks</td><td>—</td><td>Task</td><td class="status-missing">✗ not implemented</td></tr>
+        <tr><td class="mono">DELETE /api/tasks/{id}</td><td>—</td><td>—</td><td class="status-missing">✗ not implemented</td></tr>
+        <tr><td class="mono">PATCH /api/tasks/{id}</td><td>—</td><td>Task</td><td class="status-missing">✗ not implemented</td></tr>
+        <tr><td class="mono">POST /api/purchase-orders</td><td>—</td><td>PurchaseOrder</td><td class="status-missing">✗ not implemented</td></tr>
+        <tr><td class="mono">GET /api/purchase-orders/{id}</td><td>—</td><td>PurchaseOrder</td><td class="status-missing">✗ not implemented</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TECHNICAL DEBT -->
+  <div class="section">
+    <h2>Known Technical Debt</h2>
+    <p style="margin-bottom: 18px;">Items inherited from the previous vendor. Relevant to R1 remediation scope.</p>
+    <div class="debt-list">
+      <div class="debt-item critical">
+        <div class="debt-tag critical">Critical</div>
+        <div class="debt-body">
+          <h3>Reports.vue bypasses the API wrapper</h3>
+          <p>Calls axios directly with hardcoded URLs. Filters (warehouse, category, period) have no effect on Reports data. Root cause of the filter wiring defects in R1.</p>
+        </div>
+      </div>
+      <div class="debt-item critical">
+        <div class="debt-tag critical">Critical</div>
+        <div class="debt-body">
+          <h3>Reports.vue uses Options API</h3>
+          <p>All other views use Composition API. Reports was left in the older pattern. Inconsistency makes it harder to test and maintain. Should be refactored to match the rest of the codebase.</p>
+        </div>
+      </div>
+      <div class="debt-item">
+        <div class="debt-tag">Moderate</div>
+        <div class="debt-body">
+          <h3>5 unimplemented backend endpoints declared in api.js</h3>
+          <p>Tasks and purchase-order endpoints are called from the frontend but return 404. Frontend works around this with mock data in useAuth.js.</p>
+        </div>
+      </div>
+      <div class="debt-item">
+        <div class="debt-tag">Moderate</div>
+        <div class="debt-body">
+          <h3>Manual number formatting in Reports.vue</h3>
+          <p>Custom formatNumber() duplicates logic already in utils/currency.js. Formatting is locale-unaware — will produce incorrect output for Japanese locale.</p>
+        </div>
+      </div>
+      <div class="debt-item">
+        <div class="debt-tag">Low</div>
+        <div class="debt-body">
+          <h3>Dashboard.vue also uses Options API</h3>
+          <p>Options API migration was started but not completed. Dashboard is a lower priority than Reports for this engagement but is a long-term maintainability concern.</p>
+        </div>
+      </div>
+      <div class="debt-item">
+        <div class="debt-tag">Low</div>
+        <div class="debt-body">
+          <h3>purchase_orders.json is an empty array</h3>
+          <p>The purchase order data file exists but contains no data. The PurchaseOrderModal is referenced in Dashboard but appears incomplete.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STACK SUMMARY -->
+  <div class="section">
+    <h2>Stack Summary</h2>
+    <div class="two-col">
+      <div class="box">
+        <h3>Frontend</h3>
+        <ul>
+          <li><span>Framework</span> Vue 3 (Composition API)</li>
+          <li><span>Build</span> Vite, port 3000</li>
+          <li><span>HTTP</span> Axios (centralised in api.js)</li>
+          <li><span>Routing</span> vue-router</li>
+          <li><span>i18n</span> Custom composable (EN, JP)</li>
+          <li><span>Charts</span> Custom SVG — no library</li>
+          <li><span>Styles</span> Scoped CSS, custom design tokens</li>
+          <li><span>TypeScript</span> No — plain JavaScript</li>
+        </ul>
+      </div>
+      <div class="box">
+        <h3>Backend</h3>
+        <ul>
+          <li><span>Framework</span> Python FastAPI, port 8001</li>
+          <li><span>Runtime</span> Uvicorn (via uv)</li>
+          <li><span>Data</span> JSON files, in-memory at runtime</li>
+          <li><span>Models</span> Pydantic v2</li>
+          <li><span>Filtering</span> In-memory list comprehensions</li>
+          <li><span>CORS</span> allow_origins=["*"] (dev only)</li>
+          <li><span>Database</span> None</li>
+          <li><span>Tests</span> None delivered</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -4,8 +4,10 @@ export default {
     overview: 'Overview',
     inventory: 'Inventory',
     orders: 'Orders',
+    restocking: 'Restocking',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    reports: 'Reports',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -324,5 +326,74 @@ export default {
     filter: 'Filter',
     export: 'Export',
     items: 'items'
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    subtitle: 'Items below reorder point, ranked by urgency',
+    budgetLabel: 'Budget ceiling',
+    budgetPlaceholder: 'Enter budget...',
+    summary: '{count} items · est. {cost} · {remaining} remaining',
+    noRecommendations: 'No items below reorder point for the current filters.',
+    dismiss: 'Dismiss',
+    columns: {
+      priority: 'Priority',
+      sku: 'SKU',
+      name: 'Name',
+      warehouse: 'Warehouse',
+      category: 'Category',
+      onHand: 'On Hand',
+      reorderPoint: 'Reorder Pt',
+      trend: 'Trend',
+      qtyToOrder: 'Qty to Order',
+      estCost: 'Est. Cost',
+      action: 'Action'
+    },
+    priority: {
+      critical: 'Critical',
+      high: 'High',
+      medium: 'Medium'
+    },
+    trend: {
+      increasing: 'Increasing',
+      stable: 'Stable',
+      decreasing: 'Decreasing'
+    },
+    footer: {
+      total: 'Total',
+      withinBudget: '{count} items within budget'
+    }
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    subtitle: 'View quarterly performance metrics and monthly trends',
+    quarterly: {
+      title: 'Quarterly Performance',
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate'
+    },
+    monthlyTrend: {
+      title: 'Monthly Revenue Trend'
+    },
+    momAnalysis: {
+      title: 'Month-over-Month Analysis',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    },
+    summary: {
+      totalRevenue: 'Total Revenue (YTD)',
+      avgMonthly: 'Avg Monthly Revenue',
+      totalOrders: 'Total Orders (YTD)',
+      bestQuarter: 'Best Performing Quarter'
+    }
   }
 }

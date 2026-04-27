@@ -120,6 +120,20 @@ class CreatePurchaseOrderRequest(BaseModel):
     expected_delivery_date: str
     notes: Optional[str] = None
 
+class RestockingRecommendation(BaseModel):
+    sku: str
+    name: str
+    category: str
+    warehouse: str
+    quantity_on_hand: int
+    reorder_point: int
+    unit_cost: float
+    forecasted_demand: int
+    trend: str
+    quantity_to_order: int
+    estimated_cost: float
+    priority: str
+
 # API endpoints
 @app.get("/")
 def root():
@@ -228,12 +242,17 @@ def get_recent_transactions():
     return recent_transactions
 
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    month: Optional[str] = None
+):
     """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
+    filtered_orders = apply_filters(orders, warehouse=warehouse, category=category)
+    filtered_orders = filter_by_month(filtered_orders, month)
     quarters = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -274,11 +293,17 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    month: Optional[str] = None
+):
     """Get month-over-month trends"""
+    filtered_orders = apply_filters(orders, warehouse=warehouse, category=category)
+    filtered_orders = filter_by_month(filtered_orders, month)
     months = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
@@ -303,6 +328,58 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+@app.get("/api/restocking", response_model=List[RestockingRecommendation])
+def get_restocking_recommendations(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
+    """Get restocking recommendations for items below reorder point"""
+    forecast_by_sku = {f['item_sku']: f for f in demand_forecasts}
+
+    below_reorder = [item for item in inventory_items if item.get('quantity_on_hand', 0) < item.get('reorder_point', 0)]
+    below_reorder = apply_filters(below_reorder, warehouse=warehouse, category=category)
+
+    priority_order = {'critical': 0, 'high': 1, 'medium': 2}
+    recommendations = []
+    for item in below_reorder:
+        sku = item.get('sku', '')
+        forecast = forecast_by_sku.get(sku, {})
+        forecasted_demand = forecast.get('forecasted_demand', 0)
+        trend = forecast.get('trend', 'stable')
+
+        qty_on_hand = item.get('quantity_on_hand', 0)
+        reorder_point = item.get('reorder_point', 0)
+        unit_cost = item.get('unit_cost', 0)
+
+        quantity_to_order = max(reorder_point - qty_on_hand + forecasted_demand, 1)
+        estimated_cost = round(quantity_to_order * unit_cost, 2)
+
+        ratio = qty_on_hand / reorder_point if reorder_point > 0 else 1
+        if ratio < 0.5 or trend == 'increasing':
+            priority = 'critical'
+        elif ratio < 0.75:
+            priority = 'high'
+        else:
+            priority = 'medium'
+
+        recommendations.append(RestockingRecommendation(
+            sku=sku,
+            name=item.get('name', ''),
+            category=item.get('category', ''),
+            warehouse=item.get('warehouse', ''),
+            quantity_on_hand=qty_on_hand,
+            reorder_point=reorder_point,
+            unit_cost=unit_cost,
+            forecasted_demand=forecasted_demand,
+            trend=trend,
+            quantity_to_order=quantity_to_order,
+            estimated_cost=estimated_cost,
+            priority=priority
+        ))
+
+    recommendations.sort(key=lambda r: (priority_order.get(r.priority, 9), -r.estimated_cost))
+    return recommendations
 
 if __name__ == "__main__":
     import uvicorn

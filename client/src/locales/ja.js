@@ -4,8 +4,10 @@ export default {
     overview: '概要',
     inventory: '在庫',
     orders: '注文',
+    restocking: '補充',
     finance: '財務',
     demandForecast: '需要予測',
+    reports: 'レポート',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -378,5 +380,74 @@ export default {
     'Premier Industries': 'プレミア工業',
     'Stellar Components Ltd': 'ステラコンポーネンツ',
     'Dynamic Systems Ltd': 'ダイナミックシステムズ'
+  },
+
+  // Restocking
+  restocking: {
+    title: '補充推奨',
+    subtitle: '発注点を下回るアイテム（緊急度順）',
+    budgetLabel: '予算上限',
+    budgetPlaceholder: '予算を入力...',
+    summary: '{count}件 · 推定{cost} · 残り{remaining}',
+    noRecommendations: '現在のフィルターで発注点を下回るアイテムはありません。',
+    dismiss: '却下',
+    columns: {
+      priority: '優先度',
+      sku: 'SKU',
+      name: '商品名',
+      warehouse: '倉庫',
+      category: 'カテゴリ',
+      onHand: '在庫数',
+      reorderPoint: '発注点',
+      trend: 'トレンド',
+      qtyToOrder: '発注数',
+      estCost: '推定費用',
+      action: 'アクション'
+    },
+    priority: {
+      critical: '緊急',
+      high: '高',
+      medium: '中'
+    },
+    trend: {
+      increasing: '増加',
+      stable: '安定',
+      decreasing: '減少'
+    },
+    footer: {
+      total: '合計',
+      withinBudget: '予算内 {count}件'
+    }
+  },
+
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    subtitle: '四半期パフォーマンス指標と月次トレンドを表示',
+    quarterly: {
+      title: '四半期パフォーマンス',
+      quarter: '四半期',
+      totalOrders: '総注文数',
+      totalRevenue: '総収益',
+      avgOrderValue: '平均注文金額',
+      fulfillmentRate: '履行率'
+    },
+    monthlyTrend: {
+      title: '月次収益トレンド'
+    },
+    momAnalysis: {
+      title: '前月比分析',
+      month: '月',
+      orders: '注文数',
+      revenue: '収益',
+      change: '変化',
+      growthRate: '成長率'
+    },
+    summary: {
+      totalRevenue: '総収益（年初来）',
+      avgMonthly: '平均月次収益',
+      totalOrders: '総注文数（年初来）',
+      bestQuarter: '最高パフォーマンス四半期'
+    }
   }
 }
