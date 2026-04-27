@@ -6,6 +6,8 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    reports: 'Reports',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -186,6 +188,122 @@ export default {
       trend: 'Trend',
       period: 'Period'
     }
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    quarterlyPerformance: 'Quarterly Performance',
+    monthlyTrend: 'Monthly Revenue Trend',
+    momAnalysis: 'Month-over-Month Analysis',
+    table: {
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    },
+    stats: {
+      totalRevenueYTD: 'Total Revenue (YTD)',
+      avgMonthlyRevenue: 'Avg Monthly Revenue',
+      totalOrdersYTD: 'Total Orders (YTD)',
+      bestQuarter: 'Best Performing Quarter'
+    }
+  },
+
+  // Backlog
+  backlog: {
+    title: 'Backlog Management',
+    description: 'Track and resolve inventory shortages',
+    highPriority: 'High Priority',
+    mediumPriority: 'Medium Priority',
+    lowPriority: 'Low Priority',
+    totalItems: 'Total Backlog Items',
+    cardTitle: 'Backlog Items',
+    noItems: 'No backlog items — all orders can be fulfilled!',
+    unitsShort: 'units short',
+    days: 'days',
+    table: {
+      orderId: 'Order ID',
+      sku: 'SKU',
+      itemName: 'Item Name',
+      quantityNeeded: 'Quantity Needed',
+      quantityAvailable: 'Quantity Available',
+      shortage: 'Shortage',
+      daysDelayed: 'Days Delayed',
+      priority: 'Priority'
+    },
+    modal: {
+      title: 'Inventory Shortage Details',
+      skuLabel: 'SKU',
+      priorityLabel: 'Priority',
+      shortageAmount: 'Shortage Amount',
+      daysDelayed: 'Days Delayed',
+      orderId: 'Order ID',
+      itemSku: 'Item SKU',
+      quantityNeeded: 'Quantity Needed',
+      quantityAvailable: 'Quantity Available',
+      expectedDate: 'Expected Date',
+      status: 'Status',
+      notAvailable: 'N/A',
+      units: 'units'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    description: 'Recommended purchase orders based on stock levels and demand forecasts',
+    budgetLabel: 'Budget Ceiling',
+    budgetPlaceholder: 'Enter budget (0 = no limit)',
+    getRecommendations: 'Get Recommendations',
+    stats: {
+      recommendations: 'Recommendations',
+      totalCost: 'Total Cost',
+      criticalItems: 'Critical Items'
+    },
+    table: {
+      sku: 'SKU',
+      name: 'Item Name',
+      warehouse: 'Warehouse',
+      category: 'Category',
+      onHand: 'On Hand',
+      reorderPoint: 'Reorder Point',
+      recommendedQty: 'Rec. Qty',
+      unitCost: 'Unit Cost',
+      totalCost: 'Total Cost',
+      reason: 'Reason',
+      priority: 'Priority'
+    },
+    reasons: {
+      backlog: 'Backlog',
+      lowStock: 'Low Stock',
+      lowStockDemand: 'Low Stock + Demand'
+    },
+    noRecommendations: 'No restocking needed for current filters and budget.'
+  },
+
+  // Inventory modal extensions
+  inventoryModal: {
+    title: 'Inventory Item Details',
+    quantityOnHand: 'Quantity on Hand',
+    stockLevel: 'Stock Level',
+    vsReorderPoint: 'vs. reorder point',
+    category: 'Category',
+    location: 'Location',
+    reorderPoint: 'Reorder Point',
+    unitsRemaining: 'Units Remaining',
+    unitCost: 'Unit Cost',
+    totalValue: 'Total Value',
+    warehouse: 'Warehouse',
+    status: 'Status',
+    units: 'units'
   },
 
   // Filters

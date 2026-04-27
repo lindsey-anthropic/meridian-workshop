@@ -6,6 +6,8 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    reports: 'レポート',
+    restocking: '補充',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -186,6 +188,122 @@ export default {
       trend: 'トレンド',
       period: '期間'
     }
+  },
+
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期パフォーマンス指標と月次トレンドを表示',
+    quarterlyPerformance: '四半期パフォーマンス',
+    monthlyTrend: '月次収益トレンド',
+    momAnalysis: '前月比分析',
+    table: {
+      quarter: '四半期',
+      totalOrders: '総注文数',
+      totalRevenue: '総収益',
+      avgOrderValue: '平均注文額',
+      fulfillmentRate: '履行率',
+      month: '月',
+      orders: '注文数',
+      revenue: '収益',
+      change: '変化',
+      growthRate: '成長率'
+    },
+    stats: {
+      totalRevenueYTD: '総収益（年初来）',
+      avgMonthlyRevenue: '平均月次収益',
+      totalOrdersYTD: '総注文数（年初来）',
+      bestQuarter: '最高パフォーマンス四半期'
+    }
+  },
+
+  // Backlog
+  backlog: {
+    title: 'バックログ管理',
+    description: '在庫不足の追跡と解決',
+    highPriority: '高優先度',
+    mediumPriority: '中優先度',
+    lowPriority: '低優先度',
+    totalItems: 'バックログ総数',
+    cardTitle: 'バックログ品目',
+    noItems: 'バックログなし — すべての注文を履行できます！',
+    unitsShort: '単位不足',
+    days: '日',
+    table: {
+      orderId: '注文ID',
+      sku: 'SKU',
+      itemName: '品目名',
+      quantityNeeded: '必要数量',
+      quantityAvailable: '在庫数量',
+      shortage: '不足',
+      daysDelayed: '遅延日数',
+      priority: '優先度'
+    },
+    modal: {
+      title: '在庫不足の詳細',
+      skuLabel: 'SKU',
+      priorityLabel: '優先度',
+      shortageAmount: '不足量',
+      daysDelayed: '遅延日数',
+      orderId: '注文ID',
+      itemSku: '品目SKU',
+      quantityNeeded: '必要数量',
+      quantityAvailable: '在庫数量',
+      expectedDate: '予定日',
+      status: 'ステータス',
+      notAvailable: 'N/A',
+      units: '単位'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: '補充推奨',
+    description: '在庫レベルと需要予測に基づく発注推奨',
+    budgetLabel: '予算上限',
+    budgetPlaceholder: '予算を入力（0 = 上限なし）',
+    getRecommendations: '推奨を取得',
+    stats: {
+      recommendations: '推奨件数',
+      totalCost: '合計金額',
+      criticalItems: '緊急品目'
+    },
+    table: {
+      sku: 'SKU',
+      name: '品目名',
+      warehouse: '倉庫',
+      category: 'カテゴリ',
+      onHand: '手持在庫',
+      reorderPoint: '再注文点',
+      recommendedQty: '推奨数量',
+      unitCost: '単価',
+      totalCost: '合計金額',
+      reason: '理由',
+      priority: '優先度'
+    },
+    reasons: {
+      backlog: 'バックログ',
+      lowStock: '在庫僅少',
+      lowStockDemand: '在庫僅少＋需要増'
+    },
+    noRecommendations: '現在のフィルターと予算では補充は不要です。'
+  },
+
+  // Inventory modal extensions
+  inventoryModal: {
+    title: '在庫品目の詳細',
+    quantityOnHand: '手持在庫数',
+    stockLevel: '在庫レベル',
+    vsReorderPoint: '再注文点との比較',
+    category: 'カテゴリ',
+    location: '場所',
+    reorderPoint: '再注文点',
+    unitsRemaining: '残余数量',
+    unitCost: '単価',
+    totalValue: '総価値',
+    warehouse: '倉庫',
+    status: 'ステータス',
+    units: '単位'
   },
 
   // Filters
