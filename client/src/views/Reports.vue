@@ -125,10 +125,15 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { api } from '../api'
+import { useFilters } from '../composables/useFilters'
 
 export default {
   name: 'Reports',
+  setup() {
+    const { selectedPeriod, selectedLocation, selectedCategory, selectedStatus } = useFilters()
+    return { selectedPeriod, selectedLocation, selectedCategory, selectedStatus }
+  },
   data() {
     return {
       loading: true,
@@ -141,39 +146,41 @@ export default {
       bestQuarter: ''
     }
   },
+  watch: {
+    selectedPeriod() { this.loadData() },
+    selectedLocation() { this.loadData() },
+    selectedCategory() { this.loadData() },
+    selectedStatus() { this.loadData() }
+  },
   mounted() {
-    console.log('Reports component mounted')
     this.loadData()
   },
   methods: {
     async loadData() {
-      console.log('Loading reports data...')
       try {
         this.loading = true
+        this.error = null
 
-        // Fetch quarterly data
-        console.log('Fetching quarterly data...')
-        const quarterlyResponse = await axios.get('http://localhost:8001/api/reports/quarterly')
-        this.quarterlyData = quarterlyResponse.data
-        console.log('Quarterly data:', this.quarterlyData)
+        const filters = {
+          warehouse: this.selectedLocation,
+          category: this.selectedCategory,
+          status: this.selectedStatus,
+          month: this.selectedPeriod
+        }
 
-        // Fetch monthly data
-        console.log('Fetching monthly data...')
-        const monthlyResponse = await axios.get('http://localhost:8001/api/reports/monthly-trends')
-        this.monthlyData = monthlyResponse.data
-        console.log('Monthly data:', this.monthlyData)
+        const [quarterlyData, monthlyData] = await Promise.all([
+          api.getReportsQuarterly(filters),
+          api.getReportsMonthly(filters)
+        ])
 
-        // Calculate summary stats
-        console.log('Calculating summary stats...')
+        this.quarterlyData = quarterlyData
+        this.monthlyData = monthlyData
         this.calculateSummaryStats()
-        console.log('Summary stats calculated')
 
       } catch (err) {
-        console.log('Error loading reports:', err)
         this.error = 'Failed to load reports: ' + err.message
       } finally {
         this.loading = false
-        console.log('Loading complete')
       }
     },
 
@@ -322,7 +329,7 @@ export default {
 }
 
 .card {
-  background: white;
+  background: var(--bg-surface, white);
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -336,7 +343,7 @@ export default {
 .card-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text-primary, #0f172a);
   margin: 0;
 }
 
@@ -346,21 +353,21 @@ export default {
 }
 
 .reports-table th {
-  background: #f8fafc;
+  background: var(--bg-subtle, #f8fafc);
   padding: 0.75rem;
   text-align: left;
   font-weight: 600;
-  color: #64748b;
-  border-bottom: 2px solid #e2e8f0;
+  color: var(--text-secondary, #64748b);
+  border-bottom: 2px solid var(--border-color, #e2e8f0);
 }
 
 .reports-table td {
   padding: 0.75rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
 }
 
 .reports-table tr:hover {
-  background: #f8fafc;
+  background: var(--bg-subtle, #f8fafc);
 }
 
 .chart-container {
@@ -406,7 +413,7 @@ export default {
 .bar-label {
   margin-top: 0.5rem;
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-secondary, #64748b);
   text-align: center;
   transform: rotate(-45deg);
   white-space: nowrap;
@@ -421,7 +428,7 @@ export default {
 }
 
 .stat-card {
-  background: white;
+  background: var(--bg-surface, white);
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -430,14 +437,14 @@ export default {
 
 .stat-label {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--text-secondary, #64748b);
   margin-bottom: 0.5rem;
 }
 
 .stat-value {
   font-size: 1.875rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary, #0f172a);
 }
 
 .badge {
@@ -475,7 +482,7 @@ export default {
 .loading {
   text-align: center;
   padding: 3rem;
-  color: #64748b;
+  color: var(--text-secondary, #64748b);
 }
 
 .error {
