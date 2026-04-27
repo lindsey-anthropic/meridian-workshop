@@ -120,6 +120,21 @@ class CreatePurchaseOrderRequest(BaseModel):
     expected_delivery_date: str
     notes: Optional[str] = None
 
+class RestockingRecommendation(BaseModel):
+    id: str
+    sku: str
+    name: str
+    category: str
+    warehouse: str
+    quantity_on_hand: int
+    reorder_point: int
+    forecasted_demand: int
+    recommended_quantity: int
+    unit_cost: float
+    total_cost: float
+    priority: str
+    urgency_score: float
+
 # API endpoints
 @app.get("/")
 def root():
@@ -228,12 +243,19 @@ def get_recent_transactions():
     return recent_transactions
 
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
-    """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None
+):
+    """Get quarterly performance reports with optional filtering"""
+    # Apply filters to orders first
+    filtered_orders = apply_filters(orders, warehouse, category, status)
+
+    # Calculate quarterly statistics from filtered orders
     quarters = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -274,11 +296,20 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
-    """Get month-over-month trends"""
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
+    """Get month-over-month trends with optional filtering"""
+    # Apply filters to orders first
+    filtered_orders = apply_filters(orders, warehouse, category, status)
+    filtered_orders = filter_by_month(filtered_orders, month)
+
     months = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
@@ -303,6 +334,88 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+@app.get("/api/restocking", response_model=List[RestockingRecommendation])
+def get_restocking_recommendations(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
+    """Get restocking recommendations based on stock levels and demand forecasts"""
+    # Create forecast lookup by SKU
+    forecast_by_sku = {f["item_sku"]: f for f in demand_forecasts}
+
+    recommendations = []
+
+    for item in inventory_items:
+        sku = item["sku"]
+        quantity_on_hand = item["quantity_on_hand"]
+        reorder_point = item["reorder_point"]
+
+        # Get forecasted demand if available, default to 0
+        forecast = forecast_by_sku.get(sku)
+        forecasted_demand = forecast["forecasted_demand"] if forecast else 0
+
+        # Calculate recommended quantity
+        shortage = max(reorder_point - quantity_on_hand, 0)
+        forecast_gap = max(forecasted_demand - quantity_on_hand, 0)
+        base_quantity = max(shortage, forecast_gap)
+
+        # Add 20% safety buffer
+        safety_buffer = int(reorder_point * 0.2)
+        recommended_quantity = base_quantity + safety_buffer if base_quantity > 0 else 0
+
+        # Skip if no restocking needed
+        if recommended_quantity == 0:
+            continue
+
+        # Calculate priority and urgency score
+        urgency_score = 0
+
+        # Factor 1: How far below reorder point (0-50 points)
+        if quantity_on_hand < reorder_point:
+            shortage_ratio = 1 - (quantity_on_hand / reorder_point) if reorder_point > 0 else 1
+            urgency_score += shortage_ratio * 50
+
+        # Factor 2: Forecast demand vs stock (0-50 points)
+        if forecasted_demand > 0:
+            demand_ratio = min(forecasted_demand / max(quantity_on_hand, 1), 3) / 3
+            urgency_score += demand_ratio * 50
+
+        # Determine priority label
+        if quantity_on_hand < (reorder_point * 0.5) or forecasted_demand > (quantity_on_hand * 2):
+            priority = "urgent"
+        elif quantity_on_hand < reorder_point or forecasted_demand > quantity_on_hand:
+            priority = "medium"
+        else:
+            priority = "low"
+
+        # Calculate total cost
+        unit_cost = item["unit_cost"]
+        total_cost = round(recommended_quantity * unit_cost, 2)
+
+        recommendations.append({
+            "id": item["id"],
+            "sku": sku,
+            "name": item["name"],
+            "category": item["category"],
+            "warehouse": item["warehouse"],
+            "quantity_on_hand": quantity_on_hand,
+            "reorder_point": reorder_point,
+            "forecasted_demand": forecasted_demand,
+            "recommended_quantity": recommended_quantity,
+            "unit_cost": unit_cost,
+            "total_cost": total_cost,
+            "priority": priority,
+            "urgency_score": round(urgency_score, 2)
+        })
+
+    # Apply filters
+    filtered = apply_filters(recommendations, warehouse, category)
+
+    # Sort by urgency score (highest first)
+    filtered.sort(key=lambda x: x["urgency_score"], reverse=True)
+
+    return filtered
 
 if __name__ == "__main__":
     import uvicorn
