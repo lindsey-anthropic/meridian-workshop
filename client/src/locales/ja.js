@@ -6,6 +6,8 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    reports: 'レポート',
+    restocking: '補充',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -302,6 +304,69 @@ export default {
     dueDate: '期限',
     addTask: 'タスクを追加',
     noTasks: 'タスクがありません。上記からタスクを追加してください！'
+  },
+
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期パフォーマンス指標と月次トレンドを表示',
+    loading: 'レポートを読み込み中...',
+    quarterly: {
+      title: '四半期パフォーマンス',
+      quarter: '四半期',
+      totalOrders: '総注文数',
+      totalRevenue: '総収益',
+      avgOrderValue: '平均注文額',
+      fulfillmentRate: '履行率'
+    },
+    monthlyTrend: {
+      title: '月次収益トレンド'
+    },
+    momAnalysis: {
+      title: '前月比分析',
+      month: '月',
+      orders: '注文',
+      revenue: '収益',
+      change: '変化',
+      growthRate: '成長率'
+    },
+    stats: {
+      totalRevenueYTD: '総収益（年初来）',
+      avgMonthlyRevenue: '平均月次収益',
+      totalOrdersYTD: '総注文数（年初来）',
+      bestQuarter: '最高パフォーマンス四半期'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: '補充推薦',
+    description: '在庫レベルと需要予測に基づく発注推薦',
+    loading: '推薦を読み込み中...',
+    budgetLabel: '予算上限（USD）',
+    budgetPlaceholder: '制限なし',
+    clearBudget: 'クリア',
+    stats: {
+      itemsBelowReorder: '再注文点以下の品目',
+      totalEstCost: '推定総コスト',
+      withinBudget: '予算内',
+      budgetRemaining: '残予算'
+    },
+    table: {
+      title: '推薦発注',
+      subtitle: '緊急度順（カバレッジ日数が少ない順）',
+      sku: 'SKU',
+      product: '製品',
+      warehouse: '倉庫',
+      category: 'カテゴリ',
+      currentStock: '現在在庫',
+      reorderPoint: '再注文点',
+      daysCoverage: 'カバレッジ日数',
+      recQty: '推薦数量',
+      estCost: '推定コスト',
+      trend: 'トレンド'
+    },
+    empty: '選択したフィルターで再注文点以下の品目はありません。'
   },
 
   // Language
