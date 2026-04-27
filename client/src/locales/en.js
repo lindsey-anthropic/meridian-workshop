@@ -6,8 +6,37 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
+    reports: 'Reports',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    subtitle: 'Purchase order suggestions based on stock levels and demand forecasts',
+    budgetCeiling: 'Budget Ceiling ($)',
+    budgetPlaceholder: 'No limit',
+    warehouse: 'Warehouse',
+    allWarehouses: 'All Warehouses',
+    refresh: 'Refresh',
+    analyzing: 'Analyzing stock levels...',
+    itemsToRestock: 'Items to Restock',
+    totalCost: 'Total Cost',
+    criticalItems: 'Critical Items',
+    noItems: 'No restocking needed',
+    noItemsBudget: 'No restocking needed within the specified budget',
+    sku: 'SKU',
+    item: 'Item',
+    onHand: 'On Hand',
+    reorderPoint: 'Reorder Point',
+    forecastedDemand: 'Forecasted Demand',
+    qtyToOrder: 'Qty to Order',
+    unitCost: 'Unit Cost',
+    action: 'Action',
+    order: 'Order',
+    ordered: 'Ordered'
   },
 
   // Dashboard

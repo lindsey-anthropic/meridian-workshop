@@ -125,8 +125,8 @@ const handleLogout = () => {
   align-items: center;
   gap: 0.625rem;
   padding: 0.5rem 0.875rem;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface, white);
+  border: 1px solid var(--border-color, var(--border-color, #e2e8f0));
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -134,7 +134,7 @@ const handleLogout = () => {
 }
 
 .profile-button:hover {
-  background: #f8fafc;
+  background: var(--bg-subtle, #f8fafc);
   border-color: #cbd5e1;
 }
 
@@ -155,11 +155,11 @@ const handleLogout = () => {
 .profile-name {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--text-primary, #0f172a);
 }
 
 .chevron {
-  color: #64748b;
+  color: var(--text-secondary, #64748b);
   transition: transform 0.2s ease;
 }
 
@@ -172,8 +172,8 @@ const handleLogout = () => {
   top: calc(100% + 0.5rem);
   right: 0;
   min-width: 280px;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface, white);
+  border: 1px solid var(--border-color, var(--border-color, #e2e8f0));
   border-radius: 10px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   z-index: 1000;
@@ -185,7 +185,7 @@ const handleLogout = () => {
   display: flex;
   gap: 0.875rem;
   align-items: center;
-  background: #f8fafc;
+  background: var(--bg-subtle, #f8fafc);
 }
 
 .avatar-large {
@@ -210,14 +210,14 @@ const handleLogout = () => {
 
 .user-name {
   font-weight: 600;
-  color: #0f172a;
+  color: var(--text-primary, #0f172a);
   font-size: 0.938rem;
   margin-bottom: 0.25rem;
 }
 
 .user-email {
   font-size: 0.813rem;
-  color: #64748b;
+  color: var(--text-secondary, #64748b);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -243,15 +243,15 @@ const handleLogout = () => {
   font-family: inherit;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #334155;
+  color: var(--text-body, #334155);
 }
 
 .dropdown-item:hover {
-  background: #f8fafc;
+  background: var(--bg-subtle, #f8fafc);
 }
 
 .dropdown-item svg {
-  color: #64748b;
+  color: var(--text-secondary, #64748b);
   flex-shrink: 0;
 }
 

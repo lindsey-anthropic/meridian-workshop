@@ -1,57 +1,57 @@
 <template>
   <div class="restocking">
     <div class="page-header">
-      <h2>Restocking Recommendations</h2>
-      <p>Purchase order suggestions based on stock levels and demand forecasts</p>
+      <h2>{{ t('restocking.title') }}</h2>
+      <p>{{ t('restocking.subtitle') }}</p>
     </div>
 
     <div class="controls card">
       <div class="controls-row">
         <div class="control-group">
-          <label>Budget Ceiling ($)</label>
+          <label>{{ t('restocking.budgetCeiling') }}</label>
           <input
             v-model.number="budget"
             type="number"
             min="0"
             step="1000"
-            placeholder="No limit"
+            :placeholder="t('restocking.budgetPlaceholder')"
             class="budget-input"
             @change="loadRecommendations"
           />
         </div>
         <div class="control-group">
-          <label>Warehouse</label>
+          <label>{{ t('restocking.warehouse') }}</label>
           <select v-model="warehouse" @change="loadRecommendations">
-            <option value="all">All Warehouses</option>
-            <option value="San Francisco">San Francisco</option>
-            <option value="London">London</option>
-            <option value="Tokyo">Tokyo</option>
+            <option value="all">{{ t('restocking.allWarehouses') }}</option>
+            <option value="San Francisco">{{ t('warehouses.sanFrancisco') }}</option>
+            <option value="London">{{ t('warehouses.london') }}</option>
+            <option value="Tokyo">{{ t('warehouses.tokyo') }}</option>
           </select>
         </div>
-        <button class="btn btn-primary" @click="loadRecommendations">Refresh</button>
+        <button class="btn btn-primary" @click="loadRecommendations">{{ t('restocking.refresh') }}</button>
       </div>
     </div>
 
-    <div v-if="loading" class="loading">Analyzing stock levels...</div>
+    <div v-if="loading" class="loading">{{ t('restocking.analyzing') }}</div>
     <div v-else-if="error" class="error">{{ error }}</div>
     <div v-else>
       <div class="summary-bar card">
         <div class="summary-item">
-          <span class="summary-label">Items to Restock</span>
+          <span class="summary-label">{{ t('restocking.itemsToRestock') }}</span>
           <span class="summary-value">{{ data.item_count }}</span>
         </div>
         <div class="summary-item">
-          <span class="summary-label">Total Cost</span>
+          <span class="summary-label">{{ t('restocking.totalCost') }}</span>
           <span class="summary-value">${{ formatNumber(data.total_cost) }}</span>
         </div>
         <div class="summary-item">
-          <span class="summary-label">Critical Items</span>
+          <span class="summary-label">{{ t('restocking.criticalItems') }}</span>
           <span class="summary-value critical-count">{{ criticalCount }}</span>
         </div>
       </div>
 
       <div v-if="data.recommendations.length === 0" class="card empty-state">
-        <p>No restocking needed{{ budget ? ' within the specified budget' : '' }}.</p>
+        <p>{{ budget ? t('restocking.noItemsBudget') : t('restocking.noItems') }}.</p>
       </div>
 
       <div v-else class="card">
@@ -59,16 +59,16 @@
           <table class="reports-table">
             <thead>
               <tr>
-                <th>SKU</th>
-                <th>Item</th>
-                <th>Warehouse</th>
-                <th>On Hand</th>
-                <th>Reorder Point</th>
-                <th>Forecasted Demand</th>
-                <th>Qty to Order</th>
-                <th>Unit Cost</th>
-                <th>Total Cost</th>
-                <th>Action</th>
+                <th>{{ t('restocking.sku') }}</th>
+                <th>{{ t('restocking.item') }}</th>
+                <th>{{ t('restocking.warehouse') }}</th>
+                <th>{{ t('restocking.onHand') }}</th>
+                <th>{{ t('restocking.reorderPoint') }}</th>
+                <th>{{ t('restocking.forecastedDemand') }}</th>
+                <th>{{ t('restocking.qtyToOrder') }}</th>
+                <th>{{ t('restocking.unitCost') }}</th>
+                <th>{{ t('restocking.totalCost') }}</th>
+                <th>{{ t('restocking.action') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -92,7 +92,7 @@
                     :disabled="orderedSkus.has(rec.sku)"
                     @click="createOrder(rec)"
                   >
-                    {{ orderedSkus.has(rec.sku) ? 'Ordered' : 'Order' }}
+                    {{ orderedSkus.has(rec.sku) ? t('restocking.ordered') : t('restocking.order') }}
                   </button>
                 </td>
               </tr>
@@ -106,9 +106,14 @@
 
 <script>
 import { api } from '../api'
+import { useI18n } from '../composables/useI18n'
 
 export default {
   name: 'Restocking',
+  setup() {
+    const { t } = useI18n()
+    return { t }
+  },
   data() {
     return {
       budget: null,
@@ -188,6 +193,8 @@ export default {
   border-radius: 6px;
   font-size: 0.9rem;
   width: 200px;
+  background: var(--bg-surface, white);
+  color: var(--text-primary, #0f172a);
 }
 
 .summary-bar {
