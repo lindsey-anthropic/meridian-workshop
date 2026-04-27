@@ -450,5 +450,11 @@ export default {
       units: 'units',
       notAvailable: 'N/A'
     }
+  },
+
+  // Theme
+  theme: {
+    switchToLight: 'Switch to light mode',
+    switchToDark: 'Switch to dark mode'
   }
 }

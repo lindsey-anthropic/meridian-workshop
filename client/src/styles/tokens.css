@@ -3,6 +3,10 @@
  *
  * Single source of truth for colors, spacing, typography, radii, and shadows.
  * View-level styles should consume these variables instead of hardcoding values.
+ *
+ * Theme switching: setting [data-theme="dark"] on document.documentElement
+ * overrides the color tokens with the dark palette. Spacing, typography,
+ * radii, and shadows are theme-independent.
  */
 
 :root {
@@ -81,4 +85,45 @@
   /* --- Layout --- */
   --content-max: 1600px;
   --header-height: 70px;
+}
+
+/* ---------------------------------------------------------------
+ * Dark theme — applied when document.documentElement carries
+ * data-theme="dark". Only color tokens shift; geometry stays.
+ * Shadows are softened because they're less useful on dark bg;
+ * borders carry more of the visual separation work.
+ * ------------------------------------------------------------- */
+[data-theme="dark"] {
+  --color-bg: #0f172a;            /* slate-900 — page bg */
+  --color-surface: #1e293b;       /* slate-800 — cards */
+  --color-surface-2: #334155;     /* slate-700 — table headers, alt rows */
+  --color-border: #334155;        /* slate-700 — subtle dividers */
+  --color-border-strong: #475569; /* slate-600 — emphasis */
+
+  --color-text: #f1f5f9;          /* slate-100 — primary text */
+  --color-text-muted: #cbd5e1;    /* slate-300 */
+  --color-text-dim: #94a3b8;      /* slate-400 */
+
+  --color-primary: #60a5fa;       /* blue-400 — brighter for contrast on dark */
+  --color-primary-dark: #3b82f6;  /* blue-500 */
+  --color-primary-light: #93c5fd; /* blue-300 */
+  --color-primary-soft: #1e3a8a;  /* blue-900 — for soft bg pills */
+
+  --color-success: #22c55e;       /* green-500 */
+  --color-success-text: #86efac;  /* green-300 — readable on dark soft bg */
+  --color-success-soft: #064e3b;  /* green-950 — soft bg */
+
+  --color-warning: #f59e0b;       /* amber-500 */
+  --color-warning-text: #fcd34d;  /* amber-300 */
+  --color-warning-soft: #78350f;  /* amber-900 */
+
+  --color-danger: #ef4444;        /* red-500 */
+  --color-danger-text: #fca5a5;   /* red-300 */
+  --color-danger-soft: #7f1d1d;   /* red-900 */
+
+  /* On dark bg, soft black shadows are nearly invisible. Keep them
+     subtle and rely on borders + surface contrast for separation. */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.5);
 }

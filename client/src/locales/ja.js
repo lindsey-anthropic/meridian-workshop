@@ -508,5 +508,11 @@ export default {
     'Premier Industries': 'プレミア工業',
     'Stellar Components Ltd': 'ステラコンポーネンツ',
     'Dynamic Systems Ltd': 'ダイナミックシステムズ'
+  },
+
+  // Theme
+  theme: {
+    switchToLight: 'ライトモードに切り替え',
+    switchToDark: 'ダークモードに切り替え'
   }
 }
