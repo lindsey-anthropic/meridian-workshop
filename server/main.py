@@ -120,6 +120,22 @@ class CreatePurchaseOrderRequest(BaseModel):
     expected_delivery_date: str
     notes: Optional[str] = None
 
+class Task(BaseModel):
+    id: str
+    title: str
+    priority: str
+    due_date: Optional[str] = None
+    status: str = 'pending'
+
+class CreateTaskRequest(BaseModel):
+    title: str
+    priority: str
+    due_date: Optional[str] = None
+
+# In-memory task store (resets on server restart)
+_tasks: list = []
+_task_counter: list = [0]
+
 # API endpoints
 @app.get("/")
 def root():
@@ -226,6 +242,35 @@ def get_category_spending():
 def get_recent_transactions():
     """Get recent transactions"""
     return recent_transactions
+
+@app.get("/api/tasks", response_model=List[Task])
+def get_tasks():
+    return _tasks
+
+@app.post("/api/tasks", response_model=Task, status_code=201)
+def create_task(req: CreateTaskRequest):
+    _task_counter[0] += 1
+    task = {"id": f"task-{_task_counter[0]}", "title": req.title, "priority": req.priority,
+            "due_date": req.due_date, "status": "pending"}
+    _tasks.append(task)
+    return task
+
+@app.delete("/api/tasks/{task_id}")
+def delete_task(task_id: str):
+    global _tasks
+    before = len(_tasks)
+    _tasks = [t for t in _tasks if t["id"] != task_id]
+    if len(_tasks) == before:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return {"deleted": task_id}
+
+@app.patch("/api/tasks/{task_id}", response_model=Task)
+def toggle_task(task_id: str):
+    for t in _tasks:
+        if t["id"] == task_id:
+            t["status"] = "completed" if t["status"] == "pending" else "pending"
+            return t
+    raise HTTPException(status_code=404, detail="Task not found")
 
 @app.get("/api/reports/quarterly")
 def get_quarterly_reports(warehouse: Optional[str] = None, category: Optional[str] = None):
