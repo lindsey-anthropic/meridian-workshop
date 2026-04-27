@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Capabilities Deck — RFP MC-2026-0417</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif; background: #0f172a; color: #e2e8f0; }
+  .deck { position: relative; width: 100vw; height: 100vh; }
+  .slide { position: absolute; inset: 0; display: none; padding: 6vh 8vw; flex-direction: column; justify-content: center; }
+  .slide.active { display: flex; }
+  .eyebrow { font-size: 0.85rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: #38bdf8; margin-bottom: 1.5rem; }
+  h1 { font-size: 3.4rem; line-height: 1.1; font-weight: 700; color: #f8fafc; margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+  h2 { font-size: 2.4rem; line-height: 1.15; font-weight: 700; color: #f8fafc; margin-bottom: 2rem; letter-spacing: -0.015em; }
+  h3 { font-size: 1.4rem; font-weight: 600; color: #f8fafc; margin-bottom: 0.5rem; }
+  p { font-size: 1.25rem; line-height: 1.6; color: #cbd5e1; max-width: 80ch; }
+  p.lead { font-size: 1.5rem; color: #e2e8f0; margin-bottom: 1.5rem; }
+  ul { list-style: none; }
+  ul li { font-size: 1.2rem; line-height: 1.7; color: #cbd5e1; padding-left: 1.5rem; position: relative; margin-bottom: 0.5rem; }
+  ul li::before { content: "—"; position: absolute; left: 0; color: #38bdf8; font-weight: 700; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-top: 2rem; }
+  .card { background: #1e293b; border-left: 3px solid #38bdf8; padding: 1.5rem; border-radius: 4px; }
+  .card .num { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.1em; color: #38bdf8; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .card h3 { font-size: 1.15rem; margin-bottom: 0.5rem; }
+  .card p { font-size: 0.95rem; line-height: 1.5; }
+  .timeline { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 2rem; position: relative; }
+  .timeline::before { content: ""; position: absolute; top: 30px; left: 5%; right: 5%; height: 2px; background: linear-gradient(to right, #38bdf8 0%, #38bdf8 100%); opacity: 0.3; }
+  .phase { background: #1e293b; padding: 1.5rem; border-radius: 6px; position: relative; z-index: 1; }
+  .phase .dot { width: 14px; height: 14px; border-radius: 50%; background: #38bdf8; margin-bottom: 1rem; }
+  .phase h3 { font-size: 1.1rem; margin-bottom: 0.3rem; }
+  .phase .weeks { font-size: 0.85rem; color: #38bdf8; font-weight: 600; margin-bottom: 0.8rem; }
+  .phase ul li { font-size: 0.95rem; line-height: 1.5; }
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-top: 2rem; }
+  .stat { background: #1e293b; padding: 1.5rem; border-radius: 6px; text-align: center; }
+  .stat .value { font-size: 2.2rem; font-weight: 700; color: #38bdf8; line-height: 1; margin-bottom: 0.4rem; }
+  .stat .label { font-size: 0.85rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; }
+  .why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem; }
+  .why-item { padding: 1.5rem; background: #1e293b; border-radius: 6px; }
+  .why-item h3 { color: #38bdf8; font-size: 1.05rem; margin-bottom: 0.5rem; }
+  .why-item p { font-size: 1rem; line-height: 1.5; }
+  .nav { position: fixed; bottom: 2rem; right: 2rem; display: flex; gap: 0.5rem; align-items: center; z-index: 10; }
+  .nav button { background: #1e293b; color: #e2e8f0; border: 1px solid #334155; padding: 0.5rem 0.9rem; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+  .nav button:hover { background: #334155; }
+  .counter { font-size: 0.85rem; color: #64748b; font-variant-numeric: tabular-nums; padding: 0 0.5rem; }
+  .footer { position: fixed; bottom: 2rem; left: 2rem; font-size: 0.8rem; color: #475569; }
+  .case-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-top: 1.5rem; }
+  .case { background: #1e293b; padding: 1.3rem; border-radius: 6px; }
+  .case .sector { font-size: 0.75rem; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 0.5rem; }
+  .case h3 { font-size: 1rem; margin-bottom: 0.6rem; }
+  .case p { font-size: 0.9rem; line-height: 1.5; }
+  .case .map { margin-top: 0.8rem; font-size: 0.8rem; color: #94a3b8; }
+  .case .map strong { color: #f1f5f9; }
+  .pricing-table { margin-top: 2rem; width: 100%; border-collapse: collapse; }
+  .pricing-table th, .pricing-table td { text-align: left; padding: 1rem 1.5rem; border-bottom: 1px solid #1e293b; font-size: 1.05rem; }
+  .pricing-table th { color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; }
+  .pricing-table td:last-child { text-align: right; color: #38bdf8; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .pricing-table tr.total td { font-weight: 700; color: #f8fafc; font-size: 1.15rem; border-bottom: none; padding-top: 1.2rem; }
+  .closing { text-align: center; }
+  .closing h1 { font-size: 4rem; margin-bottom: 1rem; }
+  .closing p { font-size: 1.4rem; margin: 0 auto; }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- 1: Title -->
+  <section class="slide active">
+    <div class="eyebrow">Response to RFP MC-2026-0417</div>
+    <h1>Inventory Dashboard<br>Modernization</h1>
+    <p class="lead">Capabilities Presentation</p>
+    <p>Prepared for Meridian Components, Inc. &middot; April 2026</p>
+  </section>
+
+  <!-- 2: The problem -->
+  <section class="slide">
+    <div class="eyebrow">The context</div>
+    <h2>What Meridian needs to solve</h2>
+    <ul>
+      <li>Unresolved defects in the <strong>Reports</strong> module: disconnected filters, i18n gaps, inconsistent patterns</li>
+      <li>No test coverage &mdash; the IT team has blocked all system evolution</li>
+      <li>A key Operations capability is missing: <strong>data-driven restocking recommendations</strong></li>
+      <li>Incomplete handoff documentation: the system is opaque to the internal team</li>
+      <li>Experience gaps for the Tokyo site (~12 people) and for stations in low-light environments</li>
+    </ul>
+  </section>
+
+  <!-- 3: Our approach -->
+  <section class="slide">
+    <div class="eyebrow">Our approach</div>
+    <h2>Stabilize first, evolve next, modernize last</h2>
+    <p class="lead">Each phase delivers autonomous value and reduces the risk of the next.</p>
+    <div class="grid-3">
+      <div class="card">
+        <div class="num">Phase 1</div>
+        <h3>Stabilization</h3>
+        <p>Reports remediation, E2E suite, architecture documentation. Unblocks the IT team.</p>
+      </div>
+      <div class="card">
+        <div class="num">Phase 2</div>
+        <h3>Evolution</h3>
+        <p>Restocking view with purchase recommendations. The capability Operations is waiting for.</p>
+      </div>
+      <div class="card">
+        <div class="num">Phase 3</div>
+        <h3>Modernization</h3>
+        <p>UI refresh, full i18n, dark mode. Desired items, executed on a now-stable foundation.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4: Phase 1 detail -->
+  <section class="slide">
+    <div class="eyebrow">Phase 1 &middot; Weeks 1–7</div>
+    <h2>Stabilization</h2>
+    <p class="lead">Bring the system back to a state where every future change can be automatically validated.</p>
+    <ul>
+      <li><strong>R1 — Reports remediation:</strong> global filters reconnected, i18n completed, patterns aligned with the rest of the app</li>
+      <li><strong>R3 — E2E tests:</strong> Playwright on Inventory, Orders, Spending, Demand Forecast flows, integrated into CI</li>
+      <li><strong>R4 — Architecture documentation:</strong> navigable diagram for the Meridian IT team</li>
+    </ul>
+  </section>
+
+  <!-- 5: Phase 2 detail -->
+  <section class="slide">
+    <div class="eyebrow">Phase 2 &middot; Weeks 8–12</div>
+    <h2>Evolution &mdash; Restocking View</h2>
+    <p class="lead">The operator enters a budget. The system proposes purchase orders, sorted by priority.</p>
+    <ul>
+      <li>Recommendation logic based on <strong>current stock</strong>, <strong>demand forecasts</strong>, <strong>budget constraints</strong></li>
+      <li>Prioritization rules agreed with Operations at kick-off</li>
+      <li>Actionable list: approve, modify, discard &mdash; no black box</li>
+      <li>Result: fewer stockouts, faster purchasing decisions, immediate visibility on budget allocation</li>
+    </ul>
+  </section>
+
+  <!-- 6: Phase 3 detail -->
+  <section class="slide">
+    <div class="eyebrow">Phase 3 &middot; Weeks 13–18</div>
+    <h2>Modernization</h2>
+    <ul>
+      <li><strong>D1 — UI refresh:</strong> visual coherence between views, readability of tables and charts, Meridian identity</li>
+      <li><strong>D2 — Full i18n:</strong> Japanese coverage extended to all modules for the Tokyo team</li>
+      <li><strong>D3 — Dark mode:</strong> selectable theme for stations in low-light environments, WCAG-compliant contrasts</li>
+    </ul>
+  </section>
+
+  <!-- 7: Timeline visualization -->
+  <section class="slide">
+    <div class="eyebrow">Delivery plan</div>
+    <h2>18 weeks, three milestones</h2>
+    <div class="timeline">
+      <div class="phase">
+        <div class="dot"></div>
+        <h3>Phase 1 &mdash; Stabilization</h3>
+        <div class="weeks">Weeks 1–7 &middot; Jun–Jul 2026</div>
+        <ul>
+          <li>R1, R3, R4</li>
+          <li>Milestone M1: Reports stable, E2E green, docs delivered</li>
+        </ul>
+      </div>
+      <div class="phase">
+        <div class="dot"></div>
+        <h3>Phase 2 &mdash; Evolution</h3>
+        <div class="weeks">Weeks 8–12 &middot; Jul–Aug 2026</div>
+        <ul>
+          <li>R2 &mdash; Restocking view</li>
+          <li>Milestone M2: Restocking validated by Operations</li>
+        </ul>
+      </div>
+      <div class="phase">
+        <div class="dot"></div>
+        <h3>Phase 3 &mdash; Modernization</h3>
+        <div class="weeks">Weeks 13–18 &middot; Aug–Oct 2026</div>
+        <ul>
+          <li>D1, D2, D3</li>
+          <li>Milestone M3: complete handoff</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8: Team -->
+  <section class="slide">
+    <div class="eyebrow">Team composition</div>
+    <h2>A team scaled to the scope</h2>
+    <ul>
+      <li><strong>Senior Full-stack Lead</strong> &mdash; architectural ownership, full-time across the entire engagement</li>
+      <li><strong>Full-stack Engineer</strong> &mdash; R1, R2 development and support for desired items, full-time</li>
+      <li><strong>QA / Test Automation Engineer</strong> &mdash; E2E suite and validation, ~50%</li>
+      <li><strong>UX Designer</strong> &mdash; R2 mockups and D1 refresh, ~30%</li>
+      <li><strong>Engagement Manager</strong> &mdash; governance and communication with the Meridian sponsor, ~20%</li>
+    </ul>
+  </section>
+
+  <!-- 9: Relevant experience -->
+  <section class="slide">
+    <div class="eyebrow">Relevant experience</div>
+    <h2>Three engagements with overlapping profile</h2>
+    <div class="case-grid">
+      <div class="case">
+        <div class="sector">Industrial B2B Distributor</div>
+        <h3>Stabilization and test coverage</h3>
+        <p>Inherited Vue/Python, IT blocked due to no tests. Audit, remediation, Playwright suite, handoff documentation.</p>
+        <div class="map"><strong>Maps to:</strong> R1 + R3 + R4</div>
+      </div>
+      <div class="case">
+        <div class="sector">Multi-store Retailer</div>
+        <h3>Purchase recommendation system</h3>
+        <p>Prioritization rules formalized with buyers and operations, view integrated into the ERP. -35% stockouts.</p>
+        <div class="map"><strong>Maps to:</strong> R2</div>
+      </div>
+      <div class="case">
+        <div class="sector">Logistics SaaS</div>
+        <h3>UI refresh, i18n and dark mode</h3>
+        <p>Refreshed design system, i18n extended to JP/DE, dark mode with persistence. Internal NPS +18.</p>
+        <div class="map"><strong>Maps to:</strong> D1 + D2 + D3</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10: Pricing summary -->
+  <section class="slide">
+    <div class="eyebrow">Commercial model</div>
+    <h2>Fixed-fee per phase, evaluable after each milestone</h2>
+    <table class="pricing-table">
+      <thead>
+        <tr><th>Phase</th><th>Scope</th><th style="text-align:right">Person-days</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Phase 1 — Stabilization</td><td>R1 + R3 + R4</td><td>86</td></tr>
+        <tr><td>Phase 2 — Evolution</td><td>R2</td><td>60</td></tr>
+        <tr><td>Phase 3 — Modernization</td><td>D1 + D2 + D3</td><td>58</td></tr>
+        <tr class="total"><td colspan="2">Total (R1–R4 + D1–D3)</td><td>204 days</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top: 1.5rem; font-size: 0.95rem; color: #94a3b8;">Payments tied to milestones (20 / 30 / 30 / 20). Optional stop after Phase 2 for mandatory requirements only.</p>
+  </section>
+
+  <!-- 11: Why us -->
+  <section class="slide">
+    <div class="eyebrow">Why us</div>
+    <h2>Four concrete reasons</h2>
+    <div class="why-grid">
+      <div class="why-item">
+        <h3>We already know the codebase</h3>
+        <p>We have reviewed the RFP material. We will not lose the first two weeks getting oriented.</p>
+      </div>
+      <div class="why-item">
+        <h3>Direct experience on the profile</h3>
+        <p>Three recent engagements precisely cover R1+R3+R4, R2, and the desired items.</p>
+      </div>
+      <div class="why-item">
+        <h3>Stop after each phase</h3>
+        <p>The fixed-fee per phase model lets Meridian decide whether to continue at every milestone.</p>
+      </div>
+      <div class="why-item">
+        <h3>Real handoff, not symbolic</h3>
+        <p>Architecture documentation and knowledge transfer to Meridian's IT team are part of the plan, not an add-on.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12: Closing -->
+  <section class="slide closing">
+    <div class="eyebrow">Next steps</div>
+    <h1>Ready to start<br>on June 1.</h1>
+    <p>For clarifications: the commercial team is available for a deep-dive session by May 6.</p>
+  </section>
+
+</div>
+
+<div class="footer">RFP MC-2026-0417 &middot; Capabilities Deck</div>
+<div class="nav">
+  <button id="prev">←</button>
+  <span class="counter"><span id="cur">1</span> / <span id="tot">12</span></span>
+  <button id="next">→</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let idx = 0;
+  const total = slides.length;
+  document.getElementById('tot').textContent = total;
+  function show(i) {
+    slides[idx].classList.remove('active');
+    idx = (i + total) % total;
+    slides[idx].classList.add('active');
+    document.getElementById('cur').textContent = idx + 1;
+  }
+  document.getElementById('next').onclick = () => show(idx + 1);
+  document.getElementById('prev').onclick = () => show(idx - 1);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') show(idx + 1);
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') show(idx - 1);
+    if (e.key === 'Home') show(0);
+    if (e.key === 'End') show(total - 1);
+  });
+</script>
+
+</body>
+</html>
