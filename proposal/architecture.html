@@ -560,6 +560,10 @@
 
 <p>Of note: <code>purchase_orders.json</code> exists, is loaded into <code>mock_data</code>, and its model (<code>PurchaseOrder</code>, <code>CreatePurchaseOrderRequest</code>) is defined in <code>main.py</code>. Everything is ready except the route registration. This looks like an unfinished feature, not dead code.</p>
 <p><strong>Decision required at end of Week 2:</strong> remove the orphaned client methods (and any callers), or wire up the corresponding server routes. Either way, the new Restocking work in R2 should not land alongside untriaged dead code.</p>
+
+<h3>D2 i18n — partial coverage gap</h3>
+<p>D2 (Tokyo team able to run the dashboard end-to-end in <code>ja</code>) is <strong>substantially advanced but not fully closed</strong> in this engagement. Translated by us during this engagement: Reports module (R1), the new Restocking view (R2), the theme switcher (D3), and the previously hardcoded "Reports" nav link.</p>
+<p><strong>Remaining gap:</strong> approximately 55 hardcoded English strings remain across the detail-modal components (<code>BacklogDetailModal</code>, <code>ProductDetailModal</code>, <code>InventoryDetailModal</code>, <code>CostDetailModal</code>, <code>ProfileDetailsModal</code>, <code>TasksModal</code>) and a handful of view-level labels. These are user-visible secondary surfaces — when a Tokyo operator clicks into an inventory shortage or a top product, the modal still renders English. Fix is mechanical: wrap each label in <code>t()</code>, add the key to <code>en.js</code> and <code>ja.js</code>. Many keys are reusable from existing namespaces (<code>inventory.table.*</code>, <code>orders.table.*</code>, <code>finance.*</code>). Estimated 2–3 hours scoped as a follow-up story.</p>
 </section>
 
 <section id="testing">
