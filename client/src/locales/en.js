@@ -6,6 +6,8 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    reports: 'Reports',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -324,5 +326,77 @@ export default {
     filter: 'Filter',
     export: 'Export',
     items: 'items'
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    description: 'Plan purchase orders against an operator-supplied budget. Recommendations are ranked by stockout risk.',
+    budgetLabel: 'Monthly Budget',
+    summary: {
+      recommendationCount: 'Recommendations',
+      totalCost: 'Total Recommended Cost',
+      budgetUsedPct: 'Budget Used',
+      remaining: 'Remaining Budget'
+    },
+    table: {
+      rank: 'Rank',
+      sku: 'SKU',
+      name: 'Item',
+      warehouse: 'Warehouse',
+      category: 'Category',
+      currentStock: 'Current Stock',
+      recommendedQty: 'Recommended Qty',
+      unitCost: 'Unit Cost',
+      lineTotal: 'Line Total',
+      rationale: 'Rationale'
+    },
+    rationale: {
+      below_reorder_with_demand: 'Below reorder point with {forecast}-unit forecast',
+      below_reorder: 'Below reorder point ({deficit} units short)',
+      forecast_only: '{forecast}-unit forecast exceeds current stock'
+    },
+    skipped: {
+      title: 'Skipped (risk-positive but did not fit budget)',
+      insufficient_remaining_budget: 'Insufficient remaining budget'
+    },
+    exportCsv: 'Export CSV',
+    empty: 'No restocking needed at this budget — all stocked SKUs are above their reorder point.',
+    loading: 'Calculating recommendations...',
+    errorPrefix: 'Failed to load recommendations'
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    loading: 'Loading reports...',
+    errorPrefix: 'Failed to load reports',
+    notApplicable: 'N/A',
+    quarterly: {
+      title: 'Quarterly Performance',
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate'
+    },
+    monthlyTrend: {
+      title: 'Monthly Revenue Trend'
+    },
+    monthOverMonth: {
+      title: 'Month-over-Month Analysis',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    },
+    summary: {
+      totalRevenueYTD: 'Total Revenue (YTD)',
+      avgMonthlyRevenue: 'Avg Monthly Revenue',
+      totalOrdersYTD: 'Total Orders (YTD)',
+      bestQuarter: 'Best Performing Quarter'
+    }
   }
 }

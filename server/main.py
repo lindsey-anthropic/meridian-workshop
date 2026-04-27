@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from pydantic import BaseModel
@@ -120,6 +120,32 @@ class CreatePurchaseOrderRequest(BaseModel):
     expected_delivery_date: str
     notes: Optional[str] = None
 
+class RestockingRecommendation(BaseModel):
+    sku: str
+    name: str
+    category: str
+    warehouse: str
+    current_stock: int
+    reorder_point: int
+    forecasted_demand: int
+    recommended_quantity: int
+    unit_cost: float
+    line_total: float
+    risk_score: float
+    rationale_key: str
+
+class RestockingSkipped(BaseModel):
+    sku: str
+    name: str
+    reason_key: str
+
+class RestockingResponse(BaseModel):
+    budget: float
+    total_recommended_cost: float
+    remaining_budget: float
+    recommendations: List[RestockingRecommendation]
+    skipped: List[RestockingSkipped]
+
 # API endpoints
 @app.get("/")
 def root():
@@ -228,12 +254,20 @@ def get_recent_transactions():
     return recent_transactions
 
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
-    """Get quarterly performance reports"""
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
+    """Get quarterly performance reports with optional filtering."""
+    filtered_orders = apply_filters(orders, warehouse, category, status)
+    filtered_orders = filter_by_month(filtered_orders, month)
+
     # Calculate quarterly statistics from orders
     quarters = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -274,11 +308,19 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
-    """Get month-over-month trends"""
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
+    """Get month-over-month trends with optional filtering."""
+    filtered_orders = apply_filters(orders, warehouse, category, status)
+    filtered_orders = filter_by_month(filtered_orders, month)
+
     months = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
@@ -303,6 +345,95 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+def _score_restocking_candidate(item: dict, demand_by_sku: dict) -> Optional[dict]:
+    """Score a single inventory item for restocking. Returns None if no risk."""
+    qty = item.get('quantity_on_hand', 0)
+    reorder = item.get('reorder_point', 0)
+    forecast = demand_by_sku.get(item.get('sku', ''), 0)
+
+    deficit = max(0, reorder - qty)
+    forecast_pressure = max(0, forecast - qty)
+    risk_score = (deficit * 2) + forecast_pressure
+
+    if risk_score == 0:
+        return None
+
+    if deficit > 0 and forecast > 0:
+        rationale = 'below_reorder_with_demand'
+    elif deficit > 0:
+        rationale = 'below_reorder'
+    else:
+        rationale = 'forecast_only'
+
+    target_qty = max(reorder, forecast) - qty
+    target_qty = max(0, target_qty)
+
+    return {
+        'item': item,
+        'forecast': forecast,
+        'deficit': deficit,
+        'risk_score': float(risk_score),
+        'recommended_quantity': target_qty,
+        'rationale_key': rationale,
+    }
+
+@app.get("/api/restocking/recommend", response_model=RestockingResponse)
+def recommend_restocking(
+    budget: float = Query(..., gt=0, description="Budget ceiling in the active currency"),
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
+    """Recommend purchase orders against a budget, ranked by stockout risk."""
+    filtered_inventory = apply_filters(inventory_items, warehouse, category)
+    demand_by_sku = {d['item_sku']: d['forecasted_demand'] for d in demand_forecasts}
+
+    scored = [s for s in (_score_restocking_candidate(item, demand_by_sku)
+                          for item in filtered_inventory) if s is not None]
+    scored.sort(key=lambda s: s['risk_score'], reverse=True)
+
+    remaining = float(budget)
+    recommendations: List[RestockingRecommendation] = []
+    skipped: List[RestockingSkipped] = []
+
+    for s in scored:
+        item = s['item']
+        qty = s['recommended_quantity']
+        if qty == 0:
+            continue
+        line_total = qty * item['unit_cost']
+
+        if line_total <= remaining + 1e-9:
+            recommendations.append(RestockingRecommendation(
+                sku=item['sku'],
+                name=item['name'],
+                category=item['category'],
+                warehouse=item['warehouse'],
+                current_stock=item['quantity_on_hand'],
+                reorder_point=item['reorder_point'],
+                forecasted_demand=s['forecast'],
+                recommended_quantity=qty,
+                unit_cost=item['unit_cost'],
+                line_total=round(line_total, 2),
+                risk_score=s['risk_score'],
+                rationale_key=s['rationale_key'],
+            ))
+            remaining -= line_total
+        else:
+            skipped.append(RestockingSkipped(
+                sku=item['sku'],
+                name=item['name'],
+                reason_key='insufficient_remaining_budget',
+            ))
+
+    total_cost = float(budget) - remaining
+    return RestockingResponse(
+        budget=float(budget),
+        total_recommended_cost=round(total_cost, 2),
+        remaining_budget=round(remaining, 2),
+        recommendations=recommendations,
+        skipped=skipped,
+    )
 
 if __name__ == "__main__":
     import uvicorn
