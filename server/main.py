@@ -228,12 +228,19 @@ def get_recent_transactions():
     return recent_transactions
 
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
     """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
+    filtered_orders = apply_filters(orders, warehouse, category, status)
+    filtered_orders = filter_by_month(filtered_orders, month)
+
     quarters = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -267,6 +274,8 @@ def get_quarterly_reports():
         if data['total_orders'] > 0:
             data['avg_order_value'] = round(data['total_revenue'] / data['total_orders'], 2)
             data['fulfillment_rate'] = round((data['delivered_orders'] / data['total_orders']) * 100, 1)
+        else:
+            data['fulfillment_rate'] = 0
         result.append(data)
 
     # Sort by quarter
@@ -274,11 +283,19 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
     """Get month-over-month trends"""
+    filtered_orders = apply_filters(orders, warehouse, category, status)
+    filtered_orders = filter_by_month(filtered_orders, month)
+
     months = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
@@ -303,6 +320,77 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+PRIORITY_ORDER = {'high': 0, 'medium': 1, 'low': 2}
+
+@app.get("/api/restocking")
+def get_restocking_recommendations(
+    budget: float = 0,
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
+    """Get restocking recommendations based on stock levels, demand, and budget ceiling"""
+    filtered_inventory = apply_filters(inventory_items, warehouse, category)
+
+    demand_by_sku = {d['item_sku']: d for d in demand_forecasts}
+    backlog_by_sku = {b['item_sku']: b for b in backlog_items}
+
+    recommendations = []
+    for item in filtered_inventory:
+        sku = item['sku']
+        on_hand = item['quantity_on_hand']
+        reorder_pt = item['reorder_point']
+        in_backlog = sku in backlog_by_sku
+
+        if on_hand >= reorder_pt and not in_backlog:
+            continue
+
+        demand = demand_by_sku.get(sku, {})
+        trend = demand.get('trend', '')
+
+        recommended_qty = max((reorder_pt * 2) - on_hand, 1)
+        total_cost = round(recommended_qty * item['unit_cost'], 2)
+
+        if in_backlog:
+            reason = 'backlog'
+            priority = 'high'
+        elif trend == 'increasing':
+            reason = 'low_stock+demand'
+            priority = 'high'
+        elif on_hand <= reorder_pt:
+            reason = 'low_stock'
+            priority = 'medium' if on_hand > reorder_pt * 0.5 else 'high'
+        else:
+            reason = 'low_stock'
+            priority = 'low'
+
+        recommendations.append({
+            'sku': sku,
+            'name': item['name'],
+            'category': item['category'],
+            'warehouse': item['warehouse'],
+            'quantity_on_hand': on_hand,
+            'reorder_point': reorder_pt,
+            'recommended_qty': recommended_qty,
+            'unit_cost': item['unit_cost'],
+            'total_cost': total_cost,
+            'reason': reason,
+            'priority': priority
+        })
+
+    recommendations.sort(key=lambda x: (PRIORITY_ORDER[x['priority']], -x['total_cost']))
+
+    if budget > 0:
+        selected = []
+        remaining = budget
+        for rec in recommendations:
+            if rec['total_cost'] <= remaining:
+                selected.append(rec)
+                remaining -= rec['total_cost']
+        return selected
+
+    return recommendations
+
 
 if __name__ == "__main__":
     import uvicorn
