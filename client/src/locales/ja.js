@@ -240,6 +240,34 @@ export default {
     consumables: '消耗品'
   },
 
+  // Reports
+  reports: {
+    pageTitle: 'パフォーマンスレポート',
+    pageSubtitle: '四半期業績と月次トレンドを表示',
+    quarterlyPerformance: '四半期業績',
+    monthlyRevenueTrend: '月次売上推移',
+    momAnalysis: '前月比較分析',
+    quarter: '四半期',
+    month: '月',
+    totalOrders: '総注文数',
+    totalRevenue: '総売上',
+    avgOrderValue: '平均注文額',
+    fulfillmentRate: '充足率',
+    orders: '注文数',
+    revenue: '売上',
+    change: '変化',
+    growthRate: '成長率',
+    totalRevenueYtd: '年初来総売上',
+    avgMonthlyRevenue: '月平均売上',
+    totalOrdersYtd: '年初来総注文数',
+    bestQuarter: '最高業績四半期',
+    loadingReports: 'レポートを読み込み中...',
+    failedToLoad: 'レポートの読み込みに失敗しました',
+    noDataForFilters: '現在のフィルターに該当するデータはありません。',
+    notAvailable: '該当なし',
+    chartBarLabel: '{month}: {value}'
+  },
+
   // Warehouses
   warehouses: {
     sanFrancisco: 'サンフランシスコ',
@@ -265,6 +293,7 @@ export default {
     february: '2月',
     march: '3月',
     april: '4月',
+    may: '5月',
     june: '6月',
     july: '7月',
     august: '8月',

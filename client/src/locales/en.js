@@ -240,6 +240,34 @@ export default {
     consumables: 'Consumables'
   },
 
+  // Reports
+  reports: {
+    pageTitle: 'Performance Reports',
+    pageSubtitle: 'View quarterly performance metrics and monthly trends',
+    quarterlyPerformance: 'Quarterly Performance',
+    monthlyRevenueTrend: 'Monthly Revenue Trend',
+    momAnalysis: 'Month-over-Month Analysis',
+    quarter: 'Quarter',
+    month: 'Month',
+    totalOrders: 'Total Orders',
+    totalRevenue: 'Total Revenue',
+    avgOrderValue: 'Avg Order Value',
+    fulfillmentRate: 'Fulfillment Rate',
+    orders: 'Orders',
+    revenue: 'Revenue',
+    change: 'Change',
+    growthRate: 'Growth Rate',
+    totalRevenueYtd: 'Total Revenue (YTD)',
+    avgMonthlyRevenue: 'Avg Monthly Revenue',
+    totalOrdersYtd: 'Total Orders (YTD)',
+    bestQuarter: 'Best Performing Quarter',
+    loadingReports: 'Loading reports...',
+    failedToLoad: 'Failed to load reports',
+    noDataForFilters: 'No data for the current filters.',
+    notAvailable: 'N/A',
+    chartBarLabel: '{month}: {value}'
+  },
+
   // Warehouses
   warehouses: {
     sanFrancisco: 'San Francisco',
@@ -265,6 +293,7 @@ export default {
     february: 'February',
     march: 'March',
     april: 'April',
+    may: 'May',
     june: 'June',
     july: 'July',
     august: 'August',
