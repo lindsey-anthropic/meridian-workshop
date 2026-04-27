@@ -228,14 +228,13 @@ def get_recent_transactions():
     return recent_transactions
 
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
+def get_quarterly_reports(warehouse: Optional[str] = None, category: Optional[str] = None):
     """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
-    quarters = {}
+    filtered = apply_filters(orders, warehouse, category)
 
-    for order in orders:
+    quarters = {}
+    for order in filtered:
         order_date = order.get('order_date', '')
-        # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
             quarter = 'Q1-2025'
         elif '2025-04' in order_date or '2025-05' in order_date or '2025-06' in order_date:
@@ -261,7 +260,6 @@ def get_quarterly_reports():
         if order.get('status') == 'Delivered':
             quarters[quarter]['delivered_orders'] += 1
 
-    # Calculate averages and fulfillment rate
     result = []
     for q, data in quarters.items():
         if data['total_orders'] > 0:
@@ -269,22 +267,21 @@ def get_quarterly_reports():
             data['fulfillment_rate'] = round((data['delivered_orders'] / data['total_orders']) * 100, 1)
         result.append(data)
 
-    # Sort by quarter
     result.sort(key=lambda x: x['quarter'])
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
+def get_monthly_trends(warehouse: Optional[str] = None, category: Optional[str] = None):
     """Get month-over-month trends"""
-    months = {}
+    filtered = apply_filters(orders, warehouse, category)
 
-    for order in orders:
+    months = {}
+    for order in filtered:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
 
-        # Extract month (format: YYYY-MM-DD)
-        month = order_date[:7]  # Gets YYYY-MM
+        month = order_date[:7]
 
         if month not in months:
             months[month] = {
@@ -299,10 +296,122 @@ def get_monthly_trends():
         if order.get('status') == 'Delivered':
             months[month]['delivered_count'] += 1
 
-    # Convert to list and sort
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+@app.get("/api/restocking")
+def get_restocking_recommendations(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    budget: Optional[float] = None
+):
+    """Recommend purchase orders based on stock levels, demand forecast, and budget."""
+    filtered_inventory = apply_filters(inventory_items, warehouse, category)
+
+    # Build SKU → demand lookup
+    demand_by_sku = {d['item_sku']: d for d in demand_forecasts}
+
+    recommendations = []
+    for item in filtered_inventory:
+        sku = item.get('sku')
+        demand = demand_by_sku.get(sku)
+        if not demand:
+            continue
+
+        forecasted = demand.get('forecasted_demand', 0)
+        on_hand = item.get('quantity_on_hand', 0)
+        unit_cost = item.get('unit_cost', 0)
+
+        qty_to_order = max(0, int(forecasted - on_hand))
+        if qty_to_order == 0:
+            continue
+
+        daily_demand = forecasted / 30
+        days_of_stock = round(on_hand / daily_demand, 1) if daily_demand > 0 else 999
+
+        if days_of_stock >= 30:
+            continue
+
+        if days_of_stock < 7:
+            urgency = 'high'
+        elif days_of_stock < 15:
+            urgency = 'medium'
+        else:
+            urgency = 'low'
+
+        recommendations.append({
+            'sku': sku,
+            'name': item.get('name'),
+            'warehouse': item.get('warehouse'),
+            'category': item.get('category'),
+            'quantity_on_hand': on_hand,
+            'days_of_stock': days_of_stock,
+            'forecasted_demand': forecasted,
+            'quantity_to_order': qty_to_order,
+            'unit_cost': unit_cost,
+            'line_total': round(qty_to_order * unit_cost, 2),
+            'urgency': urgency,
+            'budget_status': 'uncovered',
+            'covered_quantity': 0,
+            'covered_cost': 0.0
+        })
+
+    # Sort by urgency (days_of_stock ascending = most urgent first)
+    recommendations.sort(key=lambda x: x['days_of_stock'])
+
+    # Greedy budget allocation
+    remaining = budget if budget is not None else None
+    total_spend = 0.0
+    items_covered = 0
+    items_partial = 0
+    items_uncovered = 0
+
+    for rec in recommendations:
+        line = rec['line_total']
+        if remaining is None:
+            rec['budget_status'] = 'covered'
+            rec['covered_quantity'] = rec['quantity_to_order']
+            rec['covered_cost'] = line
+            items_covered += 1
+            total_spend += line
+        elif remaining >= line:
+            rec['budget_status'] = 'covered'
+            rec['covered_quantity'] = rec['quantity_to_order']
+            rec['covered_cost'] = line
+            remaining = round(remaining - line, 2)
+            items_covered += 1
+            total_spend += line
+        elif remaining > 0:
+            can_afford = int(remaining // rec['unit_cost'])
+            if can_afford > 0:
+                rec['budget_status'] = 'partial'
+                rec['covered_quantity'] = can_afford
+                rec['covered_cost'] = round(can_afford * rec['unit_cost'], 2)
+                remaining = round(remaining - rec['covered_cost'], 2)
+                items_partial += 1
+                total_spend += rec['covered_cost']
+            else:
+                rec['budget_status'] = 'uncovered'
+                items_uncovered += 1
+            remaining = max(remaining, 0)
+        else:
+            rec['budget_status'] = 'uncovered'
+            items_uncovered += 1
+
+    return {
+        'recommendations': recommendations,
+        'summary': {
+            'total_items_at_risk': len(recommendations),
+            'items_covered': items_covered,
+            'items_partial': items_partial,
+            'items_uncovered': items_uncovered,
+            'total_recommended_spend': round(total_spend, 2),
+            'budget': budget,
+            'budget_remaining': round(remaining, 2) if remaining is not None else None
+        }
+    }
+
 
 if __name__ == "__main__":
     import uvicorn
