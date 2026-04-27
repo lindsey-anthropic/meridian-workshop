@@ -120,6 +120,20 @@ class CreatePurchaseOrderRequest(BaseModel):
     expected_delivery_date: str
     notes: Optional[str] = None
 
+class RestockingRecommendation(BaseModel):
+    sku: str
+    name: str
+    category: str
+    warehouse: str
+    quantity_on_hand: int
+    reorder_point: int
+    forecasted_demand: int
+    recommended_qty: int
+    unit_cost: float
+    line_cost: float
+    trend: str
+    urgency: str
+
 # API endpoints
 @app.get("/")
 def root():
@@ -228,12 +242,19 @@ def get_recent_transactions():
     return recent_transactions
 
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
+def get_quarterly_reports(warehouse: Optional[str] = None, category: Optional[str] = None, month: Optional[str] = None):
     """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
     quarters = {}
 
-    for order in orders:
+    filtered_orders = orders
+    if warehouse and warehouse != 'all':
+        filtered_orders = [o for o in filtered_orders if o.get('warehouse') == warehouse]
+    if category and category != 'all':
+        filtered_orders = [o for o in filtered_orders if o.get('category', '').lower() == category.lower()]
+    if month and month != 'all':
+        filtered_orders = [o for o in filtered_orders if o.get('order_date', '').startswith(month)]
+
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -274,11 +295,19 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
+def get_monthly_trends(warehouse: Optional[str] = None, category: Optional[str] = None, month: Optional[str] = None):
     """Get month-over-month trends"""
     months = {}
 
-    for order in orders:
+    filtered_orders = orders
+    if warehouse and warehouse != 'all':
+        filtered_orders = [o for o in filtered_orders if o.get('warehouse') == warehouse]
+    if category and category != 'all':
+        filtered_orders = [o for o in filtered_orders if o.get('category', '').lower() == category.lower()]
+    if month and month != 'all':
+        filtered_orders = [o for o in filtered_orders if o.get('order_date', '').startswith(month)]
+
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
@@ -303,6 +332,48 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+@app.get("/api/restocking", response_model=List[RestockingRecommendation])
+def get_restocking_recommendations(warehouse: Optional[str] = None, category: Optional[str] = None):
+    """Get ranked restocking recommendations based on stock levels and demand forecasts."""
+    filtered = apply_filters(inventory_items, warehouse, category)
+    needs_restock = [i for i in filtered if i.get('quantity_on_hand', 0) <= i.get('reorder_point', 0)]
+
+    demand_by_sku = {d['item_sku']: d for d in demand_forecasts}
+    trend_rank = {'increasing': 0, 'stable': 1, 'decreasing': 2}
+
+    recommendations = []
+    for item in needs_restock:
+        sku = item['sku']
+        demand = demand_by_sku.get(sku, {})
+        qty_on_hand = item.get('quantity_on_hand', 0)
+        reorder_point = item.get('reorder_point', 0)
+        forecasted = demand.get('forecasted_demand', reorder_point * 2)
+        trend = demand.get('trend', 'stable')
+
+        recommended_qty = max(forecasted - qty_on_hand, reorder_point - qty_on_hand)
+        if recommended_qty <= 0:
+            continue
+
+        unit_cost = item.get('unit_cost', 0)
+        recommendations.append(RestockingRecommendation(
+            sku=sku,
+            name=item.get('name', ''),
+            category=item.get('category', ''),
+            warehouse=item.get('warehouse', ''),
+            quantity_on_hand=qty_on_hand,
+            reorder_point=reorder_point,
+            forecasted_demand=forecasted,
+            recommended_qty=recommended_qty,
+            unit_cost=unit_cost,
+            line_cost=round(recommended_qty * unit_cost, 2),
+            trend=trend,
+            urgency='critical' if qty_on_hand == 0 else 'low'
+        ))
+
+    recommendations.sort(key=lambda r: (0 if r.urgency == 'critical' else 1, trend_rank.get(r.trend, 1), -(r.reorder_point - r.quantity_on_hand)))
+    return recommendations
+
 
 if __name__ == "__main__":
     import uvicorn
