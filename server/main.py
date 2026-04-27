@@ -227,13 +227,76 @@ def get_recent_transactions():
     """Get recent transactions"""
     return recent_transactions
 
+@app.get("/api/restocking")
+def get_restocking_recommendations(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    budget: Optional[float] = 0
+):
+    """Get restocking recommendations based on stock gaps, demand, and budget ceiling."""
+    demand_map = {d['item_sku']: d for d in demand_forecasts}
+
+    filtered = inventory_items
+    if warehouse and warehouse != 'all':
+        filtered = [i for i in filtered if i.get('warehouse') == warehouse]
+    if category and category != 'all':
+        filtered = [i for i in filtered if i.get('category', '').lower() == category.lower()]
+
+    recommendations = []
+    for item in filtered:
+        gap = item.get('reorder_point', 0) - item.get('quantity_on_hand', 0)
+        if gap <= 0:
+            continue
+
+        unit_cost = item.get('unit_cost', 0)
+        restock_cost = round(gap * unit_cost, 2)
+
+        demand = demand_map.get(item['sku'], {})
+        trend = demand.get('trend', 'unknown')
+        forecasted_demand = demand.get('forecasted_demand', 0)
+
+        priority = gap + (20 if trend == 'increasing' else 0)
+
+        recommendations.append({
+            'sku': item['sku'],
+            'name': item['name'],
+            'category': item['category'],
+            'warehouse': item['warehouse'],
+            'quantity_on_hand': item['quantity_on_hand'],
+            'reorder_point': item['reorder_point'],
+            'stock_gap': gap,
+            'unit_cost': unit_cost,
+            'restock_cost': restock_cost,
+            'demand_trend': trend,
+            'forecasted_demand': forecasted_demand,
+            'priority': priority,
+            'within_budget': False,
+            'cumulative_cost': 0
+        })
+
+    recommendations.sort(key=lambda x: x['priority'], reverse=True)
+
+    cumulative = 0
+    for rec in recommendations:
+        cumulative += rec['restock_cost']
+        rec['cumulative_cost'] = round(cumulative, 2)
+        rec['within_budget'] = (budget <= 0) or (cumulative <= budget)
+
+    return recommendations
+
+
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
+def get_quarterly_reports(warehouse: Optional[str] = None, category: Optional[str] = None):
     """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
+    filtered = orders
+    if warehouse and warehouse != 'all':
+        filtered = [o for o in filtered if o.get('warehouse') == warehouse]
+    if category and category != 'all':
+        filtered = [o for o in filtered if o.get('category', '').lower() == category.lower()]
+
     quarters = {}
 
-    for order in orders:
+    for order in filtered:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -274,11 +337,17 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
+def get_monthly_trends(warehouse: Optional[str] = None, category: Optional[str] = None):
     """Get month-over-month trends"""
+    filtered = orders
+    if warehouse and warehouse != 'all':
+        filtered = [o for o in filtered if o.get('warehouse') == warehouse]
+    if category and category != 'all':
+        filtered = [o for o in filtered if o.get('category', '').lower() == category.lower()]
+
     months = {}
 
-    for order in orders:
+    for order in filtered:
         order_date = order.get('order_date', '')
         if not order_date:
             continue

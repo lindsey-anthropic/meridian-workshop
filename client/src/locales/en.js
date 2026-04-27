@@ -6,8 +6,76 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    reports: 'Reports',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    subtitle: 'Purchase order recommendations based on stock levels, demand, and budget',
+    budgetLabel: 'Budget Ceiling',
+    budgetPlaceholder: 'Enter amount (0 = no limit)',
+    apply: 'Apply',
+    noItems: 'No understocked items for the selected filters.',
+    table: {
+      sku: 'SKU',
+      name: 'Item Name',
+      category: 'Category',
+      warehouse: 'Warehouse',
+      onHand: 'On Hand',
+      reorderPoint: 'Reorder Point',
+      gap: 'Gap',
+      unitCost: 'Unit Cost',
+      restockCost: 'Restock Cost',
+      demandTrend: 'Demand Trend',
+      status: 'Status'
+    },
+    stats: {
+      itemsAtRisk: 'Items at Risk',
+      totalRestockCost: 'Total Restock Cost',
+      withinBudget: 'Within Budget',
+      budgetRemaining: 'Budget Remaining'
+    },
+    trend: {
+      increasing: 'Increasing',
+      stable: 'Stable',
+      decreasing: 'Decreasing',
+      unknown: 'Unknown'
+    },
+    status: {
+      withinBudget: 'Within Budget',
+      overBudget: 'Over Budget'
+    }
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    subtitle: 'View quarterly performance metrics and monthly trends',
+    quarterlyPerformance: 'Quarterly Performance',
+    monthlyTrend: 'Monthly Revenue Trend',
+    monthOverMonth: 'Month-over-Month Analysis',
+    table: {
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    },
+    stats: {
+      totalRevenueYTD: 'Total Revenue (YTD)',
+      avgMonthlyRevenue: 'Avg Monthly Revenue',
+      totalOrdersYTD: 'Total Orders (YTD)',
+      bestQuarter: 'Best Performing Quarter'
+    }
   },
 
   // Dashboard
