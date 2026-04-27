@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Meridian Inventory Dashboard — Current-State Architecture</title>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --paper: #ffffff;
+    --ink: #0f172a;
+    --ink-soft: #475569;
+    --ink-faint: #94a3b8;
+    --accent: #1e40af;
+    --accent-soft: #dbeafe;
+    --rule: #e2e8f0;
+    --rule-strong: #cbd5e1;
+    --good: #15803d;
+    --warn: #b45309;
+    --bad: #b91c1c;
+    --code-bg: #f1f5f9;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  nav.toc {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 32px 16px 32px 32px;
+    border-right: 1px solid var(--rule);
+    font-size: 13px;
+  }
+  nav.toc h4 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    margin: 0 0 12px;
+  }
+  nav.toc ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  nav.toc li { margin-bottom: 4px; }
+  nav.toc a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    display: block;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  nav.toc a:hover { background: var(--code-bg); color: var(--ink); }
+
+  main {
+    background: var(--paper);
+    padding: 48px 64px 96px;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+    min-height: 100vh;
+  }
+
+  header.doc-header {
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 40px;
+  }
+  header.doc-header .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-faint);
+    margin-bottom: 8px;
+  }
+  header.doc-header h1 {
+    font-size: 36px;
+    margin: 0 0 8px;
+    letter-spacing: -0.02em;
+  }
+  header.doc-header .meta {
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+
+  section { margin-bottom: 48px; scroll-margin-top: 24px; }
+  section h2 {
+    font-size: 22px;
+    margin: 0 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--rule);
+    letter-spacing: -0.01em;
+  }
+  section h3 {
+    font-size: 16px;
+    margin: 24px 0 8px;
+    color: var(--ink);
+  }
+  p { color: var(--ink-soft); margin: 0 0 12px; }
+  ul { padding-left: 22px; color: var(--ink-soft); margin: 0 0 12px; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--ink); font-weight: 600; }
+
+  code, pre {
+    font-family: "SF Mono", "Monaco", "Menlo", monospace;
+    font-size: 13px;
+  }
+  code {
+    background: var(--code-bg);
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: var(--ink);
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 16px;
+    overflow-x: auto;
+    line-height: 1.5;
+  }
+  pre code { background: none; padding: 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  th {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-faint);
+    font-weight: 600;
+    background: #f8fafc;
+  }
+  tr:last-child td { border-bottom: none; }
+
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .pill.good { background: #dcfce7; color: var(--good); }
+  .pill.warn { background: #fef3c7; color: var(--warn); }
+  .pill.bad { background: #fee2e2; color: var(--bad); }
+  .pill.info { background: var(--accent-soft); color: var(--accent); }
+
+  .callout {
+    border: 1px solid var(--rule);
+    background: #fefce8;
+    border-left: 4px solid var(--warn);
+    padding: 16px 20px;
+    border-radius: 4px;
+    margin: 16px 0;
+  }
+  .callout.bad {
+    background: #fef2f2;
+    border-left-color: var(--bad);
+  }
+  .callout.info {
+    background: var(--accent-soft);
+    border-left-color: var(--accent);
+  }
+  .callout h4 {
+    margin: 0 0 4px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+  }
+  .callout p { margin: 0; color: var(--ink-soft); font-size: 14px; }
+
+  .diagram {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 24px;
+    margin: 16px 0;
+  }
+  .diagram svg { display: block; max-width: 100%; height: auto; }
+  .diagram-label {
+    font-size: 12px;
+    color: var(--ink-faint);
+    text-align: center;
+    margin-top: 12px;
+    font-style: italic;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .panel {
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 16px;
+    background: var(--paper);
+  }
+  .panel h4 {
+    margin: 0 0 8px;
+    font-size: 14px;
+  }
+
+  @media print {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc { display: none; }
+    main { border: none; padding: 24px 0; }
+    section { page-break-inside: avoid; }
+  }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc { display: none; }
+    main { padding: 24px 20px; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<nav class="toc">
+  <h4>Contents</h4>
+  <ol>
+    <li><a href="#overview">1. Overview</a></li>
+    <li><a href="#stack">2. Stack</a></li>
+    <li><a href="#topology">3. System topology</a></li>
+    <li><a href="#frontend">4. Frontend</a></li>
+    <li><a href="#backend">5. Backend</a></li>
+    <li><a href="#data">6. Data layer</a></li>
+    <li><a href="#filters">7. The filter pattern</a></li>
+    <li><a href="#flow">8. Request flow</a></li>
+    <li><a href="#endpoints">9. Endpoint inventory</a></li>
+    <li><a href="#orphans">10. Discovery findings</a></li>
+    <li><a href="#testing">11. Test posture</a></li>
+    <li><a href="#operational">12. Operational concerns</a></li>
+    <li><a href="#onboarding">13. Onboarding a new engineer</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="doc-header">
+  <div class="eyebrow">Current-State Architecture · RFP MC-2026-0417 · Deliverable R4</div>
+  <h1>Meridian Inventory Dashboard</h1>
+  <div class="meta">Prepared for Meridian Components IT — Phase 1, Week 2 — April 2026</div>
+</header>
+
+<section id="overview">
+<h2>1. Overview</h2>
+<p>The Meridian inventory dashboard is a single-page Vue application backed by a Python (FastAPI) read-only API. It serves operations teams in three warehouses (San Francisco, London, Tokyo) for day-to-day visibility into stock levels, orders, supplier spend, demand forecasts, and a backlog queue. The system was originally delivered by a previous vendor in 2024 and has been frozen pending modernization.</p>
+<p><strong>It is a small system.</strong> Two services, no database, no authentication, one shared filter convention. The architectural surface area is modest. The complexity it has is mostly in the data shapes — seven JSON files representing seven loosely related domains — and in the front-end views that compose those shapes into operational reports.</p>
+
+<div class="callout info">
+  <h4>Document scope</h4>
+  <p>This is the institutional knowledge document the previous vendor did not leave behind. It describes the system as it is on day one of our engagement. It will be updated as we change the system through Phases 2–4.</p>
+</div>
+</section>
+
+<section id="stack">
+<h2>2. Stack</h2>
+<table>
+  <thead>
+    <tr><th>Layer</th><th>Technology</th><th>Version observed</th><th>Port</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Frontend</td><td>Vue 3 + Vite + Composition API</td><td>Vite 5.4</td><td>3000</td></tr>
+    <tr><td>Frontend HTTP</td><td>axios</td><td>—</td><td>—</td></tr>
+    <tr><td>Frontend i18n</td><td>Hand-rolled <code>useI18n.js</code> composable (not vue-i18n)</td><td>—</td><td>—</td></tr>
+    <tr><td>Backend</td><td>FastAPI + Pydantic + Uvicorn</td><td>FastAPI 0.136, Pydantic 2.13</td><td>8001</td></tr>
+    <tr><td>Backend runtime</td><td>Python (managed by <code>uv</code>)</td><td>Python 3.13 (≥3.11)</td><td>—</td></tr>
+    <tr><td>Persistence</td><td><strong>JSON files on disk</strong> — no database</td><td>—</td><td>—</td></tr>
+    <tr><td>Auth</td><td><strong>None.</strong> CORS allows all origins.</td><td>—</td><td>—</td></tr>
+    <tr><td>Test infrastructure</td><td>pytest (backend, 46 cases). No frontend tests.</td><td>pytest 9.0</td><td>—</td></tr>
+  </tbody>
+</table>
+</section>
+
+<section id="topology">
+<h2>3. System topology</h2>
+<div class="diagram">
+<svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg" aria-label="System topology">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <!-- Browser -->
+  <rect x="20" y="100" width="140" height="80" rx="6" fill="#dbeafe" stroke="#1e40af" stroke-width="1.5"/>
+  <text x="90" y="135" text-anchor="middle" font-size="14" font-weight="600" fill="#0f172a">Operator browser</text>
+  <text x="90" y="155" text-anchor="middle" font-size="11" fill="#475569">Chrome, Edge, etc.</text>
+
+  <!-- Frontend -->
+  <rect x="220" y="100" width="180" height="80" rx="6" fill="#fff" stroke="#1e40af" stroke-width="1.5"/>
+  <text x="310" y="128" text-anchor="middle" font-size="14" font-weight="600" fill="#0f172a">Vue 3 SPA</text>
+  <text x="310" y="148" text-anchor="middle" font-size="11" fill="#475569">Vite dev :3000 / built static</text>
+  <text x="310" y="166" text-anchor="middle" font-size="11" fill="#475569">7 views · 3 composables</text>
+
+  <!-- Backend -->
+  <rect x="450" y="100" width="180" height="80" rx="6" fill="#fff" stroke="#1e40af" stroke-width="1.5"/>
+  <text x="540" y="128" text-anchor="middle" font-size="14" font-weight="600" fill="#0f172a">FastAPI service</text>
+  <text x="540" y="148" text-anchor="middle" font-size="11" fill="#475569">Uvicorn :8001</text>
+  <text x="540" y="166" text-anchor="middle" font-size="11" fill="#475569">12 GET endpoints · Pydantic</text>
+
+  <!-- Data -->
+  <rect x="660" y="100" width="80" height="80" rx="6" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="700" y="135" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">JSON</text>
+  <text x="700" y="155" text-anchor="middle" font-size="11" fill="#475569">7 files</text>
+
+  <!-- Arrows -->
+  <line x1="160" y1="140" x2="216" y2="140" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="400" y1="140" x2="446" y2="140" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="630" y1="140" x2="656" y2="140" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <text x="188" y="132" text-anchor="middle" font-size="10" fill="#475569">HTTPS</text>
+  <text x="423" y="132" text-anchor="middle" font-size="10" fill="#475569">JSON / HTTP</text>
+  <text x="643" y="132" text-anchor="middle" font-size="10" fill="#475569">read</text>
+
+  <!-- Service labels -->
+  <text x="310" y="220" text-anchor="middle" font-size="11" fill="#94a3b8" font-style="italic">stateless static asset bundle</text>
+  <text x="540" y="220" text-anchor="middle" font-size="11" fill="#94a3b8" font-style="italic">stateless, in-memory data on startup</text>
+
+  <!-- Note -->
+  <text x="380" y="260" text-anchor="middle" font-size="11" fill="#b45309" font-weight="600">No database. No authentication. CORS wildcard. Suitable for internal use only.</text>
+</svg>
+<div class="diagram-label">Two services, one data store. Browser → Vue SPA → FastAPI → JSON files on disk.</div>
+</div>
+</section>
+
+<section id="frontend">
+<h2>4. Frontend</h2>
+<p>Single-page Vue 3 application. Vite serves the dev build on port 3000; production assets are static. The application bootstraps in <code>client/src/main.js</code> and routes through the standard Vue Router pattern into seven top-level views.</p>
+
+<div class="grid-2">
+<div class="panel">
+<h4>Views (<code>client/src/views/</code>)</h4>
+<ul>
+  <li><code>Dashboard.vue</code> — summary tiles and headline metrics</li>
+  <li><code>Inventory.vue</code> — stock levels by warehouse and category</li>
+  <li><code>Orders.vue</code> — orders with status, warehouse, month filters</li>
+  <li><code>Demand.vue</code> — demand forecasts</li>
+  <li><code>Spending.vue</code> — supplier spend, monthly + by-category</li>
+  <li><code>Reports.vue</code> <span class="pill warn">remediation target</span> — quarterly + monthly trends</li>
+  <li><code>Backlog.vue</code> — delayed-inventory queue with PO status</li>
+</ul>
+</div>
+
+<div class="panel">
+<h4>Composables (<code>client/src/composables/</code>)</h4>
+<ul>
+  <li><code>useFilters.js</code> — shared filter state (warehouse, category, status, month). The convention that runs through every view.</li>
+  <li><code>useI18n.js</code> — hand-rolled translation lookup. Locale persisted in <code>localStorage</code>. <code>en</code> and <code>ja</code> dictionaries present.</li>
+  <li><code>useAuth.js</code> — placeholder; not actually wired to a backend.</li>
+</ul>
+</div>
+</div>
+
+<h3>API client</h3>
+<p><code>client/src/api.js</code> is the centralized axios wrapper with one method per backend endpoint. <strong>Most views go through <code>api.js</code></strong>; Reports is the exception — it makes direct <code>axios.get()</code> calls to the backend, which is one of the inconsistencies R1 will address.</p>
+
+<h3>Pattern conventions</h3>
+<ul>
+  <li><strong>Composition API</strong> in most views; Reports is on the older Options API (cleanup target under D1).</li>
+  <li><strong>v-for keys are always unique IDs</strong> — never indices.</li>
+  <li><strong>Loading / error / data</strong> tri-state pattern in views that fetch.</li>
+  <li><strong>Computed for derived data, refs for source data</strong> — explicit in <code>client/CLAUDE.md</code>.</li>
+</ul>
+</section>
+
+<section id="backend">
+<h2>5. Backend</h2>
+<p>Single-file FastAPI service in <code>server/main.py</code> (~309 lines). All endpoints are <code>GET</code> only — the application is read-only against the JSON data. Pydantic models define the response shapes; the same shapes are used to validate the inbound JSON files at startup via <code>server/mock_data.py</code>.</p>
+
+<h3>Module layout</h3>
+<pre><code>server/
+├── main.py            # FastAPI app, all routes
+├── mock_data.py       # Loads + parses JSON files at module import
+├── data/              # Source-of-truth JSON files
+│   ├── inventory.json
+│   ├── orders.json
+│   ├── demand_forecasts.json
+│   ├── backlog_items.json
+│   ├── purchase_orders.json
+│   ├── spending.json
+│   └── transactions.json
+└── pyproject.toml     # uv-managed; deps: fastapi, uvicorn, pydantic</code></pre>
+
+<h3>Pydantic models defined</h3>
+<ul>
+  <li><code>InventoryItem</code>, <code>Order</code>, <code>DemandForecast</code>, <code>BacklogItem</code></li>
+  <li><code>PurchaseOrder</code>, <code>CreatePurchaseOrderRequest</code> <span class="pill warn">defined but no endpoint exposes them</span></li>
+</ul>
+
+<h3>CORS posture</h3>
+<p><code>allow_origins=["*"]</code>, all methods, all headers, credentials allowed. <strong>Suitable for internal development only.</strong> Production deployment requires explicit origin allowlisting.</p>
+</section>
+
+<section id="data">
+<h2>6. Data layer</h2>
+<p>The "database" is seven JSON files in <code>server/data/</code>, loaded into Python lists at module import time and held in memory for the lifetime of the process. There is no write path: changes to the JSON files require a server restart to take effect; the API itself never writes back.</p>
+
+<table>
+  <thead><tr><th>File</th><th>Loaded as</th><th>Used by</th></tr></thead>
+  <tbody>
+    <tr><td><code>inventory.json</code></td><td><code>inventory_items</code></td><td>Inventory + Dashboard summary</td></tr>
+    <tr><td><code>orders.json</code></td><td><code>orders</code></td><td>Orders + Dashboard summary + Reports</td></tr>
+    <tr><td><code>demand_forecasts.json</code></td><td><code>demand_forecasts</code></td><td>Demand</td></tr>
+    <tr><td><code>backlog_items.json</code></td><td><code>backlog_items</code></td><td>Backlog</td></tr>
+    <tr><td><code>purchase_orders.json</code></td><td><code>purchase_orders</code></td><td>Backlog (referenced for <code>has_purchase_order</code> flag)</td></tr>
+    <tr><td><code>spending.json</code></td><td><code>spending_summary</code>, <code>monthly_spending</code>, <code>category_spending</code></td><td>Spending</td></tr>
+    <tr><td><code>transactions.json</code></td><td><code>recent_transactions</code></td><td>Spending</td></tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <h4>Limitations of the JSON-file pattern</h4>
+  <p>No concurrency control, no durability beyond what the host filesystem provides, no schema evolution story, and no query optimization. Reasonable for a small read-only demonstration; not the right shape for write paths or for scaling beyond a few thousand items per file. R2 (Restocking) is read-only and so does not require this to change. A future engagement could migrate to a relational store; we'd scope it separately.</p>
+</div>
+</section>
+
+<section id="filters">
+<h2>7. The filter pattern</h2>
+<p>Every list-returning endpoint accepts the same set of optional query parameters and applies them through <code>apply_filters()</code> in <code>main.py</code>. The convention is consistent enough that it is worth documenting as a pattern — every new endpoint should follow it.</p>
+
+<table>
+  <thead><tr><th>Param</th><th>Sentinel for "no filter"</th><th>Comparison</th></tr></thead>
+  <tbody>
+    <tr><td><code>warehouse</code></td><td>missing or <code>"all"</code></td><td>exact match on <code>item.warehouse</code></td></tr>
+    <tr><td><code>category</code></td><td>missing or <code>"all"</code></td><td>case-insensitive on <code>item.category</code></td></tr>
+    <tr><td><code>status</code></td><td>missing or <code>"all"</code></td><td>case-insensitive on <code>item.status</code></td></tr>
+    <tr><td><code>month</code></td><td>missing or <code>"all"</code></td><td>substring match on <code>item.order_date</code>; quarter sentinels (<code>Q1-2025</code>...) expanded via <code>QUARTER_MAP</code></td></tr>
+  </tbody>
+</table>
+<p>On the frontend, <code>useFilters.js</code> holds the same four refs and exposes <code>getCurrentFilters()</code> for views to forward into <code>api.js</code> calls. The contract is symmetric on both sides — change one, change both.</p>
+</section>
+
+<section id="flow">
+<h2>8. Request flow</h2>
+<div class="diagram">
+<svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" aria-label="Request flow">
+  <defs>
+    <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <!-- Lane labels -->
+  <text x="80" y="30" font-size="12" font-weight="600" fill="#94a3b8">User</text>
+  <text x="240" y="30" font-size="12" font-weight="600" fill="#94a3b8">View</text>
+  <text x="400" y="30" font-size="12" font-weight="600" fill="#94a3b8">api.js</text>
+  <text x="540" y="30" font-size="12" font-weight="600" fill="#94a3b8">FastAPI</text>
+  <text x="680" y="30" font-size="12" font-weight="600" fill="#94a3b8">JSON</text>
+
+  <!-- Lane lines -->
+  <line x1="100" y1="40" x2="100" y2="290" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+  <line x1="260" y1="40" x2="260" y2="290" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+  <line x1="420" y1="40" x2="420" y2="290" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+  <line x1="560" y1="40" x2="560" y2="290" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+  <line x1="700" y1="40" x2="700" y2="290" stroke="#e2e8f0" stroke-dasharray="3,3"/>
+
+  <!-- Steps -->
+  <line x1="100" y1="70" x2="260" y2="70" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow2)"/>
+  <text x="180" y="64" text-anchor="middle" font-size="11" fill="#0f172a">selects warehouse + month</text>
+
+  <line x1="260" y1="105" x2="260" y2="125" stroke="#475569" stroke-width="1.5"/>
+  <text x="270" y="120" font-size="11" fill="#0f172a">useFilters refs update → watcher fires</text>
+
+  <line x1="260" y1="150" x2="420" y2="150" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow2)"/>
+  <text x="340" y="144" text-anchor="middle" font-size="11" fill="#0f172a">api.getOrders(filters)</text>
+
+  <line x1="420" y1="180" x2="560" y2="180" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow2)"/>
+  <text x="490" y="174" text-anchor="middle" font-size="11" fill="#0f172a">GET /api/orders?warehouse=...&amp;month=...</text>
+
+  <line x1="560" y1="210" x2="700" y2="210" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow2)"/>
+  <text x="630" y="204" text-anchor="middle" font-size="11" fill="#0f172a">in-memory list filter</text>
+
+  <line x1="700" y1="240" x2="100" y2="240" stroke="#15803d" stroke-width="1.5" marker-end="url(#arrow2)"/>
+  <text x="400" y="234" text-anchor="middle" font-size="11" fill="#15803d">Pydantic-validated JSON → reactive ref → re-render</text>
+</svg>
+<div class="diagram-label">Filter changes propagate through the composable, are forwarded by the api.js client, and produce a server-side in-memory filter against pre-loaded JSON.</div>
+</div>
+</section>
+
+<section id="endpoints">
+<h2>9. Endpoint inventory</h2>
+<p>Confirmed by reading <code>server/main.py</code>. All endpoints are <code>GET</code> unless noted.</p>
+
+<table>
+  <thead>
+    <tr><th>Endpoint</th><th>Filters</th><th>Returns</th><th>Used by</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>/api/inventory</code></td><td>warehouse, category</td><td><code>InventoryItem[]</code></td><td>Inventory view</td></tr>
+    <tr><td><code>/api/inventory/{id}</code></td><td>—</td><td><code>InventoryItem</code> · 404 if missing</td><td>—</td></tr>
+    <tr><td><code>/api/orders</code></td><td>warehouse, category, status, month</td><td><code>Order[]</code></td><td>Orders view</td></tr>
+    <tr><td><code>/api/orders/{id}</code></td><td>—</td><td><code>Order</code> · 404 if missing</td><td>—</td></tr>
+    <tr><td><code>/api/dashboard/summary</code></td><td>warehouse, category, status, month</td><td>aggregated dict</td><td>Dashboard view</td></tr>
+    <tr><td><code>/api/demand</code></td><td>—</td><td><code>DemandForecast[]</code></td><td>Demand view</td></tr>
+    <tr><td><code>/api/backlog</code></td><td>—</td><td><code>BacklogItem[]</code> with PO flag</td><td>Backlog view</td></tr>
+    <tr><td><code>/api/spending/summary</code></td><td>—</td><td>summary dict</td><td>Spending view</td></tr>
+    <tr><td><code>/api/spending/monthly</code></td><td>—</td><td>monthly list</td><td>Spending view</td></tr>
+    <tr><td><code>/api/spending/categories</code></td><td>—</td><td>by-category list</td><td>Spending view</td></tr>
+    <tr><td><code>/api/spending/transactions</code></td><td>—</td><td>transaction list</td><td>Spending view</td></tr>
+    <tr><td><code>/api/reports/quarterly</code></td><td>—</td><td>quarterly aggregate</td><td>Reports view</td></tr>
+    <tr><td><code>/api/reports/monthly-trends</code></td><td>—</td><td>monthly aggregate</td><td>Reports view</td></tr>
+  </tbody>
+</table>
+</section>
+
+<section id="orphans">
+<h2>10. Discovery findings</h2>
+<p>One finding warrants explicit mention: there are endpoints called by the frontend that do not exist on the backend.</p>
+
+<div class="callout bad">
+  <h4>Orphaned client endpoints</h4>
+  <p>The following are defined as methods on <code>api.js</code> but have no route handler in <code>server/main.py</code>. They will fail at runtime with a 404 from FastAPI's default handler — there is no graceful client-side fallback. Disposition is part of R2 discovery.</p>
+</div>
+
+<table>
+  <thead><tr><th>Client method</th><th>Calls</th><th>Server status</th></tr></thead>
+  <tbody>
+    <tr><td><code>api.getTasks()</code></td><td><code>GET /api/tasks</code></td><td><span class="pill bad">404 — not implemented</span></td></tr>
+    <tr><td><code>api.createTask(data)</code></td><td><code>POST /api/tasks</code></td><td><span class="pill bad">404 — not implemented</span></td></tr>
+    <tr><td><code>api.deleteTask(id)</code></td><td><code>DELETE /api/tasks/{id}</code></td><td><span class="pill bad">404 — not implemented</span></td></tr>
+    <tr><td><code>api.toggleTask(id)</code></td><td><code>PATCH /api/tasks/{id}</code></td><td><span class="pill bad">404 — not implemented</span></td></tr>
+    <tr><td><code>api.createPurchaseOrder(data)</code></td><td><code>POST /api/purchase-orders</code></td><td><span class="pill bad">404 — not implemented</span></td></tr>
+    <tr><td><code>api.getPurchaseOrderByBacklogItem(id)</code></td><td><code>GET /api/purchase-orders/{backlogItemId}</code></td><td><span class="pill bad">404 — not implemented</span></td></tr>
+  </tbody>
+</table>
+
+<p>Of note: <code>purchase_orders.json</code> exists, is loaded into <code>mock_data</code>, and its model (<code>PurchaseOrder</code>, <code>CreatePurchaseOrderRequest</code>) is defined in <code>main.py</code>. Everything is ready except the route registration. This looks like an unfinished feature, not dead code.</p>
+<p><strong>Decision required at end of Week 2:</strong> remove the orphaned client methods (and any callers), or wire up the corresponding server routes. Either way, the new Restocking work in R2 should not land alongside untriaged dead code.</p>
+
+<h3>D2 i18n — partial coverage gap</h3>
+<p>D2 (Tokyo team able to run the dashboard end-to-end in <code>ja</code>) is <strong>substantially advanced but not fully closed</strong> in this engagement. Translated by us during this engagement: Reports module (R1), the new Restocking view (R2), the theme switcher (D3), and the previously hardcoded "Reports" nav link.</p>
+<p><strong>Remaining gap:</strong> approximately 55 hardcoded English strings remain across the detail-modal components (<code>BacklogDetailModal</code>, <code>ProductDetailModal</code>, <code>InventoryDetailModal</code>, <code>CostDetailModal</code>, <code>ProfileDetailsModal</code>, <code>TasksModal</code>) and a handful of view-level labels. These are user-visible secondary surfaces — when a Tokyo operator clicks into an inventory shortage or a top product, the modal still renders English. Fix is mechanical: wrap each label in <code>t()</code>, add the key to <code>en.js</code> and <code>ja.js</code>. Many keys are reusable from existing namespaces (<code>inventory.table.*</code>, <code>orders.table.*</code>, <code>finance.*</code>). Estimated 2–3 hours scoped as a follow-up story.</p>
+</section>
+
+<section id="testing">
+<h2>11. Test posture</h2>
+<table>
+  <thead><tr><th>Layer</th><th>Coverage</th><th>Tooling</th></tr></thead>
+  <tbody>
+    <tr><td>Backend</td><td><span class="pill good">46 cases</span> across 3 modules in <code>tests/backend/</code></td><td>pytest + FastAPI <code>TestClient</code></td></tr>
+    <tr><td>Frontend unit</td><td><span class="pill bad">none</span></td><td>—</td></tr>
+    <tr><td>End-to-end / browser</td><td><span class="pill bad">none</span></td><td>— (Playwright introduced in this engagement)</td></tr>
+  </tbody>
+</table>
+<p>The RFP's claim of "no automated test coverage" is not quite accurate: the backend has a real test suite. The gap R3 is asking us to close is browser-level coverage of user flows. We extend the existing pytest suite alongside.</p>
+</section>
+
+<section id="operational">
+<h2>12. Operational concerns</h2>
+<ul>
+  <li><strong>No authentication.</strong> Anyone reachable at <code>:8001</code> can hit any endpoint. Suitable for an internal network only; production deployment requires an auth layer (proxied or in-app).</li>
+  <li><strong>CORS allows everything.</strong> <code>allow_origins=["*"]</code> with credentials. Production needs explicit origin allowlist.</li>
+  <li><strong>No rate limiting.</strong> Not a concern internally; flag for any external exposure.</li>
+  <li><strong>Data refresh requires restart.</strong> Edits to JSON files are picked up only on server boot.</li>
+  <li><strong>No logging or observability.</strong> No structured logs, no metrics, no traces. Adding even basic request logging is straightforward and worth doing during R3 hardening.</li>
+  <li><strong>No environment-specific configuration.</strong> <code>API_BASE_URL</code> is hardcoded to <code>http://localhost:8001/api</code> in <code>client/src/api.js</code>. A build-time environment variable is the standard fix.</li>
+</ul>
+</section>
+
+<section id="onboarding">
+<h2>13. Onboarding a new engineer</h2>
+<p>A developer with general Vue and FastAPI experience should be able to run the system locally in under ten minutes, and should be able to answer the questions below using only this document plus the codebase.</p>
+
+<h3>Quick start</h3>
+<pre><code># Backend
+cd server
+uv sync
+uv run python main.py    # serves on :8001
+
+# Frontend (separate terminal)
+cd client
+npm install
+npm run dev              # serves on :3000
+
+# Visit http://localhost:3000 in a browser</code></pre>
+
+<h3>Self-check questions</h3>
+<ul>
+  <li><strong>Where does data live?</strong> JSON files in <code>server/data/</code>, loaded into memory at startup by <code>server/mock_data.py</code>.</li>
+  <li><strong>How does a filter become a query parameter?</strong> View binds to <code>useFilters.js</code> refs → calls <code>api.js</code> method with <code>getCurrentFilters()</code> → axios appends URL search params → FastAPI reads optional query args → <code>apply_filters()</code> filters the in-memory list → Pydantic-validated JSON returned.</li>
+  <li><strong>Where would I add a new view?</strong> A new file in <code>client/src/views/</code>, register in the router, follow the loading/error/data pattern, use <code>api.js</code> for backend calls.</li>
+  <li><strong>Where would I add a new endpoint?</strong> Pydantic model + route function in <code>server/main.py</code>, follow the <code>apply_filters()</code> convention, add a wrapper method to <code>client/src/api.js</code>, write a pytest case in <code>tests/backend/</code>.</li>
+</ul>
+</section>
+
+</main>
+
+</div>
+
+</body>
+</html>

@@ -165,7 +165,7 @@ const close = () => {
 }
 
 .modal-container {
-  background: white;
+  background: var(--color-paper);
   border-radius: 12px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
   max-width: 600px;
@@ -181,20 +181,20 @@ const close = () => {
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-rule);
 }
 
 .modal-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-ink);
   letter-spacing: -0.025em;
 }
 
 .close-button {
   background: none;
   border: none;
-  color: #64748b;
+  color: var(--color-ink-muted);
   cursor: pointer;
   padding: 0.5rem;
   display: flex;
@@ -205,8 +205,8 @@ const close = () => {
 }
 
 .close-button:hover {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: var(--color-surface-muted);
+  color: var(--color-ink);
 }
 
 .modal-body {
@@ -226,8 +226,8 @@ const close = () => {
 }
 
 .summary-card.total {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%);
+  color: var(--color-paper);
 }
 
 .summary-label {
@@ -258,7 +258,7 @@ const close = () => {
 
 .cost-item.procurement {
   border-color: #93c5fd;
-  background: #eff6ff;
+  background: var(--color-accent-softest);
 }
 
 .cost-item.operational {
@@ -273,7 +273,7 @@ const close = () => {
 
 .cost-item.overhead {
   border-color: #fcd34d;
-  background: #fffbeb;
+  background: var(--color-warning-softest);
 }
 
 .cost-header {
@@ -294,23 +294,23 @@ const close = () => {
 }
 
 .cost-item.procurement .cost-icon {
-  background: #3b82f6;
-  color: white;
+  background: var(--color-accent);
+  color: var(--color-paper);
 }
 
 .cost-item.operational .cost-icon {
   background: #8b5cf6;
-  color: white;
+  color: var(--color-paper);
 }
 
 .cost-item.labor .cost-icon {
-  background: #10b981;
-  color: white;
+  background: var(--color-success);
+  color: var(--color-paper);
 }
 
 .cost-item.overhead .cost-icon {
-  background: #f59e0b;
-  color: white;
+  background: var(--color-warning);
+  color: var(--color-paper);
 }
 
 .cost-info {
@@ -319,7 +319,7 @@ const close = () => {
 
 .cost-name {
   font-weight: 600;
-  color: #0f172a;
+  color: var(--color-ink);
   font-size: 1rem;
   margin-bottom: 0.25rem;
 }
@@ -327,38 +327,38 @@ const close = () => {
 .cost-amount {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-ink);
 }
 
 .cost-percentage {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--color-ink-muted);
   font-weight: 500;
 }
 
 .modal-footer {
   padding: 1.5rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--color-rule);
   display: flex;
   justify-content: flex-end;
 }
 
 .btn-secondary {
   padding: 0.625rem 1.25rem;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-rule);
   border-radius: 8px;
   font-weight: 500;
   font-size: 0.875rem;
-  color: #334155;
+  color: var(--color-ink-strong);
   cursor: pointer;
   transition: all 0.15s ease;
   font-family: inherit;
 }
 
 .btn-secondary:hover {
-  background: #e2e8f0;
-  border-color: #cbd5e1;
+  background: var(--color-rule);
+  border-color: var(--color-rule-strong);
 }
 
 /* Modal transition animations */

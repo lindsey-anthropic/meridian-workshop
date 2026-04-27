@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Capabilities Presentation — Meridian Components RFP MC-2026-0417</title>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --slide-bg: #ffffff;
+    --ink: #0f172a;
+    --ink-soft: #475569;
+    --ink-faint: #94a3b8;
+    --accent: #1e40af;
+    --accent-soft: #dbeafe;
+    --rule: #e2e8f0;
+    --good: #15803d;
+    --warn: #b45309;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  .deck {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .slide {
+    display: none;
+    width: 100%;
+    max-width: 1100px;
+    aspect-ratio: 16 / 9;
+    background: var(--slide-bg);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 64px 72px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+    position: relative;
+    flex-direction: column;
+  }
+  .slide.active { display: flex; }
+
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-faint);
+    margin-bottom: 24px;
+  }
+
+  h1 {
+    font-size: 44px;
+    line-height: 1.15;
+    font-weight: 700;
+    margin: 0 0 16px;
+    letter-spacing: -0.02em;
+  }
+  h2 {
+    font-size: 32px;
+    line-height: 1.2;
+    font-weight: 700;
+    margin: 0 0 24px;
+    letter-spacing: -0.015em;
+  }
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: var(--ink);
+  }
+  p, li { color: var(--ink-soft); }
+  p { margin: 0 0 16px; }
+
+  .lede { font-size: 22px; color: var(--ink-soft); max-width: 800px; }
+  .accent { color: var(--accent); }
+
+  ul { padding-left: 20px; margin: 0 0 16px; }
+  li { margin-bottom: 8px; }
+  li strong { color: var(--ink); }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 8px;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    margin-top: 8px;
+  }
+  .grid-4 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 16px;
+    margin-top: 8px;
+  }
+
+  .card {
+    background: #f8fafc;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 20px;
+  }
+  .card .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .card h3 { margin-bottom: 6px; font-size: 16px; }
+  .card p { font-size: 14px; margin: 0; }
+
+  .phase-card {
+    background: var(--slide-bg);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 16px;
+    border-top: 3px solid var(--accent);
+  }
+  .phase-card .week { font-size: 11px; color: var(--ink-faint); font-weight: 600; }
+  .phase-card h3 { font-size: 15px; margin: 4px 0 8px; }
+  .phase-card p { font-size: 13px; margin: 0; }
+
+  .gantt {
+    font-family: "SF Mono", "Monaco", "Menlo", monospace;
+    font-size: 13px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    padding: 20px;
+    color: var(--ink);
+    line-height: 1.6;
+    margin-top: 16px;
+  }
+  .gantt .bar { color: var(--accent); }
+
+  .price-headline {
+    font-size: 56px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    margin: 8px 0;
+  }
+  .price-detail {
+    font-size: 16px;
+    color: var(--ink-soft);
+    margin-bottom: 24px;
+  }
+
+  .why-us-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .why-us-row:last-child { border-bottom: none; }
+  .why-us-row .num {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    min-width: 48px;
+  }
+  .why-us-row h3 { font-size: 18px; margin-bottom: 4px; }
+  .why-us-row p { font-size: 15px; margin: 0; }
+
+  .footer {
+    position: absolute;
+    bottom: 24px;
+    left: 72px;
+    right: 72px;
+    display: flex;
+    justify-content: space-between;
+    color: var(--ink-faint);
+    font-size: 12px;
+  }
+
+  .nav {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 6px 14px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+    font-size: 13px;
+    color: var(--ink-soft);
+    user-select: none;
+  }
+  .nav button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ink-soft);
+    font-size: 18px;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .nav button:hover { background: var(--rule); }
+  .nav .counter { font-variant-numeric: tabular-nums; min-width: 48px; text-align: center; }
+
+  .title-slide {
+    justify-content: center;
+    text-align: left;
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+  }
+  .title-slide h1 { font-size: 56px; }
+  .title-slide .meta { color: var(--ink-faint); font-size: 14px; margin-top: 32px; }
+
+  .closing-slide { justify-content: center; }
+
+  @media print {
+    .nav { display: none; }
+    .deck { display: block; height: auto; padding: 0; }
+    .slide {
+      display: flex !important;
+      page-break-after: always;
+      box-shadow: none;
+      border: none;
+      max-width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- Slide 1 — Title -->
+  <section class="slide active title-slide">
+    <div class="eyebrow">Capabilities Presentation</div>
+    <h1>Modernizing the Meridian<br>Inventory Dashboard</h1>
+    <p class="lede">A response to RFP MC-2026-0417, in twelve slides.</p>
+    <div class="meta">
+      Prepared for J. Okafor, Director of Procurement, Meridian Components, Inc.<br>
+      April 2026
+    </div>
+    <div class="footer"><span></span><span>1 / 12</span></div>
+  </section>
+
+  <!-- Slide 2 — Our understanding -->
+  <section class="slide">
+    <div class="eyebrow">Our understanding</div>
+    <h2>The dashboard works. It's been stalled.</h2>
+    <div class="grid-2">
+      <div>
+        <p>Operations across San Francisco, London, and Tokyo depend on the inventory dashboard every day. The previous engagement ended with:</p>
+        <ul>
+          <li>The <strong>Reports module</strong> half-finished</li>
+          <li><strong>No automated tests</strong>, freezing IT change approvals</li>
+          <li>Documentation thin enough that future change carries unknown risk</li>
+        </ul>
+      </div>
+      <div>
+        <p>The result: a working system that nobody is comfortable changing, and a list of capabilities — most importantly Restocking — that operations has been waiting on for months.</p>
+        <p><strong class="accent">This isn't a rebuild. It's a stabilization-and-extension engagement.</strong></p>
+      </div>
+    </div>
+    <div class="footer"><span>RFP MC-2026-0417</span><span>2 / 12</span></div>
+  </section>
+
+  <!-- Slide 3 — Who we're solving for -->
+  <section class="slide">
+    <div class="eyebrow">Who we're solving for</div>
+    <h2>Three stakeholders, three different needs.</h2>
+    <div class="grid-3">
+      <div class="card">
+        <div class="label">Operations</div>
+        <h3>R. Tanaka, VP Operations</h3>
+        <p>Lives in the dashboard daily. Restocking is her ask. Wants the system to stop getting in her team's way.</p>
+      </div>
+      <div class="card">
+        <div class="label">Gatekeeper</div>
+        <h3>Meridian IT</h3>
+        <p>Has paused changes because there's no way to know what breaks. Test coverage is the unlock for everything else.</p>
+      </div>
+      <div class="card">
+        <div class="label">Buying decision</div>
+        <h3>J. Okafor, Procurement</h3>
+        <p>Cares about timeline confidence and price predictability. Has heard "we'll get it done" before.</p>
+      </div>
+    </div>
+    <p style="margin-top: 32px; max-width: 760px;">Our approach speaks to each, in priority order: <strong>tests first</strong> (IT), <strong>Reports cleanup and Restocking</strong> (Tanaka), <strong>capped pricing with weekly visibility</strong> (Okafor).</p>
+    <div class="footer"><span>RFP MC-2026-0417</span><span>3 / 12</span></div>
+  </section>
+
+  <!-- Slide 4 — Approach overview -->
+  <section class="slide">
+    <div class="eyebrow">Our approach</div>
+    <h2>Stabilize first, then extend.</h2>
+    <div class="grid-2">
+      <div>
+        <h3>Sequencing principle</h3>
+        <p>Every change lands behind a regression test. Every requirement closes on a demo to operations and a documentation update for IT.</p>
+        <h3 style="margin-top: 24px;">Why this order</h3>
+        <p>The test harness and architecture review come <em>before</em> any remediation, because they are what make the rest of the engagement safe to ship.</p>
+      </div>
+      <div>
+        <h3>Engagement shape</h3>
+        <ul>
+          <li><strong>12 weeks, four phases</strong></li>
+          <li><strong>3-person senior team</strong>, no offshore handoff</li>
+          <li><strong>T&amp;M with not-to-exceed cap</strong>, confirmed at the Week-2 discovery checkpoint</li>
+          <li>Bi-weekly status with hours, progress, and remaining cap headroom</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer"><span>RFP MC-2026-0417</span><span>4 / 12</span></div>
+  </section>
+
+  <!-- Slide 5 — Phase 1 -->
+  <section class="slide">
+    <div class="eyebrow">Phase 1 · Weeks 1–2</div>
+    <h2>Discovery &amp; test harness</h2>
+    <p class="lede">Architecture review, Playwright scaffold, Reports defect audit. Plus the discovery checkpoint that confirms the cap.</p>
+    <div class="grid-3" style="margin-top: 24px;">
+      <div class="phase-card">
+        <div class="week">R4</div>
+        <h3>Architecture review</h3>
+        <p>The institutional knowledge the previous vendor didn't leave. Drafted with Meridian IT.</p>
+      </div>
+      <div class="phase-card">
+        <div class="week">R3 · foundation</div>
+        <h3>Playwright + CI</h3>
+        <p>Test harness in place before any remediation. Smoke suite green from Day 1.</p>
+      </div>
+      <div class="phase-card">
+        <div class="week">R1 · audit</div>
+        <h3>Defect audit</h3>
+        <p>Two days walking the Reports module to produce the itemized list Meridian doesn't have today.</p>
+      </div>
+    </div>
+    <p style="margin-top: 32px;"><strong>Gate:</strong> Discovery Checkpoint at end of Week 2. Final NTE cap signed.</p>
+    <div class="footer"><span>RFP MC-2026-0417</span><span>5 / 12</span></div>
+  </section>
+
+  <!-- Slide 6 — Phase 2 -->
+  <section class="slide">
+    <div class="eyebrow">Phase 2 · Weeks 3–5</div>
+    <h2>Reports remediation</h2>
+    <div class="grid-2">
+      <div>
+        <p>What we already see in the code:</p>
+        <ul>
+          <li>~488 LoC, older Options API while the rest of the app has moved on</li>
+          <li>~13 <code>console.log</code> statements left in the rendered code path</li>
+          <li>User-facing strings hardcoded English (overlaps with D2)</li>
+          <li>Direct <code>axios</code> calls bypassing the centralized API client</li>
+        </ul>
+      </div>
+      <div>
+        <h3>How we close it</h3>
+        <ul>
+          <li>Audit list triaged with Tanaka's team</li>
+          <li>Each defect closed behind a regression test</li>
+          <li>View brought onto the patterns the rest of the app uses</li>
+        </ul>
+        <h3 style="margin-top: 16px;">Gate</h3>
+        <p>R1 demo to operations. Sign-off against the audit list.</p>
+      </div>
+    </div>
+    <div class="footer"><span>RFP MC-2026-0417</span><span>6 / 12</span></div>
+  </section>
+
+  <!-- Slide 7 — Phase 3 -->
+  <section class="slide">
+    <div class="eyebrow">Phase 3 · Weeks 6–9</div>
+    <h2>Restocking capability</h2>
+    <p class="lede">VP Operations' headline ask. The largest single piece of work in the engagement.</p>
+    <div class="grid-2" style="margin-top: 24px;">
+      <div>
+        <h3>Backend</h3>
+        <p><code>GET /api/restocking/recommend</code>, accepting an operator budget, returning ranked recommendations with rationale. Greedy fill ordered by stockout risk — simple, explainable, tunable.</p>
+      </div>
+      <div>
+        <h3>Frontend</h3>
+        <p>New top-level view following established patterns: Composition API, scoped i18n keys from day one, <code>api.js</code> client. CSV export for downstream procurement use.</p>
+      </div>
+    </div>
+    <p style="margin-top: 24px;"><strong>Discovery item:</strong> the codebase already calls <code>/api/purchase-orders/*</code> endpoints that don't exist on the server. We disposition this in Phase 1, then build cleanly.</p>
+    <div class="footer"><span>RFP MC-2026-0417</span><span>7 / 12</span></div>
+  </section>
+
+  <!-- Slide 8 — Phase 4 -->
+  <section class="slide">
+    <div class="eyebrow">Phase 4 · Weeks 10–12</div>
+    <h2>Hardening &amp; desired items</h2>
+    <div class="grid-4">
+      <div class="phase-card">
+        <div class="week">R3 · final</div>
+        <h3>Test coverage</h3>
+        <p>Critical flows fully covered. Suite handed to Meridian-hosted CI.</p>
+      </div>
+      <div class="phase-card">
+        <div class="week">D2</div>
+        <h3>i18n extension</h3>
+        <p>Tokyo team can run the dashboard end-to-end in <code>ja</code>.</p>
+      </div>
+      <div class="phase-card">
+        <div class="week">D1</div>
+        <h3>UI cleanup</h3>
+        <p>Color tokens, spacing, polish. Cleanup, not redesign.</p>
+      </div>
+      <div class="phase-card">
+        <div class="week">D3</div>
+        <h3>Dark mode</h3>
+        <p>Operator-toggleable theme. D1 is the prerequisite.</p>
+      </div>
+    </div>
+    <p style="margin-top: 32px;"><strong>De-scope order if reality bites:</strong> D3 → D1 → D2. Required scope (R1–R4) is held.</p>
+    <div class="footer"><span>RFP MC-2026-0417</span><span>8 / 12</span></div>
+  </section>
+
+  <!-- Slide 9 — Timeline at a glance -->
+  <section class="slide">
+    <div class="eyebrow">Timeline at a glance</div>
+    <h2>Twelve weeks, four gates.</h2>
+    <pre class="gantt">Week:    1   2 │ 3   4   5 │ 6   7   8   9 │10  11  12
+Phase 1: <span class="bar">███ ███</span>│            │                │
+Phase 2:        │<span class="bar">███ ███ ███</span>│                │
+Phase 3:        │            │<span class="bar">███ ███ ███ ███</span>│
+Phase 4:        │            │                │<span class="bar">███ ███ ███</span>
+                │            │                │
+Gate:        ▲              ▲              ▲              ▲
+        Discovery        R1 demo        R2 demo        Final acceptance
+        checkpoint                                     + handover</pre>
+    <p style="margin-top: 24px;">Engagement assumed to start <strong>Monday, May 18, 2026</strong>. One week of contingency distributed across Phases 3 and 4.</p>
+    <div class="footer"><span>RFP MC-2026-0417</span><span>9 / 12</span></div>
+  </section>
+
+  <!-- Slide 10 — Pricing -->
+  <section class="slide">
+    <div class="eyebrow">Pricing</div>
+    <h2>T&amp;M with a not-to-exceed cap.</h2>
+    <div class="price-headline">$247,000</div>
+    <div class="price-detail">Preliminary engagement cap, confirmed at the Week-2 Discovery Checkpoint.</div>
+    <div class="grid-3">
+      <div class="card">
+        <div class="label">Phase 1 · Weeks 1–2</div>
+        <h3>$27,000</h3>
+        <p style="margin-top: 4px;">Firm fixed-fee. Discovery scope is well-defined.</p>
+      </div>
+      <div class="card">
+        <div class="label">Phases 2–4 · Weeks 3–12</div>
+        <h3>$220,000</h3>
+        <p style="margin-top: 4px;">T&amp;M cap, including ~12% contingency.</p>
+      </div>
+      <div class="card">
+        <div class="label">Visibility</div>
+        <h3>Bi-weekly status</h3>
+        <p style="margin-top: 4px;">Hours, progress, remaining cap headroom — every two weeks.</p>
+      </div>
+    </div>
+    <p style="margin-top: 24px; font-size: 15px;">Senior US team. Rate card disclosed in the written proposal: $245 / $195 / $165 for tech lead, frontend, QA.</p>
+    <div class="footer"><span>RFP MC-2026-0417</span><span>10 / 12</span></div>
+  </section>
+
+  <!-- Slide 11 — Why us -->
+  <section class="slide">
+    <div class="eyebrow">Why us</div>
+    <h2>Three reasons, briefly.</h2>
+    <div style="margin-top: 16px;">
+      <div class="why-us-row">
+        <div class="num">1</div>
+        <div>
+          <h3>We've done this exact engagement before.</h3>
+          <p>Our most recent comparable engagement was a 5-month vendor-handoff stabilization for a $22M logistics broker. Same shape — half-finished application, no test coverage, frozen change pipeline, paused operations features. Closed 23 logged defects, added a new operations view, retired the change freeze. Two more case studies in the written proposal.</p>
+        </div>
+      </div>
+      <div class="why-us-row">
+        <div class="num">2</div>
+        <div>
+          <h3>Small and senior. No offshore handoff.</h3>
+          <p>Three people, all with at least two years on the team, all hands-on. Tanaka's team and Meridian IT will speak to the same engineers from kickoff to closeout.</p>
+        </div>
+      </div>
+      <div class="why-us-row">
+        <div class="num">3</div>
+        <div>
+          <h3>Honest scoping over heroic promises.</h3>
+          <p>We've sized this engagement against an audit we haven't run yet. The Discovery Checkpoint at end of Week 2 is the moment we confirm the cap — based on the defect surface as it actually is. Meridian gets a real number, not a hopeful one.</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><span>RFP MC-2026-0417</span><span>11 / 12</span></div>
+  </section>
+
+  <!-- Slide 12 — Closing -->
+  <section class="slide closing-slide">
+    <div class="eyebrow">Next steps</div>
+    <h1>We'd like to keep talking.</h1>
+    <p class="lede" style="margin-top: 16px;">Happy to walk the buying committee through any section in detail, talk to references, or sit with R. Tanaka's team for an hour to validate the R1 audit assumptions before contract.</p>
+    <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--rule); color: var(--ink-soft); font-size: 15px;">
+      Written proposal package: executive summary · technical approach · timeline · pricing · relevant experience.<br>
+      All sections referenced in this deck are available in the accompanying <code>proposal/</code> directory.
+    </div>
+    <div class="footer"><span>RFP MC-2026-0417</span><span>12 / 12</span></div>
+  </section>
+
+</div>
+
+<div class="nav">
+  <button id="prev" aria-label="Previous slide">←</button>
+  <span class="counter"><span id="cur">1</span> / <span id="total">12</span></span>
+  <button id="next" aria-label="Next slide">→</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let idx = 0;
+  document.getElementById('total').textContent = total;
+
+  function show(i) {
+    slides[idx].classList.remove('active');
+    idx = (i + total) % total;
+    slides[idx].classList.add('active');
+    document.getElementById('cur').textContent = idx + 1;
+  }
+  document.getElementById('prev').addEventListener('click', () => show(idx - 1));
+  document.getElementById('next').addEventListener('click', () => show(idx + 1));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); show(idx + 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(idx - 1); }
+    if (e.key === 'Home') show(0);
+    if (e.key === 'End') show(total - 1);
+  });
+</script>
+
+</body>
+</html>

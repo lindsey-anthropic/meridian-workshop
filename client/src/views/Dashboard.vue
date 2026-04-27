@@ -85,19 +85,19 @@
               <!-- Left: Donut Chart -->
               <div class="order-health-chart">
                 <svg viewBox="0 0 200 200" class="donut-svg-compact">
-                  <circle cx="100" cy="100" r="65" fill="none" stroke="#e2e8f0" stroke-width="25"/>
-                  <circle cx="100" cy="100" r="65" fill="none" stroke="#10b981" stroke-width="25"
+                  <circle cx="100" cy="100" r="65" fill="none" stroke="var(--color-rule)" stroke-width="25"/>
+                  <circle cx="100" cy="100" r="65" fill="none" stroke="var(--color-success)" stroke-width="25"
                     :stroke-dasharray="`${getCircleSegment(statusData.delivered)} 408`"
                     stroke-dashoffset="0" transform="rotate(-90 100 100)"/>
-                  <circle cx="100" cy="100" r="65" fill="none" stroke="#3b82f6" stroke-width="25"
+                  <circle cx="100" cy="100" r="65" fill="none" stroke="var(--color-accent)" stroke-width="25"
                     :stroke-dasharray="`${getCircleSegment(statusData.shipped)} 408`"
                     :stroke-dashoffset="`-${getCircleSegment(statusData.delivered)}`"
                     transform="rotate(-90 100 100)"/>
-                  <circle cx="100" cy="100" r="65" fill="none" stroke="#f59e0b" stroke-width="25"
+                  <circle cx="100" cy="100" r="65" fill="none" stroke="var(--color-warning)" stroke-width="25"
                     :stroke-dasharray="`${getCircleSegment(statusData.processing)} 408`"
                     :stroke-dashoffset="`-${getCircleSegment(statusData.delivered) + getCircleSegment(statusData.shipped)}`"
                     transform="rotate(-90 100 100)"/>
-                  <circle cx="100" cy="100" r="65" fill="none" stroke="#ef4444" stroke-width="25"
+                  <circle cx="100" cy="100" r="65" fill="none" stroke="var(--color-danger)" stroke-width="25"
                     :stroke-dasharray="`${getCircleSegment(statusData.backordered)} 408`"
                     :stroke-dashoffset="`-${getCircleSegment(statusData.delivered) + getCircleSegment(statusData.shipped) + getCircleSegment(statusData.processing)}`"
                     transform="rotate(-90 100 100)"/>
@@ -105,10 +105,10 @@
                   <text x="100" y="120" text-anchor="middle" class="donut-center-value">{{ orderHealthMetrics.totalOrders }}</text>
                 </svg>
                 <div class="donut-legend-compact">
-                  <div class="legend-item-compact"><span class="legend-dot" style="background: #10b981"></span>{{ t('status.delivered') }}</div>
-                  <div class="legend-item-compact"><span class="legend-dot" style="background: #3b82f6"></span>{{ t('status.shipped') }}</div>
-                  <div class="legend-item-compact"><span class="legend-dot" style="background: #f59e0b"></span>{{ t('status.processing') }}</div>
-                  <div class="legend-item-compact"><span class="legend-dot" style="background: #ef4444"></span>{{ t('status.backordered') }}</div>
+                  <div class="legend-item-compact"><span class="legend-dot" style="background: var(--color-success)"></span>{{ t('status.delivered') }}</div>
+                  <div class="legend-item-compact"><span class="legend-dot" style="background: var(--color-accent)"></span>{{ t('status.shipped') }}</div>
+                  <div class="legend-item-compact"><span class="legend-dot" style="background: var(--color-warning)"></span>{{ t('status.processing') }}</div>
+                  <div class="legend-item-compact"><span class="legend-dot" style="background: var(--color-danger)"></span>{{ t('status.backordered') }}</div>
                 </div>
               </div>
 
@@ -199,7 +199,7 @@
                     </span>
                   </td>
                   <td @click="showBacklogDetail(item)" style="cursor: pointer;">
-                    <span :style="{ color: item.days_delayed > 7 ? '#ef4444' : '#f59e0b', fontWeight: 600 }">
+                    <span :style="{ color: item.days_delayed > 7 ? 'var(--color-danger)' : 'var(--color-warning)', fontWeight: 600 }">
                       {{ item.days_delayed }} {{ t('dashboard.inventoryShortages.days') }}
                     </span>
                   </td>
@@ -409,7 +409,7 @@ export default {
       const categoryMap = {}
 
       // Use a single neutral slate/gray color for all categories
-      const singleColor = '#64748b' // Neutral slate gray color
+      const singleColor = 'var(--color-ink-muted)' // Neutral slate gray color
 
       // Get SKUs from orders in the filtered time period
       const orderedSkus = new Set()
@@ -736,7 +736,7 @@ export default {
 
 .header-meta {
   font-size: 0.813rem;
-  color: #64748b;
+  color: var(--color-ink-muted);
 }
 
 .kpi-section {
@@ -746,7 +746,7 @@ export default {
 .section-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--color-ink-soft);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 1rem;
@@ -759,8 +759,8 @@ export default {
 }
 
 .kpi-card {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
   border-radius: 10px;
   padding: 1rem;
 }
@@ -772,7 +772,7 @@ export default {
 .kpi-label {
   font-size: 0.813rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--color-ink-muted);
   text-transform: uppercase;
   letter-spacing: 0.025em;
 }
@@ -780,34 +780,34 @@ export default {
 .kpi-value {
   font-size: 2rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-ink);
   margin-bottom: 0.5rem;
   letter-spacing: -0.025em;
 }
 
 .kpi-goal {
   font-size: 0.813rem;
-  color: #64748b;
+  color: var(--color-ink-muted);
   margin-bottom: 0.75rem;
 }
 
 .kpi-progress-bar {
   width: 100%;
   height: 6px;
-  background: #f1f5f9;
+  background: var(--color-surface-muted);
   border-radius: 3px;
   overflow: hidden;
 }
 
 .kpi-progress {
   height: 100%;
-  background: #3b82f6;
+  background: var(--color-accent);
   border-radius: 3px;
   transition: width 0.6s ease;
 }
 
 .kpi-progress.success {
-  background: #10b981;
+  background: var(--color-success);
 }
 
 .charts-grid {
@@ -848,7 +848,7 @@ export default {
   align-items: center;
   gap: 0.625rem;
   font-size: 0.875rem;
-  color: #475569;
+  color: var(--color-ink-soft);
 }
 
 .legend-dot {
@@ -883,7 +883,7 @@ export default {
 
 .donut-center-label {
   font-size: 12px;
-  fill: #64748b;
+  fill: var(--color-ink-muted);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -891,7 +891,7 @@ export default {
 
 .donut-center-value {
   font-size: 36px;
-  fill: #0f172a;
+  fill: var(--color-ink);
   font-weight: 700;
 }
 
@@ -906,7 +906,7 @@ export default {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.875rem;
-  color: #475569;
+  color: var(--color-ink-soft);
   font-weight: 500;
 }
 
@@ -928,7 +928,7 @@ export default {
 
 .health-metric-label {
   font-size: 0.688rem;
-  color: #64748b;
+  color: var(--color-ink-muted);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -937,20 +937,20 @@ export default {
 .health-metric-value {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--color-ink);
   letter-spacing: -0.025em;
 }
 
 .metric-good {
-  color: #10b981;
+  color: var(--color-success);
 }
 
 .metric-warning {
-  color: #f59e0b;
+  color: var(--color-warning);
 }
 
 .metric-bad {
-  color: #ef4444;
+  color: var(--color-danger);
 }
 
 .horizontal-bar-chart {
@@ -971,14 +971,14 @@ export default {
   min-width: 120px;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--color-ink-soft);
   flex-shrink: 0;
 }
 
 .h-bar-container {
   flex: 1;
   height: 32px;
-  background: #f8fafc;
+  background: var(--color-page-bg);
   border-radius: 6px;
   overflow: hidden;
 }
@@ -995,7 +995,7 @@ export default {
 .h-bar-value {
   font-size: 0.813rem;
   font-weight: 700;
-  color: white;
+  color: var(--color-paper);
 }
 
 .line-chart {
@@ -1010,8 +1010,8 @@ export default {
   justify-content: space-between;
   padding-right: 1rem;
   font-size: 0.75rem;
-  color: #94a3b8;
-  border-right: 1px solid #e2e8f0;
+  color: var(--color-ink-faint);
+  border-right: 1px solid var(--color-rule);
 }
 
 .line-chart-area {
@@ -1044,7 +1044,7 @@ export default {
   width: 100%;
   max-width: 60px;
   min-height: 8px;
-  background: #3b82f6;
+  background: var(--color-accent);
   border-radius: 6px 6px 0 0;
   transition: all 0.3s ease;
   cursor: pointer;
@@ -1052,32 +1052,32 @@ export default {
 }
 
 .line-bar.empty-bar {
-  background: #e2e8f0;
+  background: var(--color-rule);
   box-shadow: none;
   min-height: 4px;
 }
 
 .line-bar:hover {
-  background: #2563eb;
+  background: var(--color-accent-hover);
   transform: scaleY(1.05);
 }
 
 .line-bar.empty-bar:hover {
-  background: #cbd5e1;
+  background: var(--color-rule-strong);
   transform: none;
 }
 
 .line-bar-label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--color-ink-muted);
   white-space: nowrap;
 }
 
 .no-data {
   padding: 2rem;
   text-align: center;
-  color: #94a3b8;
+  color: var(--color-ink-faint);
   font-size: 0.875rem;
 }
 
@@ -1093,12 +1093,12 @@ export default {
 .success-icon {
   width: 48px;
   height: 48px;
-  color: #10b981;
+  color: var(--color-success);
 }
 
 .no-backlog-text {
   font-size: 1.125rem;
-  color: #10b981;
+  color: var(--color-success);
   font-weight: 600;
   margin: 0;
 }
@@ -1109,7 +1109,7 @@ export default {
 }
 
 .clickable-row:hover {
-  background: #eff6ff !important;
+  background: var(--color-accent-softest) !important;
 }
 
 /* Tasks Card Styles */
@@ -1130,7 +1130,7 @@ export default {
 .task-input {
   flex: 1;
   padding: 0.75rem;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--color-rule);
   border-radius: 8px;
   font-size: 0.95rem;
   transition: border-color 0.2s ease;
@@ -1144,7 +1144,7 @@ export default {
 .task-add-btn {
   padding: 0.75rem 1.5rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  color: var(--color-paper);
   border: none;
   border-radius: 8px;
   font-weight: 600;
@@ -1164,7 +1164,7 @@ export default {
 .no-tasks {
   text-align: center;
   padding: 2rem;
-  color: #64748b;
+  color: var(--color-ink-muted);
   font-style: italic;
 }
 
@@ -1179,15 +1179,15 @@ export default {
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
-  background: #f8fafc;
+  background: var(--color-page-bg);
   border-radius: 8px;
   border: 2px solid transparent;
   transition: all 0.2s ease;
 }
 
 .task-item:hover {
-  border-color: #e2e8f0;
-  background: white;
+  border-color: var(--color-rule);
+  background: var(--color-paper);
 }
 
 .task-item.completed {
@@ -1196,7 +1196,7 @@ export default {
 
 .task-item.completed .task-text {
   text-decoration: line-through;
-  color: #94a3b8;
+  color: var(--color-ink-faint);
 }
 
 .task-checkbox {
@@ -1210,15 +1210,15 @@ export default {
   flex: 1;
   cursor: pointer;
   user-select: none;
-  color: #0f172a;
+  color: var(--color-ink);
   font-size: 0.95rem;
 }
 
 .task-delete-btn {
   width: 28px;
   height: 28px;
-  background: #ef4444;
-  color: white;
+  background: var(--color-danger);
+  color: var(--color-paper);
   border: none;
   border-radius: 6px;
   font-size: 1.25rem;
@@ -1232,7 +1232,7 @@ export default {
 }
 
 .task-delete-btn:hover {
-  background: #dc2626;
+  background: var(--color-danger-strong);
   transform: scale(1.1);
 }
 
@@ -1248,23 +1248,23 @@ export default {
 }
 
 .po-button.create {
-  background: #3b82f6;
-  color: white;
+  background: var(--color-accent);
+  color: var(--color-paper);
 }
 
 .po-button.create:hover {
-  background: #2563eb;
+  background: var(--color-accent-hover);
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
 }
 
 .po-button.view {
-  background: #64748b;
-  color: white;
+  background: var(--color-ink-muted);
+  color: var(--color-paper);
 }
 
 .po-button.view:hover {
-  background: #475569;
+  background: var(--color-ink-soft);
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(100, 116, 139, 0.3);
 }

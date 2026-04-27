@@ -6,6 +6,8 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    reports: 'レポート',
+    restocking: '補充',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -311,6 +313,12 @@ export default {
     selectLanguage: '言語を選択'
   },
 
+  // Theme
+  theme: {
+    switchToLight: 'ライトテーマに切り替え',
+    switchToDark: 'ダークテーマに切り替え'
+  },
+
   // Common
   common: {
     loading: '読み込み中...',
@@ -324,6 +332,78 @@ export default {
     filter: 'フィルター',
     export: 'エクスポート',
     items: '件'
+  },
+
+  // Restocking
+  restocking: {
+    title: '補充推奨',
+    description: 'オペレーター指定の予算に基づいて発注計画を立案。在庫切れリスクで順位付けされます。',
+    budgetLabel: '月次予算',
+    summary: {
+      recommendationCount: '推奨件数',
+      totalCost: '推奨合計金額',
+      budgetUsedPct: '予算使用率',
+      remaining: '残予算'
+    },
+    table: {
+      rank: '順位',
+      sku: 'SKU',
+      name: '品目',
+      warehouse: '倉庫',
+      category: 'カテゴリ',
+      currentStock: '現在庫',
+      recommendedQty: '推奨数量',
+      unitCost: '単価',
+      lineTotal: '小計',
+      rationale: '理由'
+    },
+    rationale: {
+      below_reorder_with_demand: '再注文点を下回り、{forecast}単位の需要予測あり',
+      below_reorder: '再注文点を下回る（{deficit}単位不足）',
+      forecast_only: '{forecast}単位の需要予測が現在庫を超過'
+    },
+    skipped: {
+      title: 'スキップ（リスクあり、予算超過）',
+      insufficient_remaining_budget: '残予算不足'
+    },
+    exportCsv: 'CSVエクスポート',
+    empty: 'この予算では補充の必要はありません — 全在庫SKUが再注文点を上回っています。',
+    loading: '推奨を計算中...',
+    errorPrefix: '推奨の読み込みに失敗しました'
+  },
+
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期業績指標と月次トレンドを表示',
+    loading: 'レポートを読み込み中...',
+    errorPrefix: 'レポートの読み込みに失敗しました',
+    notApplicable: 'なし',
+    quarterly: {
+      title: '四半期業績',
+      quarter: '四半期',
+      totalOrders: '総注文数',
+      totalRevenue: '総収益',
+      avgOrderValue: '平均注文額',
+      fulfillmentRate: '履行率'
+    },
+    monthlyTrend: {
+      title: '月次収益トレンド'
+    },
+    monthOverMonth: {
+      title: '月次比較分析',
+      month: '月',
+      orders: '注文数',
+      revenue: '収益',
+      change: '変化',
+      growthRate: '成長率'
+    },
+    summary: {
+      totalRevenueYTD: '総収益（年初来）',
+      avgMonthlyRevenue: '月次平均収益',
+      totalOrdersYTD: '総注文数（年初来）',
+      bestQuarter: 'ベスト四半期'
+    }
   },
 
   // Product Names
