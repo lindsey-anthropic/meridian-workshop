@@ -126,11 +126,12 @@ const handleLogout = () => {
   gap: 0.625rem;
   padding: 0.5rem 0.875rem;
   background: var(--bg-surface, white);
-  border: 1px solid var(--border-color, var(--border-color, #e2e8f0));
+  border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: inherit;
+  color: var(--text-primary, #0f172a);
 }
 
 .profile-button:hover {
@@ -225,7 +226,7 @@ const handleLogout = () => {
 
 .dropdown-divider {
   height: 1px;
-  background: #e2e8f0;
+  background: var(--border-color, #e2e8f0);
   margin: 0.5rem 0;
 }
 
