@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Components — System Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 40px;
+    min-height: 100vh;
+  }
+
+  header {
+    max-width: 1100px;
+    margin: 0 auto 32px;
+  }
+
+  header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 4px;
+  }
+
+  header p {
+    font-size: 14px;
+    color: #64748b;
+  }
+
+  .diagram {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Layer cards */
+  .layer {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px 24px;
+    position: relative;
+  }
+
+  .layer-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-bottom: 14px;
+  }
+
+  .layer-grid {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  /* Boxes inside layers */
+  .box {
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 130px;
+  }
+
+  .box .sub {
+    font-size: 11px;
+    font-weight: 400;
+    color: inherit;
+    opacity: 0.75;
+    margin-top: 3px;
+  }
+
+  /* Colour schemes */
+  .blue   { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+  .green  { background: #dcfce7; color: #14532d; border: 1px solid #bbf7d0; }
+  .amber  { background: #fef3c7; color: #78350f; border: 1px solid #fde68a; }
+  .purple { background: #ede9fe; color: #4c1d95; border: 1px solid #ddd6fe; }
+  .slate  { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+  .red    { background: #fee2e2; color: #7f1d1d; border: 1px solid #fecaca; }
+
+  /* Arrow between layers */
+  .arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .arrow-line {
+    flex: 1;
+    max-width: 200px;
+    height: 1px;
+    background: #cbd5e1;
+    position: relative;
+  }
+
+  .arrow-line::after {
+    content: '▼';
+    position: absolute;
+    right: -6px;
+    top: -8px;
+    font-size: 11px;
+    color: #94a3b8;
+  }
+
+  /* Section divider inside a layer */
+  .section-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .section-row:last-child { margin-bottom: 0; }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    width: 100%;
+    margin-bottom: 2px;
+  }
+
+  /* Data flow table */
+  .flow-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .flow-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #94a3b8;
+    padding: 8px 12px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .flow-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    vertical-align: top;
+  }
+
+  .flow-table tr:last-child td { border-bottom: none; }
+
+  .mono {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    background: #f8fafc;
+    padding: 1px 5px;
+    border-radius: 3px;
+    border: 1px solid #e2e8f0;
+  }
+
+  /* Notes section */
+  .notes {
+    max-width: 1100px;
+    margin: 24px auto 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .note-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px 24px;
+  }
+
+  .note-card h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 10px;
+  }
+
+  .note-card ul {
+    list-style: none;
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.6;
+  }
+
+  .note-card ul li::before {
+    content: '·  ';
+    color: #94a3b8;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Meridian Components — Inventory Dashboard: Current-State Architecture</h1>
+  <p>Prepared by vendor engagement team · April 2026 · Based on direct codebase assessment</p>
+</header>
+
+<div class="diagram">
+
+  <!-- Browser layer -->
+  <div class="layer">
+    <div class="layer-label">Layer 1 — Browser (Single-Page Application)</div>
+
+    <div class="section-row">
+      <div class="section-title">Router</div>
+      <div class="box blue">Vue Router
+        <div class="sub">7 routes / hash-less history</div>
+      </div>
+    </div>
+
+    <div class="section-row">
+      <div class="section-title">Views (pages)</div>
+      <div class="box blue">Dashboard <div class="sub">/</div></div>
+      <div class="box blue">Inventory <div class="sub">/inventory</div></div>
+      <div class="box blue">Orders <div class="sub">/orders</div></div>
+      <div class="box blue">Finance <div class="sub">/spending</div></div>
+      <div class="box blue">Demand <div class="sub">/demand</div></div>
+      <div class="box blue">Reports <div class="sub">/reports</div></div>
+      <div class="box blue">Restocking <div class="sub">/restocking</div></div>
+    </div>
+
+    <div class="section-row">
+      <div class="section-title">Shared components</div>
+      <div class="box purple">FilterBar <div class="sub">4 global filters</div></div>
+      <div class="box purple">LanguageSwitcher <div class="sub">EN / JA</div></div>
+      <div class="box purple">ProfileMenu</div>
+      <div class="box purple">Modals <div class="sub">Inventory · Order · Backlog · Profile</div></div>
+    </div>
+
+    <div class="section-row">
+      <div class="section-title">Composables (shared state)</div>
+      <div class="box slate">useFilters <div class="sub">Global filter state (singleton)</div></div>
+      <div class="box slate">useI18n <div class="sub">Locale · t() · currency</div></div>
+      <div class="box slate">useAuth <div class="sub">Current user session</div></div>
+    </div>
+
+    <div class="section-row">
+      <div class="section-title">API client</div>
+      <div class="box slate">api.js (axios) <div class="sub">Centralised HTTP calls · filter params → URLSearchParams</div></div>
+    </div>
+  </div>
+
+  <div class="arrow">
+    <div class="arrow-line"></div>
+    HTTP / JSON over localhost · CORS open · no auth
+    <div class="arrow-line"></div>
+  </div>
+
+  <!-- Backend layer -->
+  <div class="layer">
+    <div class="layer-label">Layer 2 — Backend (FastAPI · Python 3.12 · port 8001)</div>
+
+    <div class="section-row">
+      <div class="section-title">Endpoints</div>
+      <div class="box green">GET /api/inventory <div class="sub">warehouse · category</div></div>
+      <div class="box green">GET /api/orders <div class="sub">warehouse · category · status · month</div></div>
+      <div class="box green">GET /api/dashboard/summary <div class="sub">All filters</div></div>
+      <div class="box green">GET /api/reports/quarterly <div class="sub">All filters</div></div>
+      <div class="box green">GET /api/reports/monthly-trends <div class="sub">All filters</div></div>
+      <div class="box green">GET /api/restocking <div class="sub">warehouse · category</div></div>
+      <div class="box green">GET /api/demand <div class="sub">No filters</div></div>
+      <div class="box green">GET /api/backlog <div class="sub">No filters</div></div>
+      <div class="box green">GET /api/spending/* <div class="sub">summary · monthly · categories · transactions</div></div>
+    </div>
+
+    <div class="section-row">
+      <div class="section-title">Filter utilities (main.py)</div>
+      <div class="box slate">apply_filters() <div class="sub">warehouse · category · status</div></div>
+      <div class="box slate">filter_by_month() <div class="sub">YYYY-MM or Q1–Q4 quarter</div></div>
+    </div>
+
+    <div class="section-row">
+      <div class="section-title">Data models (Pydantic)</div>
+      <div class="box slate">InventoryItem</div>
+      <div class="box slate">Order</div>
+      <div class="box slate">DemandForecast</div>
+      <div class="box slate">BacklogItem</div>
+      <div class="box slate">PurchaseOrder</div>
+    </div>
+  </div>
+
+  <div class="arrow">
+    <div class="arrow-line"></div>
+    JSON files loaded into memory at startup · no persistence between restarts
+    <div class="arrow-line"></div>
+  </div>
+
+  <!-- Data layer -->
+  <div class="layer">
+    <div class="layer-label">Layer 3 — Data (JSON files · server/data/)</div>
+    <div class="layer-grid">
+      <div class="box amber">inventory.json <div class="sub">32 items · SKU · stock · cost</div></div>
+      <div class="box amber">orders.json <div class="sub">250 orders · 2025 · all warehouses</div></div>
+      <div class="box amber">demand_forecasts.json <div class="sub">9 items · 30-day forecast · trend</div></div>
+      <div class="box amber">backlog_items.json <div class="sub">4 items · shortage · delay</div></div>
+      <div class="box amber">purchase_orders.json <div class="sub">Empty array</div></div>
+      <div class="box amber">spending.json <div class="sub">Summary · monthly · categories · transactions</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- API endpoint + data flow table -->
+<div class="notes" style="grid-template-columns: 1fr;">
+  <div class="note-card">
+    <h3>Data Flow</h3>
+    <table class="flow-table">
+      <thead>
+        <tr>
+          <th>Step</th>
+          <th>Where</th>
+          <th>What happens</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>FilterBar.vue</td>
+          <td>User changes a filter → <span class="mono">useFilters</span> singleton refs update reactively across all views</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>View (e.g. Reports.vue)</td>
+          <td><span class="mono">watch([selectedLocation, selectedCategory, …])</span> fires → calls <span class="mono">loadData()</span></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>api.js</td>
+          <td>Filter values serialised to <span class="mono">URLSearchParams</span> → axios GET to FastAPI</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>FastAPI endpoint</td>
+          <td><span class="mono">apply_filters()</span> and <span class="mono">filter_by_month()</span> applied to in-memory data → Pydantic validates response</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>View</td>
+          <td>Reactive refs updated → Vue re-renders the affected template sections</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="notes">
+  <div class="note-card">
+    <h3>Tech Stack</h3>
+    <ul>
+      <li>Frontend: Vue 3 · Composition API · Vite · Vue Router</li>
+      <li>HTTP client: axios (centralised in api.js)</li>
+      <li>i18n: custom composable · EN + JA locales</li>
+      <li>Backend: FastAPI · Python 3.12 · uvicorn · Pydantic v2</li>
+      <li>Package manager: uv (backend) · npm (frontend)</li>
+      <li>Tests: pytest + pytest-playwright (browser E2E)</li>
+      <li>Dev ports: frontend 3000 · backend 8001</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>Known Constraints &amp; Observations</h3>
+    <ul>
+      <li>No database — all data is JSON files loaded into memory at startup. Changes do not persist.</li>
+      <li>No authentication or authorisation on any endpoint.</li>
+      <li>CORS is open (<span class="mono">allow_origins=["*"]</span>) — dev only, not production-safe.</li>
+      <li>Some views still use Options API (incomplete migration from previous vendor).</li>
+      <li>purchase_orders.json is empty — write endpoints exist but are not wired to persistent storage.</li>
+      <li>Demand forecasts cover only 9 of 32 inventory SKUs.</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>Warehouses</h3>
+    <ul>
+      <li>San Francisco — HQ and primary distribution</li>
+      <li>London — EMEA</li>
+      <li>Tokyo — APAC, opened 2023</li>
+    </ul>
+  </div>
+
+  <div class="note-card">
+    <h3>Running the System</h3>
+    <ul>
+      <li>Backend: <span class="mono">cd server &amp;&amp; uv run python main.py</span></li>
+      <li>Frontend: <span class="mono">cd client &amp;&amp; npm run dev</span></li>
+      <li>Both: <span class="mono">./scripts/start.sh</span></li>
+      <li>Browser tests: <span class="mono">cd tests &amp;&amp; uv run pytest browser/ --browser chromium -v</span></li>
+      <li>API docs: <span class="mono">http://localhost:8001/docs</span></li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

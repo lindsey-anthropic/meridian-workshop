@@ -6,6 +6,8 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
+    reports: 'Reports',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -316,6 +318,7 @@ export default {
     loading: 'Loading...',
     error: 'Error',
     noData: 'No data available',
+    loadError: 'Failed to load data. Please try again.',
     viewDetails: 'View Details',
     close: 'Close',
     save: 'Save',
@@ -324,5 +327,54 @@ export default {
     filter: 'Filter',
     export: 'Export',
     items: 'items'
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    subtitle: 'Purchase order recommendations based on stock levels and demand forecasts',
+    budgetCeiling: 'Budget Ceiling',
+    budgetPlaceholder: 'Enter budget (USD)',
+    totalItems: 'Items Needing Restock',
+    totalCost: 'Total Estimated Cost',
+    withinBudget: 'Items Within Budget',
+    item: 'Item',
+    warehouse: 'Warehouse',
+    stockStatus: 'Stock Status',
+    demandTrend: 'Demand Trend',
+    recommendedQty: 'Recommended Qty',
+    estimatedCost: 'Est. Cost',
+    priority: 'Priority',
+    budgetStatus: 'Budget',
+    high: 'High',
+    medium: 'Medium',
+    low: 'Low',
+    included: 'Included',
+    excluded: 'Excluded',
+    noItems: 'No restocking needed for current filters',
+    daysDelayed: '{days} days delayed'
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    subtitle: 'View quarterly performance metrics and monthly trends',
+    quarterlyPerformance: 'Quarterly Performance',
+    monthlyRevenueTrend: 'Monthly Revenue Trend',
+    monthOverMonth: 'Month-over-Month Analysis',
+    quarter: 'Quarter',
+    totalOrders: 'Total Orders',
+    totalRevenue: 'Total Revenue',
+    avgOrderValue: 'Avg Order Value',
+    fulfillmentRate: 'Fulfillment Rate',
+    month: 'Month',
+    orders: 'Orders',
+    revenue: 'Revenue',
+    change: 'Change',
+    growthRate: 'Growth Rate',
+    totalRevenueYTD: 'Total Revenue (YTD)',
+    avgMonthlyRevenue: 'Avg Monthly Revenue',
+    totalOrdersYTD: 'Total Orders (YTD)',
+    bestQuarter: 'Best Performing Quarter'
   }
 }
