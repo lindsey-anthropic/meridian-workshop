@@ -6,8 +6,49 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
+    reports: 'Reports',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    description: 'Generate prioritized purchase orders based on stock levels, demand forecasts, and a budget ceiling.',
+    budgetLabel: 'Budget',
+    budgetPlaceholder: 'Enter budget',
+    summaryRecommended: 'Recommended',
+    summaryBudget: 'Budget',
+    summaryWithinBudget: 'Items within budget',
+    summaryAboveBudget: 'Items above budget',
+    withinBudgetTitle: 'Recommended within budget ({count})',
+    aboveBudgetTitle: 'Above budget cutoff ({count})',
+    noResults: 'No items need restocking under the current filters.',
+    columns: {
+      priority: 'Priority',
+      sku: 'SKU',
+      name: 'Item Name',
+      warehouse: 'Warehouse',
+      currentStock: 'Current Stock',
+      reorderPoint: 'Reorder Point',
+      recommendedQty: 'Recommended Qty',
+      unitCost: 'Unit Cost',
+      totalCost: 'Total Cost',
+      forecast: 'Forecast'
+    },
+    priorityHigh: 'High',
+    priorityMedium: 'Medium',
+    priorityLow: 'Low',
+    forecastAvailable: 'Yes',
+    forecastMissing: 'No forecast',
+    selectAll: 'Select all',
+    selectedSummary: '{count} items selected · {symbol}{total}',
+    createPurchaseOrders: 'Create Purchase Orders',
+    creating: 'Creating...',
+    createSuccess: 'Created {count} purchase orders.',
+    createError: 'Failed to create purchase orders: ',
+    failedToLoad: 'Failed to load recommendations: '
   },
 
   // Dashboard
@@ -195,7 +236,8 @@ export default {
     category: 'Category',
     orderStatus: 'Order Status',
     all: 'All',
-    allMonths: 'All Months'
+    allMonths: 'All Months',
+    resetAll: 'Reset all filters'
   },
 
   // Statuses
@@ -311,6 +353,30 @@ export default {
     selectLanguage: 'Select Language'
   },
 
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    quarterlyPerformance: 'Quarterly Performance',
+    monthlyRevenueTrend: 'Monthly Revenue Trend',
+    monthOverMonthAnalysis: 'Month-over-Month Analysis',
+    quarter: 'Quarter',
+    totalOrders: 'Total Orders',
+    totalRevenue: 'Total Revenue',
+    avgOrderValue: 'Avg Order Value',
+    fulfillmentRate: 'Fulfillment Rate',
+    month: 'Month',
+    orders: 'Orders',
+    revenue: 'Revenue',
+    change: 'Change',
+    growthRate: 'Growth Rate',
+    totalRevenueYTD: 'Total Revenue (YTD)',
+    avgMonthlyRevenue: 'Avg Monthly Revenue',
+    totalOrdersYTD: 'Total Orders (YTD)',
+    bestPerformingQuarter: 'Best Performing Quarter',
+    failedToLoad: 'Failed to load reports: '
+  },
+
   // Common
   common: {
     loading: 'Loading...',
@@ -323,6 +389,66 @@ export default {
     search: 'Search',
     filter: 'Filter',
     export: 'Export',
-    items: 'items'
+    items: 'items',
+    actions: 'Actions',
+    createPO: 'Create PO',
+    viewPO: 'View PO'
+  },
+
+  // Transaction details (used in Finance/Spending alerts)
+  transactions: {
+    detailsTitle: 'Transaction Details',
+    id: 'ID',
+    description: 'Description',
+    vendor: 'Vendor',
+    date: 'Date',
+    amount: 'Amount'
+  },
+
+  // Auth
+  auth: {
+    logoutPlaceholder: 'Logout functionality - in a real app, this would clear session and redirect to login.'
+  },
+
+  // Detail Modals
+  modals: {
+    backlog: {
+      title: 'Inventory Shortage Details',
+      shortageAmount: 'Shortage Amount',
+      daysDelayed: 'Days Delayed',
+      itemSku: 'Item SKU',
+      expectedDate: 'Expected Date',
+      units: 'units',
+      days: 'days',
+      priority: 'Priority',
+      notAvailable: 'N/A'
+    },
+    cost: {
+      title: 'Cost Breakdown',
+      totalCosts: 'Total Costs',
+      ofTotal: '% of total'
+    },
+    inventory: {
+      title: 'Inventory Item Details',
+      quantityOnHand: 'Quantity on Hand',
+      stockLevel: 'Stock Level',
+      vsReorderPoint: 'vs. reorder point',
+      unitsRemaining: 'Units Remaining',
+      unitCost: 'Unit Cost',
+      totalValue: 'Total Value',
+      warehouse: 'Warehouse',
+      units: 'units'
+    },
+    product: {
+      title: 'Product Details',
+      unitsOrdered: 'Units Ordered',
+      totalRevenue: 'Total Revenue',
+      currentStock: 'Current Stock',
+      reorderPoint: 'Reorder Point',
+      firstOrderDate: 'First Order Date',
+      stockStatus: 'Stock Status',
+      units: 'units',
+      notAvailable: 'N/A'
+    }
   }
 }

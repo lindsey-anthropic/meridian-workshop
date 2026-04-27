@@ -6,8 +6,49 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    restocking: '補充',
+    reports: 'レポート',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
+  },
+
+  // Restocking
+  restocking: {
+    title: '補充推奨',
+    description: '在庫レベル、需要予測、予算上限に基づいて優先順位付けされた発注書を生成します。',
+    budgetLabel: '予算',
+    budgetPlaceholder: '予算を入力',
+    summaryRecommended: '推奨額',
+    summaryBudget: '予算',
+    summaryWithinBudget: '予算内の品目',
+    summaryAboveBudget: '予算超過の品目',
+    withinBudgetTitle: '予算内の推奨品目（{count}件）',
+    aboveBudgetTitle: '予算超過の品目（{count}件）',
+    noResults: '現在のフィルターでは補充が必要な品目はありません。',
+    columns: {
+      priority: '優先度',
+      sku: 'SKU',
+      name: '品目名',
+      warehouse: '倉庫',
+      currentStock: '現在の在庫',
+      reorderPoint: '発注点',
+      recommendedQty: '推奨数量',
+      unitCost: '単価',
+      totalCost: '合計コスト',
+      forecast: '予測'
+    },
+    priorityHigh: '高',
+    priorityMedium: '中',
+    priorityLow: '低',
+    forecastAvailable: 'あり',
+    forecastMissing: '予測なし',
+    selectAll: 'すべて選択',
+    selectedSummary: '{count}件選択 · {symbol}{total}',
+    createPurchaseOrders: '発注書を作成',
+    creating: '作成中...',
+    createSuccess: '{count}件の発注書を作成しました。',
+    createError: '発注書の作成に失敗しました: ',
+    failedToLoad: '推奨の読み込みに失敗しました: '
   },
 
   // Dashboard
@@ -195,7 +236,8 @@ export default {
     category: 'カテゴリ',
     orderStatus: '注文ステータス',
     all: 'すべて',
-    allMonths: 'すべての月'
+    allMonths: 'すべての月',
+    resetAll: 'すべてのフィルターをリセット'
   },
 
   // Statuses
@@ -311,6 +353,30 @@ export default {
     selectLanguage: '言語を選択'
   },
 
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期パフォーマンス指標と月次トレンドを表示',
+    quarterlyPerformance: '四半期パフォーマンス',
+    monthlyRevenueTrend: '月次収益トレンド',
+    monthOverMonthAnalysis: '前月比分析',
+    quarter: '四半期',
+    totalOrders: '総注文数',
+    totalRevenue: '総収益',
+    avgOrderValue: '平均注文額',
+    fulfillmentRate: '履行率',
+    month: '月',
+    orders: '注文数',
+    revenue: '収益',
+    change: '変化額',
+    growthRate: '成長率',
+    totalRevenueYTD: '総収益（年初来）',
+    avgMonthlyRevenue: '平均月次収益',
+    totalOrdersYTD: '総注文数（年初来）',
+    bestPerformingQuarter: '最高パフォーマンス四半期',
+    failedToLoad: 'レポートの読み込みに失敗しました: '
+  },
+
   // Common
   common: {
     loading: '読み込み中...',
@@ -323,7 +389,67 @@ export default {
     search: '検索',
     filter: 'フィルター',
     export: 'エクスポート',
-    items: '件'
+    items: '件',
+    actions: '操作',
+    createPO: '発注書を作成',
+    viewPO: '発注書を表示'
+  },
+
+  // Transaction details (used in Finance/Spending alerts)
+  transactions: {
+    detailsTitle: '取引詳細',
+    id: 'ID',
+    description: '説明',
+    vendor: '取引先',
+    date: '日付',
+    amount: '金額'
+  },
+
+  // Auth
+  auth: {
+    logoutPlaceholder: 'ログアウト機能 - 実際のアプリではセッションをクリアしてログイン画面にリダイレクトします。'
+  },
+
+  // Detail Modals
+  modals: {
+    backlog: {
+      title: '在庫不足詳細',
+      shortageAmount: '不足数量',
+      daysDelayed: '遅延日数',
+      itemSku: '品目SKU',
+      expectedDate: '予定日',
+      units: '個',
+      days: '日',
+      priority: '優先度',
+      notAvailable: 'なし'
+    },
+    cost: {
+      title: 'コスト内訳',
+      totalCosts: '総コスト',
+      ofTotal: '% 合計比'
+    },
+    inventory: {
+      title: '在庫品目詳細',
+      quantityOnHand: '手持在庫数',
+      stockLevel: '在庫レベル',
+      vsReorderPoint: '発注点比',
+      unitsRemaining: '残余数量',
+      unitCost: '単価',
+      totalValue: '総価値',
+      warehouse: '倉庫',
+      units: '個'
+    },
+    product: {
+      title: '製品詳細',
+      unitsOrdered: '注文数量',
+      totalRevenue: '総収益',
+      currentStock: '現在の在庫',
+      reorderPoint: '発注点',
+      firstOrderDate: '初回注文日',
+      stockStatus: '在庫状況',
+      units: '個',
+      notAvailable: 'なし'
+    }
   },
 
   // Product Names
@@ -359,7 +485,11 @@ export default {
     '48V DC Power Supply Unit': '48V DC電源ユニット',
     'USB-C PD 100W Power Supply': 'USB-C PD 100W電源',
     'Battery Backup Power Supply': 'バッテリバックアップ電源',
-    'Adjustable Bench Power Supply': '可変ベンチ電源'
+    'Adjustable Bench Power Supply': '可変ベンチ電源',
+    'Oil Filter Cartridge': 'オイルフィルターカートリッジ',
+    'Electric Motor 5HP': '5HP電動モータ',
+    'Pressure Relief Valve': '圧力リリーフバルブ',
+    'Industrial Widget Type A': '産業用ウィジェットAタイプ'
   },
 
   // Customer Names

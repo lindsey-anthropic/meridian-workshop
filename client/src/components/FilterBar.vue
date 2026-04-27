@@ -3,8 +3,8 @@
     <div class="filters-container">
       <div class="filters-grid">
         <div class="filter-group">
-          <label>{{ t('filters.timePeriod') }}</label>
-          <select v-model="selectedPeriod" class="filter-select">
+          <label for="filter-time-period">{{ t('filters.timePeriod') }}</label>
+          <select id="filter-time-period" v-model="selectedPeriod" class="filter-select">
             <option value="all">{{ t('filters.allMonths') }}</option>
             <option value="2025-01">{{ t('months.january') }}</option>
             <option value="2025-02">{{ t('months.february') }}</option>
@@ -22,8 +22,8 @@
         </div>
 
         <div class="filter-group">
-          <label>{{ t('filters.location') }}</label>
-          <select v-model="selectedLocation" class="filter-select">
+          <label for="filter-location">{{ t('filters.location') }}</label>
+          <select id="filter-location" v-model="selectedLocation" class="filter-select">
             <option value="all">{{ t('filters.all') }}</option>
             <option value="San Francisco">{{ t('warehouses.sanFrancisco') }}</option>
             <option value="London">{{ t('warehouses.london') }}</option>
@@ -32,8 +32,8 @@
         </div>
 
         <div class="filter-group">
-          <label>{{ t('filters.category') }}</label>
-          <select v-model="selectedCategory" class="filter-select">
+          <label for="filter-category">{{ t('filters.category') }}</label>
+          <select id="filter-category" v-model="selectedCategory" class="filter-select">
             <option value="all">{{ t('filters.all') }}</option>
             <option value="circuit boards">{{ t('categories.circuitBoards') }}</option>
             <option value="sensors">{{ t('categories.sensors') }}</option>
@@ -44,8 +44,8 @@
         </div>
 
         <div class="filter-group">
-          <label>{{ t('filters.orderStatus') }}</label>
-          <select v-model="selectedStatus" class="filter-select">
+          <label for="filter-order-status">{{ t('filters.orderStatus') }}</label>
+          <select id="filter-order-status" v-model="selectedStatus" class="filter-select">
             <option value="all">{{ t('filters.all') }}</option>
             <option value="delivered">{{ t('status.delivered') }}</option>
             <option value="shipped">{{ t('status.shipped') }}</option>
@@ -59,7 +59,7 @@
         class="reset-filters-btn"
         @click="resetFilters"
         :disabled="!hasActiveFilters"
-        title="Reset all filters"
+        :title="t('filters.resetAll')"
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />

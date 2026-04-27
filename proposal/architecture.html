@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Meridian Inventory Dashboard — Architecture</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f8fafc;
+    --border: #e2e8f0;
+    --border-strong: #cbd5e1;
+    --text: #0f172a;
+    --text-muted: #475569;
+    --text-dim: #64748b;
+    --accent: #1d4ed8;
+    --accent-soft: #dbeafe;
+    --code-bg: #f1f5f9;
+    --green: #16a34a;
+    --amber: #d97706;
+    --red: #dc2626;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.6;
+    font-size: 16px;
+  }
+  .layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 3rem;
+  }
+  header.title-block {
+    grid-column: 1 / -1;
+    padding: 3rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+  }
+  .eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+  h1 {
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+  .meta {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+  .meta strong { color: var(--text); font-weight: 600; }
+  nav.toc {
+    position: sticky;
+    top: 2rem;
+    align-self: start;
+    font-size: 0.875rem;
+    border-left: 1px solid var(--border);
+    padding-left: 1rem;
+  }
+  nav.toc h4 {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.75rem;
+  }
+  nav.toc ul { list-style: none; }
+  nav.toc li { margin-bottom: 0.4rem; }
+  nav.toc a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  nav.toc a:hover { color: var(--accent); }
+  main { min-width: 0; }
+  section { margin-bottom: 4rem; scroll-margin-top: 1.5rem; }
+  h2 {
+    font-size: 1.7rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 2px solid var(--border);
+    letter-spacing: -0.015em;
+  }
+  h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 2rem 0 0.75rem;
+    color: var(--text);
+  }
+  p { margin-bottom: 1rem; color: var(--text-muted); }
+  p strong { color: var(--text); }
+  code {
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.875em;
+    color: var(--text);
+  }
+  pre {
+    background: var(--code-bg);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+  pre code { background: transparent; padding: 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    font-size: 0.9rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.6rem 0.85rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface);
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+  }
+  td code { font-size: 0.85em; }
+  .pill {
+    display: inline-block;
+    padding: 0.1rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .pill.get { background: #dcfce7; color: #166534; }
+  .pill.post { background: #dbeafe; color: #1e40af; }
+  .pill.delete { background: #fee2e2; color: #991b1b; }
+  .pill.patch { background: #fef3c7; color: #92400e; }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin: 1rem 0 1.5rem;
+  }
+  .card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.1rem 1.25rem;
+    background: var(--bg);
+  }
+  .card h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: var(--text);
+  }
+  .card p { font-size: 0.875rem; margin-bottom: 0.5rem; }
+  .card ul { font-size: 0.875rem; color: var(--text-muted); padding-left: 1.1rem; }
+  .card ul li { margin-bottom: 0.2rem; }
+  .diagram-wrap {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    background: var(--surface);
+    overflow-x: auto;
+    margin: 1rem 0 1.5rem;
+  }
+  .diagram-wrap svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+  .callout {
+    border-left: 4px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 0.85rem 1.25rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1rem 0 1.5rem;
+    font-size: 0.92rem;
+    color: var(--text);
+  }
+  .callout.warn { border-left-color: var(--amber); background: #fef3c7; }
+  ul.bullet { padding-left: 1.25rem; margin-bottom: 1rem; }
+  ul.bullet li { margin-bottom: 0.4rem; color: var(--text-muted); }
+  ul.bullet li strong { color: var(--text); }
+  footer {
+    grid-column: 1 / -1;
+    padding: 2rem 0 3rem;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: 1rem; }
+    nav.toc { display: none; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+  @media print {
+    nav.toc { display: none; }
+    .layout { grid-template-columns: 1fr; }
+    body { font-size: 11pt; }
+    a { color: inherit; text-decoration: none; }
+    section { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <header class="title-block">
+    <div class="eyebrow">RFP MC-2026-0417 · Deliverable R4</div>
+    <h1>Inventory Dashboard — Current-State Architecture</h1>
+    <p class="meta">
+      Prepared for <strong>Meridian Components, Inc.</strong> · System version 1.0
+      · As-built from source as of April 2026 · Authoring vendor's handoff package
+    </p>
+  </header>
+
+  <nav class="toc">
+    <h4>Contents</h4>
+    <ul>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#stack">Stack</a></li>
+      <li><a href="#topology">System topology</a></li>
+      <li><a href="#frontend">Frontend</a></li>
+      <li><a href="#backend">Backend</a></li>
+      <li><a href="#endpoints">Endpoint catalog</a></li>
+      <li><a href="#dataflow">Data flow</a></li>
+      <li><a href="#cross-cutting">Cross-cutting concerns</a></li>
+      <li><a href="#testing">Testing</a></li>
+      <li><a href="#gaps">Gaps &amp; assumptions</a></li>
+    </ul>
+  </nav>
+
+  <main>
+
+    <section id="overview">
+      <h2>Overview</h2>
+      <p>
+        The Meridian Inventory Dashboard is a single-page web application for tracking stock,
+        orders, supplier spend, demand forecasts, and (since this engagement) restocking
+        recommendations across three warehouses (San Francisco, London, Tokyo). It serves
+        Operations and Finance teams in English and Japanese.
+      </p>
+      <p>
+        The architecture is intentionally <strong>simple</strong>: a Vue 3 single-page app calls a
+        FastAPI backend that holds all data in memory at startup, loaded from JSON files on
+        disk. There is no database, no authentication, no message bus, no caching layer — by
+        design (see <a href="#gaps">Gaps &amp; assumptions</a>). This document describes the
+        system as it exists today, after R1–R3 of this engagement; R4 is this document itself.
+      </p>
+      <div class="callout">
+        <strong>Audience.</strong> This document is the handoff reference for Meridian's IT
+        team. It explains <em>what exists</em> and <em>why</em>, so that future changes — by
+        Meridian or any future vendor — can be made with confidence.
+      </div>
+    </section>
+
+    <section id="stack">
+      <h2>Stack</h2>
+      <table>
+        <thead>
+          <tr><th>Layer</th><th>Technology</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Frontend framework</td>
+            <td>Vue 3 (Composition API)</td>
+            <td>All views use <code>setup()</code>; <code>&lt;script setup&gt;</code> sugar is not used today but is compatible.</td>
+          </tr>
+          <tr>
+            <td>Build / dev server</td>
+            <td>Vite 5</td>
+            <td>Dev server on port 3000. <code>npm run build</code> emits a static bundle for production hosting.</td>
+          </tr>
+          <tr>
+            <td>Routing</td>
+            <td>vue-router 4</td>
+            <td>HTML5 history mode. Routes registered in <code>client/src/main.js</code>.</td>
+          </tr>
+          <tr>
+            <td>HTTP client</td>
+            <td>axios</td>
+            <td>Centralized in <code>client/src/api.js</code>. All views import from this single module.</td>
+          </tr>
+          <tr>
+            <td>Styling</td>
+            <td>Scoped CSS in <code>.vue</code> files</td>
+            <td>No global design system. Conventional class names (<code>.card</code>, <code>.badge</code>, <code>.stats-grid</code>) repeated across views.</td>
+          </tr>
+          <tr>
+            <td>Charts</td>
+            <td>Hand-rolled SVG / divs</td>
+            <td>No charting library. Bar charts are CSS-styled <code>div</code>s with computed heights.</td>
+          </tr>
+          <tr>
+            <td>i18n</td>
+            <td>Custom composable</td>
+            <td><code>useI18n</code> with two locale files (<code>en.js</code>, <code>ja.js</code>). Locale persisted in <code>localStorage</code>.</td>
+          </tr>
+          <tr>
+            <td>Backend framework</td>
+            <td>FastAPI (Python 3.11+)</td>
+            <td>Run with <code>uv run python main.py</code>. Uvicorn ASGI server on port 8001. OpenAPI docs at <code>/docs</code>.</td>
+          </tr>
+          <tr>
+            <td>Validation</td>
+            <td>Pydantic v2 models</td>
+            <td>Request and response models declared in <code>server/main.py</code>.</td>
+          </tr>
+          <tr>
+            <td>Data storage</td>
+            <td>JSON files + in-memory lists</td>
+            <td>Loaded once at startup by <code>server/mock_data.py</code>. Mutations during runtime are lost on restart.</td>
+          </tr>
+          <tr>
+            <td>Backend tests</td>
+            <td>pytest + FastAPI TestClient</td>
+            <td>51 tests under <code>tests/backend/</code>. Run with <code>uv run pytest -v</code>.</td>
+          </tr>
+          <tr>
+            <td>E2E tests</td>
+            <td>Playwright Test (TypeScript)</td>
+            <td>16 tests under <code>tests/e2e/</code>. Run with <code>npm test</code> against the live dev servers.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="topology">
+      <h2>System topology</h2>
+      <p>
+        Three runtime processes plus a static data set on disk. Browser talks to the frontend
+        dev server, which proxies static assets; the frontend code talks directly to the
+        backend over HTTP.
+      </p>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 920 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="System topology">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+            </marker>
+          </defs>
+
+          <!-- Browser -->
+          <g>
+            <rect x="20" y="120" width="160" height="120" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+            <text x="100" y="155" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" font-weight="700" fill="#0f172a">Operator Browser</text>
+            <text x="100" y="180" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="12" fill="#64748b">Chrome / Edge / Firefox</text>
+            <text x="100" y="210" text-anchor="middle" font-family="ui-monospace, monospace" font-size="11" fill="#1d4ed8">http://localhost:3000</text>
+          </g>
+
+          <!-- Frontend / Vite -->
+          <g>
+            <rect x="240" y="80" width="220" height="200" rx="10" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.5"/>
+            <text x="350" y="115" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" font-weight="700" fill="#1e40af">Frontend (Vite dev)</text>
+            <text x="350" y="135" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="12" fill="#1e40af">port 3000</text>
+            <line x1="265" y1="150" x2="435" y2="150" stroke="#93c5fd"/>
+            <text x="350" y="170" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#1e3a8a">Vue 3 SPA</text>
+            <text x="350" y="190" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#1e3a8a">7 views · 9 modals/components</text>
+            <text x="350" y="210" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#1e3a8a">3 composables</text>
+            <text x="350" y="230" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#1e3a8a">api.js (axios)</text>
+            <text x="350" y="252" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#1e3a8a">i18n: en, ja</text>
+          </g>
+
+          <!-- Backend / FastAPI -->
+          <g>
+            <rect x="520" y="80" width="220" height="200" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+            <text x="630" y="115" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" font-weight="700" fill="#15803d">Backend (FastAPI)</text>
+            <text x="630" y="135" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="12" fill="#15803d">port 8001</text>
+            <line x1="545" y1="150" x2="715" y2="150" stroke="#86efac"/>
+            <text x="630" y="170" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#14532d">~22 endpoints</text>
+            <text x="630" y="190" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#14532d">Pydantic models</text>
+            <text x="630" y="210" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#14532d">apply_filters, filter_by_month</text>
+            <text x="630" y="230" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#14532d">Restocking algorithm</text>
+            <text x="630" y="252" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="11" fill="#14532d">CORS open (dev)</text>
+          </g>
+
+          <!-- Data -->
+          <g>
+            <rect x="800" y="120" width="100" height="120" rx="6" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="850" y="150" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="13" font-weight="700" fill="#334155">Data</text>
+            <text x="850" y="172" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10.5" fill="#475569">7 JSON files</text>
+            <text x="850" y="190" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10.5" fill="#475569">server/data/</text>
+            <text x="850" y="220" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#64748b" font-style="italic">read at startup</text>
+          </g>
+
+          <!-- Arrows -->
+          <line x1="180" y1="180" x2="240" y2="180" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <text x="210" y="172" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#475569">HTTP</text>
+
+          <line x1="460" y1="180" x2="520" y2="180" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <text x="490" y="172" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#475569">REST/JSON</text>
+
+          <line x1="740" y1="180" x2="800" y2="180" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <text x="770" y="172" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9" fill="#475569">file I/O</text>
+
+          <!-- Caption -->
+          <text x="460" y="320" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="10" fill="#94a3b8" font-style="italic">
+            All three processes run locally during development. Production hosting is currently internal.
+          </text>
+        </svg>
+      </div>
+
+      <div class="callout warn">
+        <strong>Production note.</strong> The current deployment runs all three layers on a
+        single internal server with the dev configuration. There is no reverse proxy, no TLS
+        termination, and CORS allows all origins. Hardening for production is out of scope of
+        this engagement (would be a follow-up — see <a href="#gaps">Gaps &amp; assumptions</a>).
+      </div>
+    </section>
+
+    <section id="frontend">
+      <h2>Frontend</h2>
+      <p>
+        The frontend lives in <code>client/src/</code>. It's a single-page Vue 3 application
+        with seven page-level views and nine reusable components/modals. Shared state and logic
+        are extracted into composables.
+      </p>
+
+      <h3>Directory layout</h3>
+<pre><code>client/src/
+├── App.vue                 # Top-level layout: header, FilterBar, router-view, modals
+├── main.js                 # Vue app + router setup
+├── api.js                  # Centralized axios API client (~25 methods)
+├── views/                  # Page-level components, mounted via vue-router
+│   ├── Dashboard.vue       # Overview (KPIs, charts)
+│   ├── Inventory.vue       # Stock levels table with search + filters
+│   ├── Orders.vue          # Order list with filters
+│   ├── Spending.vue        # Finance / costs / transactions
+│   ├── Demand.vue          # Demand forecasts
+│   ├── Reports.vue         # Quarterly + monthly performance
+│   └── Restocking.vue      # Recommended purchase orders (added in this engagement)
+├── components/             # Reusable UI: modals, FilterBar, ProfileMenu, LanguageSwitcher
+├── composables/            # Shared reactive state and logic
+│   ├── useFilters.js       # Global filter state (warehouse, category, status, period)
+│   ├── useI18n.js          # Translation, locale switching, currency
+│   └── useAuth.js          # Mock current-user (no real auth today)
+├── locales/                # Static translation maps
+│   ├── en.js
+│   └── ja.js
+└── utils/
+    └── currency.js         # Locale-aware currency formatting helpers
+</code></pre>
+
+      <h3>View pattern</h3>
+      <p>
+        Every view follows the same shape — and after R1 in this engagement, this is now true
+        of <code>Reports.vue</code> and <code>Restocking.vue</code> too. Future views should
+        follow it.
+      </p>
+<pre><code>// 1. Reactive state with refs
+const loading = ref(true), error = ref(null), items = ref([])
+
+// 2. Composables for shared concerns
+const { t, currentCurrency, translateProductName } = useI18n()
+const { selectedLocation, selectedCategory, getCurrentFilters } = useFilters()
+
+// 3. Single load function that respects filters
+const loadData = async () =&gt; {
+  try {
+    loading.value = true
+    items.value = await api.getX(getCurrentFilters())
+  } catch (err) { error.value = '...' + err.message }
+  finally { loading.value = false }
+}
+
+// 4. Re-run on mount and on filter changes
+onMounted(loadData)
+watch([selectedLocation, selectedCategory], loadData)
+
+// 5. Computed values for derived state
+const filteredItems = computed(() =&gt; ...)</code></pre>
+
+      <h3>Cross-cutting via composables</h3>
+      <div class="grid-2">
+        <div class="card">
+          <h4><code>useFilters</code></h4>
+          <p>Singleton-style refs for the four global filters. Imported by <code>FilterBar.vue</code> (writes) and by every data-bearing view (reads).</p>
+          <ul>
+            <li><code>selectedLocation</code>, <code>selectedCategory</code>, <code>selectedStatus</code>, <code>selectedPeriod</code></li>
+            <li><code>getCurrentFilters()</code> formats them for API calls</li>
+            <li><code>resetFilters()</code> + <code>hasActiveFilters</code> for the Reset button</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4><code>useI18n</code></h4>
+          <p>Custom translation system. No external i18n library.</p>
+          <ul>
+            <li><code>t(key, params)</code> with placeholder substitution</li>
+            <li><code>currentLocale</code>, <code>currentCurrency</code> (auto-derived from locale)</li>
+            <li>Domain-specific helpers: <code>translateProductName</code>, <code>translateWarehouse</code>, <code>translateCustomerName</code></li>
+            <li>Persists chosen locale to <code>localStorage</code></li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4><code>useAuth</code></h4>
+          <p>Mock current-user. No real authentication today.</p>
+          <ul>
+            <li><code>currentUser</code> hardcoded to a sample profile</li>
+            <li>Different mock profile per locale (English vs Japanese)</li>
+            <li>Replace this with a real auth provider before production</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4><code>api.js</code> (not a composable, but cross-cutting)</h4>
+          <p>Single axios-based module that <em>every</em> view calls.</p>
+          <ul>
+            <li>Methods named <code>getX(filters)</code>, <code>createY(payload)</code></li>
+            <li>Filter serialization via <code>URLSearchParams</code> with the <code>'all'</code>-skip convention</li>
+            <li>No interceptors — easy to add for auth tokens later</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="backend">
+      <h2>Backend</h2>
+      <p>
+        The backend lives in <code>server/</code>. It is a single-file FastAPI application
+        (<code>main.py</code>) plus a thin data loader (<code>mock_data.py</code>) and a
+        <code>data/</code> directory of JSON files.
+      </p>
+
+      <h3>Directory layout</h3>
+<pre><code>server/
+├── main.py                # All routes, models, helpers, app config
+├── mock_data.py           # Reads data/*.json into module-level lists at import
+└── data/
+    ├── inventory.json         # 32 SKUs across 3 warehouses
+    ├── orders.json            # ~250 orders (Jan–Dec 2025)
+    ├── demand_forecasts.json  # 9 SKUs with demand projections
+    ├── backlog_items.json     # Outstanding shortages
+    ├── purchase_orders.json   # Created via POST; starts empty
+    ├── spending.json          # Aggregated cost data (procurement, operational, labor, overhead)
+    └── transactions.json      # Recent transactions feed
+</code></pre>
+
+      <h3>Module-level state</h3>
+      <p>
+        At startup, <code>mock_data.py</code> reads each JSON file into a Python list and
+        exposes them as module-level names (<code>inventory_items</code>, <code>orders</code>,
+        <code>demand_forecasts</code>, etc.). Endpoints in <code>main.py</code> read and
+        sometimes mutate these lists in place.
+      </p>
+      <p>
+        <strong>Mutation surfaces.</strong> The lists that grow at runtime:
+        <code>api_tasks</code> (created via <code>POST /api/tasks</code>),
+        <code>purchase_orders</code> (appended via <code>POST /api/purchase-orders</code>).
+        These are lost on restart by design — see <a href="#gaps">Gaps &amp; assumptions</a>.
+      </p>
+
+      <h3>Shared helpers</h3>
+      <p>
+        Two filter helpers in <code>main.py</code> are reused by most data endpoints. They
+        operate on copies of the input lists and never mutate the underlying data.
+      </p>
+<pre><code>def apply_filters(items, warehouse=None, category=None, status=None) -&gt; list
+def filter_by_month(items, month) -&gt; list  # also handles quarter strings (Q1-2025...)</code></pre>
+      <p>
+        Both honour the convention that <code>'all'</code> means "no filter". The frontend
+        sends <code>'all'</code> when a filter is unset; the backend skips it accordingly.
+      </p>
+    </section>
+
+    <section id="endpoints">
+      <h2>Endpoint catalog</h2>
+      <p>
+        All endpoints are under <code>/api/</code>. OpenAPI / Swagger UI is available at
+        <a href="http://localhost:8001/docs">http://localhost:8001/docs</a> when the backend
+        is running. Endpoints added or fixed during this engagement are marked.
+      </p>
+      <table>
+        <thead>
+          <tr><th>Method</th><th>Path</th><th>Filter params</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="pill get">GET</span></td><td><code>/api/inventory</code></td><td>warehouse, category</td><td>List stock items with filtering</td></tr>
+          <tr><td><span class="pill get">GET</span></td><td><code>/api/inventory/{id}</code></td><td>—</td><td>Single inventory item</td></tr>
+          <tr><td><span class="pill get">GET</span></td><td><code>/api/orders</code></td><td>warehouse, category, status, month</td><td>Order list with filtering</td></tr>
+          <tr><td><span class="pill get">GET</span></td><td><code>/api/orders/{id}</code></td><td>—</td><td>Single order</td></tr>
+          <tr><td><span class="pill get">GET</span></td><td><code>/api/demand</code></td><td>—</td><td>All demand forecasts</td></tr>
+          <tr><td><span class="pill get">GET</span></td><td><code>/api/backlog</code></td><td>—</td><td>Outstanding shortages with PO status</td></tr>
+          <tr><td><span class="pill get">GET</span></td><td><code>/api/dashboard/summary</code></td><td>warehouse, category, status, month</td><td>KPI summary for the Overview page</td></tr>
+          <tr><td><span class="pill get">GET</span></td><td><code>/api/spending/summary</code></td><td>—</td><td>Aggregated cost figures</td></tr>
+          <tr><td><span class="pill get">GET</span></td><td><code>/api/spending/monthly</code></td><td>—</td><td>Monthly cost breakdown</td></tr>
+          <tr><td><span class="pill get">GET</span></td><td><code>/api/spending/categories</code></td><td>—</td><td>Cost by category</td></tr>
+          <tr><td><span class="pill get">GET</span></td><td><code>/api/spending/transactions</code></td><td>—</td><td>Recent transactions feed</td></tr>
+          <tr><td><span class="pill get">GET</span></td><td><code>/api/reports/quarterly</code></td><td>warehouse, category, status, month <strong>(R1 fix)</strong></td><td>Quarterly performance</td></tr>
+          <tr><td><span class="pill get">GET</span></td><td><code>/api/reports/monthly-trends</code></td><td>warehouse, category, status, month <strong>(R1 fix)</strong></td><td>Monthly trend</td></tr>
+          <tr><td><span class="pill get">GET</span></td><td><code>/api/restocking/recommendations</code> <strong>(R2)</strong></td><td>budget (req'd), warehouse, category</td><td>Prioritized purchase orders within budget</td></tr>
+          <tr><td><span class="pill get">GET</span></td><td><code>/api/tasks</code> <strong>(added)</strong></td><td>—</td><td>List user tasks</td></tr>
+          <tr><td><span class="pill post">POST</span></td><td><code>/api/tasks</code> <strong>(added)</strong></td><td>—</td><td>Create a task</td></tr>
+          <tr><td><span class="pill delete">DELETE</span></td><td><code>/api/tasks/{id}</code> <strong>(added)</strong></td><td>—</td><td>Delete a task</td></tr>
+          <tr><td><span class="pill patch">PATCH</span></td><td><code>/api/tasks/{id}</code> <strong>(added)</strong></td><td>—</td><td>Toggle task status</td></tr>
+          <tr><td><span class="pill post">POST</span></td><td><code>/api/purchase-orders</code> <strong>(added in R2)</strong></td><td>—</td><td>Create a PO (used by Restocking and Backlog flows)</td></tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <strong>Bold "added" / "fix" markers</strong> indicate endpoints that did not exist
+        (or were silently broken) in the package handed over by the previous vendor and were
+        delivered or repaired during this engagement.
+      </div>
+    </section>
+
+    <section id="dataflow">
+      <h2>Data flow</h2>
+      <p>
+        Tracing a typical request — the operator changing the warehouse filter on the Reports
+        page — illustrates how the layers cooperate.
+      </p>
+      <ul class="bullet">
+        <li><strong>1. UI event.</strong> Operator selects "Tokyo" in <code>FilterBar.vue</code>. The <code>v-model="selectedLocation"</code> mutates the singleton ref exposed by <code>useFilters</code>.</li>
+        <li><strong>2. Reactive trigger.</strong> <code>Reports.vue</code> has a <code>watch([selectedPeriod, selectedLocation, selectedCategory, selectedStatus], loadData)</code>. Vue detects the change and runs <code>loadData()</code>.</li>
+        <li><strong>3. API call.</strong> <code>loadData</code> invokes <code>api.getQuarterlyReports(filters)</code> and <code>api.getMonthlyTrends(filters)</code>. Both pass the filter set through <code>URLSearchParams</code>, omitting any value of <code>'all'</code>.</li>
+        <li><strong>4. Network.</strong> Axios sends <code>GET /api/reports/quarterly?warehouse=Tokyo</code> to <code>http://localhost:8001</code>.</li>
+        <li><strong>5. Backend filter.</strong> The endpoint runs <code>apply_filters(orders, warehouse="Tokyo", ...)</code>, then computes per-quarter aggregates, sorts, and returns JSON.</li>
+        <li><strong>6. Render.</strong> Axios resolves; <code>loadData</code> assigns the response to <code>quarterlyData.value</code>; Vue's reactivity re-renders the table; computed summary stats (<code>totalRevenue</code>, <code>bestQuarter</code>) recompute.</li>
+        <li><strong>7. Locale &amp; currency.</strong> Throughout the render, every monetary value is prefixed with <code>{{ currencySymbol }}</code> (a computed deriving from <code>currentCurrency</code>), and every label flows through <code>t('reports.xxx')</code>.</li>
+      </ul>
+      <p>
+        The same pattern — composable-driven state, watch-triggered loads, centralized API
+        client, locale-aware render — is the design contract every view follows.
+      </p>
+    </section>
+
+    <section id="cross-cutting">
+      <h2>Cross-cutting concerns</h2>
+      <h3>Internationalization</h3>
+      <p>
+        Two locales today (<code>en</code>, <code>ja</code>). All user-visible strings flow
+        through <code>t()</code>; currency and number formatting flow through
+        <code>currencySymbol</code> and locale-aware <code>toLocaleString</code>. Adding a
+        third locale is a new file in <code>locales/</code> plus an entry in the language
+        switcher.
+      </p>
+      <h3>Global filters</h3>
+      <p>
+        Four shared filters (warehouse, category, status, period) live as singleton refs in
+        <code>useFilters</code>. They drive both the API query string and any client-side
+        narrowing. Inventory ignores <code>status</code> and <code>period</code> (no time
+        dimension on stock); other views consume the full set.
+      </p>
+      <h3>Authentication</h3>
+      <p>
+        <strong>Currently mocked.</strong> <code>useAuth</code> returns a hardcoded user.
+        There are no tokens, no protected routes, no session management. This is a deliberate
+        gap — see <a href="#gaps">Gaps &amp; assumptions</a>.
+      </p>
+      <h3>Error handling</h3>
+      <p>
+        Each view follows a uniform <code>loading / error / data</code> pattern in the
+        template. API failures are caught in the view's <code>loadData</code> and rendered as
+        an inline error banner. Backend errors return the appropriate HTTP status with a JSON
+        <code>detail</code> payload (FastAPI's default).
+      </p>
+    </section>
+
+    <section id="testing">
+      <h2>Testing</h2>
+      <p>
+        Two parallel test suites under <code>tests/</code>. Both can run independently and
+        both are CI-ready.
+      </p>
+      <div class="grid-2">
+        <div class="card">
+          <h4>Backend — pytest (51 tests)</h4>
+          <p>Runs against the FastAPI <code>TestClient</code> (no live server needed). Fast — full suite finishes in well under a second.</p>
+<pre><code>cd tests
+uv run pytest -v</code></pre>
+          <ul>
+            <li>Endpoint smoke for inventory, orders, dashboard, demand, backlog, spending</li>
+            <li>Filter-combination edge cases</li>
+            <li>404 paths and shape validation</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4>E2E — Playwright (16 tests, added in R3)</h4>
+          <p>Runs Chromium against the live dev servers. Covers the four critical flows declared in the proposal plus Reports and Restocking.</p>
+<pre><code>cd tests/e2e
+npm install
+npx playwright install chromium
+npm test</code></pre>
+          <ul>
+            <li>Inventory · Orders · Spending · Demand · Reports · Restocking</li>
+            <li>Includes an explicit <strong>R1 regression test</strong> that asserts the global filter actually changes the Reports totals</li>
+            <li>HTML report at <code>playwright-report/</code> after each run</li>
+          </ul>
+        </div>
+      </div>
+      <p>
+        Together: <strong>67 tests</strong>, exercising both the API contract and the
+        end-to-end browser experience. This is the safety net the IT team requested — every
+        future change can be validated before going live.
+      </p>
+    </section>
+
+    <section id="gaps">
+      <h2>Gaps &amp; assumptions</h2>
+      <p>
+        Several things are deliberately simple in the current architecture. They are flagged
+        here so future decisions are made with full awareness rather than assumed away.
+      </p>
+      <table>
+        <thead>
+          <tr><th>Area</th><th>Current state</th><th>Implication</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Persistence</td>
+            <td>JSON files read at startup; mutations stored in module-level lists</td>
+            <td>All runtime data (created tasks, purchase orders) is lost on backend restart. Replace <code>mock_data.py</code> with a database layer for production.</td>
+          </tr>
+          <tr>
+            <td>Authentication</td>
+            <td>Mocked via <code>useAuth</code>; backend has no auth check</td>
+            <td>Anyone with network access to the backend can read and mutate. Add auth (OIDC, session, or API key) before any external exposure.</td>
+          </tr>
+          <tr>
+            <td>Authorization</td>
+            <td>None. Every endpoint open to all callers.</td>
+            <td>Once auth is in place, role-based access (Operations vs Finance vs IT) needs an explicit policy.</td>
+          </tr>
+          <tr>
+            <td>CORS</td>
+            <td><code>allow_origins=["*"]</code> in <code>main.py</code></td>
+            <td>Restrict to known frontends in production.</td>
+          </tr>
+          <tr>
+            <td>Supplier model</td>
+            <td>Restocking-originated POs use <code>"TBD"</code> as supplier</td>
+            <td>No supplier-to-SKU mapping exists. Add one and surface a supplier picker in the Restocking flow.</td>
+          </tr>
+          <tr>
+            <td>Lead times</td>
+            <td>Restocking uses <code>today + 14 days</code> as expected delivery</td>
+            <td>Real lead times vary per supplier and SKU. Wire through the supplier model when added.</td>
+          </tr>
+          <tr>
+            <td>Stock effect of POs</td>
+            <td>Creating a PO does not increment stock</td>
+            <td>Correct as-is — stock changes on receipt, not on order. A receipt flow is not in scope.</td>
+          </tr>
+          <tr>
+            <td>Hosting</td>
+            <td>Single internal server, dev configuration</td>
+            <td>No reverse proxy, no TLS, no static asset CDN. Standard production hardening required.</td>
+          </tr>
+          <tr>
+            <td>Observability</td>
+            <td>No structured logging, no metrics, no tracing</td>
+            <td>Add when traffic is non-trivial. <code>/docs</code> is the only operational visibility today.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <strong>Why list these?</strong> The previous vendor's handoff did not flag these
+        explicitly, which contributed to the situation Meridian found itself in. Surfacing
+        them up front means no surprises six months from now.
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    Meridian Components, Inc. · RFP MC-2026-0417 · R4 — Architecture Overview
+  </footer>
+
+</div>
+
+</body>
+</html>

@@ -1,8 +1,13 @@
+import uuid
+from datetime import date
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from pydantic import BaseModel
 from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders
+
+# In-memory tasks created via API (resets on server restart)
+api_tasks: list = []
 
 app = FastAPI(title="Factory Inventory Management System")
 
@@ -103,22 +108,36 @@ class BacklogItem(BaseModel):
 
 class PurchaseOrder(BaseModel):
     id: str
-    backlog_item_id: str
+    backlog_item_id: Optional[str] = None
     supplier_name: str
     quantity: int
     unit_cost: float
     expected_delivery_date: str
     status: str
     created_date: str
+    sku: Optional[str] = None
     notes: Optional[str] = None
 
 class CreatePurchaseOrderRequest(BaseModel):
-    backlog_item_id: str
+    backlog_item_id: Optional[str] = None
     supplier_name: str
     quantity: int
     unit_cost: float
     expected_delivery_date: str
+    sku: Optional[str] = None
     notes: Optional[str] = None
+
+class Task(BaseModel):
+    id: str
+    title: str
+    priority: str
+    dueDate: str
+    status: str
+
+class CreateTaskRequest(BaseModel):
+    title: str
+    priority: str
+    dueDate: str
 
 # API endpoints
 @app.get("/")
@@ -227,13 +246,57 @@ def get_recent_transactions():
     """Get recent transactions"""
     return recent_transactions
 
+@app.get("/api/tasks", response_model=List[Task])
+def get_tasks():
+    """Get all user-created tasks"""
+    return api_tasks
+
+@app.post("/api/tasks", response_model=Task)
+def create_task(req: CreateTaskRequest):
+    """Create a new task"""
+    task = {
+        "id": f"task-{uuid.uuid4().hex[:8]}",
+        "title": req.title,
+        "priority": req.priority,
+        "dueDate": req.dueDate,
+        "status": "pending"
+    }
+    api_tasks.insert(0, task)
+    return task
+
+@app.delete("/api/tasks/{task_id}")
+def delete_task(task_id: str):
+    """Delete a task by id"""
+    task = next((t for t in api_tasks if t["id"] == task_id), None)
+    if not task:
+        raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
+    api_tasks.remove(task)
+    return {"deleted": task_id}
+
+@app.patch("/api/tasks/{task_id}", response_model=Task)
+def toggle_task(task_id: str):
+    """Toggle a task's pending/completed status"""
+    task = next((t for t in api_tasks if t["id"] == task_id), None)
+    if not task:
+        raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
+    task["status"] = "completed" if task["status"] == "pending" else "pending"
+    return task
+
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
-    """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
+    """Get quarterly performance reports with optional filtering"""
+    filtered_orders = apply_filters(orders, warehouse, category, status)
+    filtered_orders = filter_by_month(filtered_orders, month)
+
+    # Calculate quarterly statistics from filtered orders
     quarters = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -274,11 +337,19 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
-    """Get month-over-month trends"""
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
+    """Get month-over-month trends with optional filtering"""
+    filtered_orders = apply_filters(orders, warehouse, category, status)
+    filtered_orders = filter_by_month(filtered_orders, month)
+
     months = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
@@ -303,6 +374,112 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+@app.post("/api/purchase-orders", response_model=PurchaseOrder)
+def create_purchase_order(req: CreatePurchaseOrderRequest):
+    """Create a new purchase order"""
+    po = {
+        "id": f"po-{uuid.uuid4().hex[:8]}",
+        "backlog_item_id": req.backlog_item_id,
+        "supplier_name": req.supplier_name,
+        "quantity": req.quantity,
+        "unit_cost": req.unit_cost,
+        "expected_delivery_date": req.expected_delivery_date,
+        "status": "pending",
+        "created_date": date.today().isoformat(),
+        "sku": req.sku,
+        "notes": req.notes
+    }
+    purchase_orders.append(po)
+    return po
+
+@app.get("/api/restocking/recommendations")
+def get_restocking_recommendations(
+    budget: float,
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
+    """Generate restocking recommendations under a budget ceiling.
+
+    Algorithm: for each inventory item below or near reorder point, compute a
+    recommended quantity (covering forecast when available, else 2x reorder
+    point). Score by urgency + demand growth. Greedy fill within budget;
+    overflow returned for transparency.
+    """
+    if budget <= 0:
+        raise HTTPException(status_code=400, detail="Budget must be positive")
+
+    filtered = apply_filters(inventory_items, warehouse, category)
+    forecast_by_sku = {f["item_sku"]: f for f in demand_forecasts}
+
+    candidates = []
+    for item in filtered:
+        sku = item["sku"]
+        stock = item["quantity_on_hand"]
+        reorder = item["reorder_point"]
+        forecast = forecast_by_sku.get(sku)
+
+        if forecast:
+            target = max(reorder, forecast["forecasted_demand"])
+            recommended_qty = max(0, target - stock)
+            current = forecast.get("current_demand", 0)
+            growth = forecast["forecasted_demand"] / current if current > 0 else 1.0
+        else:
+            recommended_qty = max(0, reorder * 2 - stock)
+            growth = 1.0
+
+        if recommended_qty <= 0:
+            continue
+
+        urgency = max(0, (reorder - stock) / reorder) if reorder > 0 else 0
+        priority_score = urgency + (growth - 1) * 0.5
+
+        if priority_score >= 0.5:
+            priority = "high"
+        elif priority_score >= 0.2:
+            priority = "medium"
+        else:
+            priority = "low"
+
+        total_cost = round(recommended_qty * item["unit_cost"], 2)
+
+        candidates.append({
+            "sku": sku,
+            "name": item["name"],
+            "category": item["category"],
+            "warehouse": item["warehouse"],
+            "current_stock": stock,
+            "reorder_point": reorder,
+            "recommended_qty": recommended_qty,
+            "unit_cost": item["unit_cost"],
+            "total_cost": total_cost,
+            "priority": priority,
+            "priority_score": round(priority_score, 3),
+            "has_forecast": forecast is not None,
+            "forecasted_demand": forecast["forecasted_demand"] if forecast else None
+        })
+
+    candidates.sort(key=lambda c: c["priority_score"], reverse=True)
+
+    accepted = []
+    overflow = []
+    running = 0.0
+    for c in candidates:
+        if running + c["total_cost"] <= budget:
+            accepted.append(c)
+            running += c["total_cost"]
+        else:
+            overflow.append(c)
+
+    return {
+        "recommendations": accepted,
+        "overflow": overflow,
+        "total_recommended": round(running, 2),
+        "budget": budget,
+        "currency": "USD",
+        "items_within_budget": len(accepted),
+        "items_above_budget": len(overflow)
+    }
 
 if __name__ == "__main__":
     import uvicorn

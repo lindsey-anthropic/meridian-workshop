@@ -91,10 +91,11 @@ const currentUser = createCurrentUser()
 export function useAuth() {
   const isAuthenticated = ref(true)
 
+  const { t } = useI18n()
+
   const logout = () => {
     // In a real app, this would clear tokens, etc.
-    console.log('Logout clicked - would redirect to login')
-    alert('Logout functionality - in a real app, this would clear session and redirect to login')
+    alert(t('auth.logoutPlaceholder'))
   }
 
   const getInitials = (name) => {

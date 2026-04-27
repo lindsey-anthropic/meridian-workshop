@@ -448,8 +448,16 @@ export default {
     }
 
     const handleTransactionClick = (transaction) => {
-      console.log('Transaction clicked:', transaction)
-      alert(`Transaction Details:\n\nID: ${transaction.id}\nDescription: ${transaction.description}\nVendor: ${transaction.vendor}\nDate: ${formatDateShort(transaction.date)}\nAmount: $${transaction.amount.toLocaleString()}`)
+      const lines = [
+        t('transactions.detailsTitle'),
+        '',
+        `${t('transactions.id')}: ${transaction.id}`,
+        `${t('transactions.description')}: ${transaction.description}`,
+        `${t('transactions.vendor')}: ${transaction.vendor}`,
+        `${t('transactions.date')}: ${formatDateShort(transaction.date)}`,
+        `${t('transactions.amount')}: ${currencySymbol.value}${transaction.amount.toLocaleString()}`
+      ]
+      alert(lines.join('\n'))
     }
 
     const showCostDetail = (monthData) => {
