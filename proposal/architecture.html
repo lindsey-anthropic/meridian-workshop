@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Meridian — Architecture Overview</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Helvetica Neue', Arial, sans-serif; background:#0f172a; color:#e2e8f0; padding:48px; }
+h1 { font-size:28px; font-weight:300; color:#fff; margin-bottom:8px; }
+.subtitle { font-size:14px; color:#64748b; margin-bottom:48px; }
+h2 { font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#e07040; margin-bottom:20px; }
+.section { margin-bottom:48px; }
+
+/* Stack diagram */
+.stack { display:flex; gap:0; align-items:stretch; }
+.stack-layer { flex:1; border:1px solid #1e293b; border-right:none; padding:24px; }
+.stack-layer:last-child { border-right:1px solid #1e293b; }
+.stack-layer h3 { font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#94a3b8; margin-bottom:12px; }
+.stack-layer ul { list-style:none; }
+.stack-layer li { font-size:13px; color:#cbd5e1; padding:4px 0; border-bottom:1px solid #1e293b; }
+.stack-layer li:last-child { border-bottom:none; }
+.stack-layer li span { color:#64748b; font-size:11px; display:block; }
+.arrow { display:flex; align-items:center; padding:0 8px; color:#e07040; font-size:20px; flex-shrink:0; }
+
+/* Filter matrix */
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { background:#1e293b; padding:10px 14px; text-align:left; font-weight:600; color:#94a3b8; font-size:11px; letter-spacing:.05em; }
+td { padding:10px 14px; border-bottom:1px solid #1e293b; color:#cbd5e1; }
+tr:hover td { background:#1e293b44; }
+.yes { color:#22c55e; font-weight:700; }
+.no { color:#ef4444; font-weight:700; }
+.na { color:#475569; }
+.bug { background:rgba(239,68,68,.08); }
+.endpoint { font-family: monospace; font-size:12px; color:#7dd3fc; }
+
+/* Tech debt */
+.debt-list { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.debt-item { background:#1e293b; border-radius:8px; padding:20px; border-left:3px solid #ef4444; }
+.debt-item.warn { border-left-color:#f59e0b; }
+.debt-item h4 { font-size:13px; color:#fff; margin-bottom:6px; }
+.debt-item p { font-size:12px; color:#94a3b8; line-height:1.5; }
+.debt-item .file { font-family:monospace; font-size:11px; color:#7dd3fc; margin-top:6px; display:block; }
+
+/* Data flow */
+.flow { display:flex; align-items:center; gap:0; flex-wrap:wrap; }
+.flow-box { background:#1e293b; border:1px solid #334155; border-radius:6px; padding:12px 20px; font-size:13px; white-space:nowrap; }
+.flow-box.highlight { border-color:#e07040; color:#e07040; }
+.flow-arrow { color:#475569; padding:0 12px; font-size:18px; }
+</style>
+</head>
+<body>
+
+<h1>Meridian Components — Architecture Overview</h1>
+<p class="subtitle">Current state · Generated 2026-04-27 · Meridian Inventory Dashboard</p>
+
+<!-- Stack -->
+<div class="section">
+  <h2>Stack</h2>
+  <div style="display:flex;align-items:stretch;gap:0;">
+    <div class="stack-layer" style="background:#1e293b22;">
+      <h3>Browser · :3000</h3>
+      <ul>
+        <li>Vue 3 + Composition API<span>Vite dev server</span></li>
+        <li>FilterBar.vue<span>Global filter state</span></li>
+        <li>useFilters.js<span>Singleton composable</span></li>
+        <li>useI18n.js<span>EN/JA localization</span></li>
+        <li>api.js<span>Centralized axios client</span></li>
+      </ul>
+    </div>
+    <div class="arrow">→</div>
+    <div class="stack-layer" style="background:#1e293b22;">
+      <h3>FastAPI · :8001</h3>
+      <ul>
+        <li>main.py<span>15 endpoints</span></li>
+        <li>apply_filters()<span>warehouse/category/status</span></li>
+        <li>filter_by_month()<span>YYYY-MM or Q1–Q4</span></li>
+        <li>Pydantic models<span>Input validation</span></li>
+        <li>CORS: allow all origins<span>Dev only</span></li>
+      </ul>
+    </div>
+    <div class="arrow">→</div>
+    <div class="stack-layer" style="background:#1e293b22;">
+      <h3>Data layer</h3>
+      <ul>
+        <li>mock_data.py<span>Loads JSON at startup</span></li>
+        <li>server/data/*.json<span>In-memory, no DB</span></li>
+        <li>No persistence<span>Restart reloads data</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Data flow -->
+<div class="section">
+  <h2>Standard data flow</h2>
+  <div class="flow" style="margin-bottom:12px;">
+    <div class="flow-box highlight">useFilters.js</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">getCurrentFilters()</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">api.js</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">axios.get(endpoint + params)</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">FastAPI apply_filters()</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">JSON in-memory</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box highlight">Vue ref() → template</div>
+  </div>
+  <p style="font-size:12px;color:#ef4444;">⚠ Reports.vue breaks this pattern — calls axios directly, bypasses api.js and useFilters()</p>
+</div>
+
+<!-- Filter matrix -->
+<div class="section">
+  <h2>Endpoint · Filter support matrix</h2>
+  <table>
+    <thead>
+      <tr><th>Endpoint</th><th>View</th><th>warehouse</th><th>category</th><th>status</th><th>month</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="endpoint">GET /api/inventory</td><td>Inventory</td><td class="yes">✓</td><td class="yes">✓</td><td class="na">—</td><td class="na">—</td></tr>
+      <tr><td class="endpoint">GET /api/orders</td><td>Orders</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+      <tr><td class="endpoint">GET /api/dashboard/summary</td><td>Dashboard</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+      <tr class="bug"><td class="endpoint">GET /api/reports/quarterly</td><td>Reports</td><td class="no">✗ BUG</td><td class="no">✗ BUG</td><td class="no">✗ BUG</td><td class="na">—</td></tr>
+      <tr class="bug"><td class="endpoint">GET /api/reports/monthly-trends</td><td>Reports</td><td class="no">✗ BUG</td><td class="no">✗ BUG</td><td class="no">✗ BUG</td><td class="na">—</td></tr>
+      <tr><td class="endpoint">GET /api/demand</td><td>Demand</td><td class="na">—</td><td class="na">—</td><td class="na">—</td><td class="na">—</td></tr>
+      <tr><td class="endpoint">GET /api/backlog</td><td>Backlog</td><td class="na">—</td><td class="na">—</td><td class="na">—</td><td class="na">—</td></tr>
+      <tr><td class="endpoint">GET /api/spending/*</td><td>Spending</td><td class="na">—</td><td class="na">—</td><td class="na">—</td><td class="na">—</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Component map -->
+<div class="section">
+  <h2>Component map</h2>
+  <table>
+    <thead>
+      <tr><th>View</th><th>File</th><th>API calls</th><th>Uses useFilters</th><th>API pattern</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Dashboard</td><td>Dashboard.vue</td><td>getDashboardSummary()</td><td class="yes">✓</td><td class="yes">api.js</td><td></td></tr>
+      <tr><td>Inventory</td><td>Inventory.vue</td><td>getInventory()</td><td class="yes">✓</td><td class="yes">api.js</td><td></td></tr>
+      <tr><td>Orders</td><td>Orders.vue</td><td>getOrders()</td><td class="yes">✓</td><td class="yes">api.js</td><td></td></tr>
+      <tr class="bug"><td>Reports</td><td>Reports.vue</td><td>axios direct</td><td class="no">✗</td><td class="no">axios direct</td><td>Options API · 7 console.log · ES5 loops</td></tr>
+      <tr><td>Spending</td><td>Spending.vue</td><td>getSpending*()</td><td class="na">n/a</td><td class="yes">api.js</td><td></td></tr>
+      <tr><td>Backlog</td><td>Backlog.vue</td><td>getBacklog()</td><td class="na">n/a</td><td class="yes">api.js</td><td></td></tr>
+      <tr><td>Demand</td><td>Demand.vue</td><td>getDemandForecasts()</td><td class="na">n/a</td><td class="yes">api.js</td><td></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Tech debt -->
+<div class="section">
+  <h2>Technical debt</h2>
+  <div class="debt-list">
+    <div class="debt-item">
+      <h4>BUG-01/02 — Report endpoints missing filters</h4>
+      <p>quarterly and monthly-trends accept no query params. Filters from the UI are silently ignored.</p>
+      <span class="file">server/main.py L231–305</span>
+    </div>
+    <div class="debt-item">
+      <h4>BUG-03/04 — Reports.vue bypasses api.js and useFilters</h4>
+      <p>Calls axios directly with hardcoded URL. Global filter state never reaches the component.</p>
+      <span class="file">client/src/views/Reports.vue L156, L162</span>
+    </div>
+    <div class="debt-item">
+      <h4>BUG-05 — Options API in Reports.vue</h4>
+      <p>Entire component uses data()/methods() pattern. All other views use Composition API setup().</p>
+      <span class="file">client/src/views/Reports.vue</span>
+    </div>
+    <div class="debt-item warn">
+      <h4>BUG-06 — Console noise (7+ console.log)</h4>
+      <p>Debug logs on every render cycle including formatNumber() and getBarHeight() calls.</p>
+      <span class="file">client/src/views/Reports.vue L145, L153, L158, L163…</span>
+    </div>
+    <div class="debt-item warn">
+      <h4>BUG-07/08 — ES5 code + index keys in v-for</h4>
+      <p>var with shadowed i, for-loops instead of reduce/map. Array index used as :key in v-for.</p>
+      <span class="file">client/src/views/Reports.vue L181–211, L28, L51, L82</span>
+    </div>
+    <div class="debt-item warn">
+      <h4>Missing — Restocking view</h4>
+      <p>No endpoint or UI for purchase order recommendations. Required by RFP R2.</p>
+      <span class="file">server/main.py, client/src/views/Restocking.vue (to be created)</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

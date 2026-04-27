@@ -1,0 +1,13 @@
+{
+  "name": "meridian-e2e",
+  "version": "1.0.0",
+  "description": "Playwright e2e tests for Meridian Components dashboard",
+  "scripts": {
+    "test": "npx playwright test --config=playwright.config.js",
+    "test:headed": "npx playwright test --config=playwright.config.js --headed",
+    "test:ui": "npx playwright test --config=playwright.config.js --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.0"
+  }
+}

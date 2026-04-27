@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from pydantic import BaseModel
@@ -228,12 +228,16 @@ def get_recent_transactions():
     return recent_transactions
 
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+):
     """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
+    filtered_orders = apply_filters(orders, warehouse, category, status)
     quarters = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -274,11 +278,16 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+):
     """Get month-over-month trends"""
+    filtered_orders = apply_filters(orders, warehouse, category, status)
     months = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
@@ -303,6 +312,114 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+class RestockingRecommendation(BaseModel):
+    id: str
+    sku: str
+    name: str
+    category: str
+    warehouse: str
+    current_stock: int
+    reorder_point: int
+    qty_to_order: int
+    unit_cost: float
+    total_cost: float
+    priority_score: float
+    demand_trend: str
+
+TREND_WEIGHT = {"increasing": 1.5, "stable": 1.0, "decreasing": 0.5}
+
+@app.get("/api/restocking", response_model=List[RestockingRecommendation])
+def get_restocking_recommendations(
+    budget: float = Query(..., gt=0, description="Budget ceiling in USD"),
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+):
+    """Return ranked purchase order recommendations within a budget ceiling."""
+    filtered_items = apply_filters(inventory_items, warehouse, category)
+    understocked = [i for i in filtered_items if i["quantity_on_hand"] <= i["reorder_point"]]
+
+    forecast_map = {f["item_sku"]: f for f in demand_forecasts}
+
+    recommendations = []
+    for item in understocked:
+        forecast = forecast_map.get(item["sku"], {})
+        trend = forecast.get("trend", "stable")
+        trend_w = TREND_WEIGHT.get(trend, 1.0)
+        stock_gap = item["reorder_point"] - item["quantity_on_hand"]
+        forecasted_demand = forecast.get("forecasted_demand", stock_gap)
+        qty_to_order = max(stock_gap, forecasted_demand)
+        total_cost = round(qty_to_order * item["unit_cost"], 2)
+        priority_score = round(stock_gap * trend_w * item["unit_cost"], 2)
+
+        recommendations.append({
+            "id": item["id"],
+            "sku": item["sku"],
+            "name": item["name"],
+            "category": item["category"],
+            "warehouse": item["warehouse"],
+            "current_stock": item["quantity_on_hand"],
+            "reorder_point": item["reorder_point"],
+            "qty_to_order": qty_to_order,
+            "unit_cost": item["unit_cost"],
+            "total_cost": total_cost,
+            "priority_score": priority_score,
+            "demand_trend": trend,
+        })
+
+    recommendations.sort(key=lambda x: x["priority_score"], reverse=True)
+
+    # trim to budget ceiling
+    result = []
+    spent = 0.0
+    for rec in recommendations:
+        if spent + rec["total_cost"] <= budget:
+            result.append(rec)
+            spent += rec["total_cost"]
+
+    return result
+
+
+class Task(BaseModel):
+    id: str
+    title: str
+    status: str
+    created_date: Optional[str] = None
+
+class CreateTaskRequest(BaseModel):
+    title: str
+
+_tasks: list = [
+    {"id": "t1", "title": "Review low-stock alerts", "status": "pending", "created_date": "2025-01-15"},
+    {"id": "t2", "title": "Approve Q1 purchase orders", "status": "pending", "created_date": "2025-01-16"},
+]
+_task_counter = [3]
+
+@app.get("/api/tasks", response_model=List[Task])
+def get_tasks():
+    return _tasks
+
+@app.post("/api/tasks", response_model=Task, status_code=201)
+def create_task(body: CreateTaskRequest):
+    task = {"id": f"t{_task_counter[0]}", "title": body.title, "status": "pending", "created_date": "2025-01-17"}
+    _task_counter[0] += 1
+    _tasks.insert(0, task)
+    return task
+
+@app.delete("/api/tasks/{task_id}")
+def delete_task(task_id: str):
+    global _tasks
+    _tasks = [t for t in _tasks if t["id"] != task_id]
+    return {"ok": True}
+
+@app.patch("/api/tasks/{task_id}", response_model=Task)
+def toggle_task(task_id: str):
+    task = next((t for t in _tasks if t["id"] == task_id), None)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    task["status"] = "completed" if task["status"] == "pending" else "pending"
+    return task
+
 
 if __name__ == "__main__":
     import uvicorn
