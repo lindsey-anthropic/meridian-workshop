@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Components — System Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; padding: 40px 24px; }
+
+  h1 { font-size: 1.5rem; font-weight: 700; color: #f8fafc; text-align: center; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #64748b; font-size: 0.85rem; margin-bottom: 40px; }
+
+  .arch { display: grid; grid-template-columns: 1fr 80px 1fr 80px 1fr; gap: 0; align-items: start; max-width: 1100px; margin: 0 auto; }
+
+  /* ---- Layers ---- */
+  .layer { background: #1e2330; border: 1px solid #2d3448; border-radius: 12px; padding: 20px; }
+  .layer-title { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #94a3b8; margin-bottom: 16px; border-bottom: 1px solid #2d3448; padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .layer-title svg { opacity: 0.7; }
+
+  /* ---- Cards within layers ---- */
+  .card { background: #252b3b; border: 1px solid #3a4155; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; }
+  .card:last-child { margin-bottom: 0; }
+  .card-title { font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; }
+  .card-items { list-style: none; }
+  .card-items li { font-size: 0.72rem; color: #94a3b8; padding: 2px 0; padding-left: 12px; position: relative; }
+  .card-items li::before { content: '·'; position: absolute; left: 2px; color: #4b5563; }
+
+  /* ---- Color accents ---- */
+  .fe .layer { border-color: #1d4ed8; }
+  .fe .layer-title { color: #60a5fa; }
+  .fe .card { border-color: #1e3a5f; }
+  .fe .card-title { color: #93c5fd; }
+
+  .be .layer { border-color: #065f46; }
+  .be .layer-title { color: #34d399; }
+  .be .card { border-color: #064e3b; }
+  .be .card-title { color: #6ee7b7; }
+
+  .data .layer { border-color: #7c3aed; }
+  .data .layer-title { color: #a78bfa; }
+  .data .card { border-color: #4c1d95; }
+  .data .card-title { color: #c4b5fd; }
+
+  /* ---- Arrows ---- */
+  .arrow { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding-top: 60px; }
+  .arrow-line { width: 2px; height: 40px; background: linear-gradient(to bottom, #3a4155, #4b5563); }
+  .arrow svg { color: #4b5563; }
+  .arrow-label { font-size: 0.62rem; color: #64748b; text-align: center; line-height: 1.3; max-width: 70px; }
+  .arrow-double { display: flex; flex-direction: column; align-items: center; }
+
+  /* ---- Endpoints table ---- */
+  .endpoints { font-size: 0.68rem; }
+  .ep { display: flex; align-items: baseline; gap: 6px; padding: 3px 0; border-bottom: 1px solid #2d3448; }
+  .ep:last-child { border-bottom: none; }
+  .method { font-weight: 700; font-family: monospace; font-size: 0.62rem; min-width: 32px; }
+  .method.get { color: #34d399; }
+  .method.post { color: #f59e0b; }
+  .method.patch { color: #60a5fa; }
+  .method.del { color: #f87171; }
+  .ep-path { font-family: monospace; color: #94a3b8; }
+  .ep-note { color: #4b5563; font-size: 0.62rem; font-style: italic; }
+
+  /* ---- Legend ---- */
+  .legend { display: flex; gap: 24px; justify-content: center; margin-top: 32px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: #64748b; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-fe { background: #1d4ed8; }
+  .dot-be { background: #065f46; }
+  .dot-data { background: #7c3aed; }
+
+  /* ---- Notes ---- */
+  .notes { max-width: 1100px; margin: 32px auto 0; background: #1e2330; border: 1px solid #2d3448; border-radius: 12px; padding: 20px 24px; }
+  .notes h3 { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b; margin-bottom: 12px; }
+  .notes ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .notes li { font-size: 0.75rem; color: #94a3b8; padding-left: 16px; position: relative; }
+  .notes li::before { content: '→'; position: absolute; left: 0; color: #4b5563; }
+  .tag { display: inline-block; font-size: 0.6rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; vertical-align: middle; margin-left: 4px; }
+  .tag-warn { background: #451a03; color: #fb923c; }
+  .tag-ok { background: #052e16; color: #4ade80; }
+</style>
+</head>
+<body>
+
+<h1>Meridian Components — Inventory Management System</h1>
+<p class="subtitle">Current-state architecture · April 2026 · Delivered by Catalyst Components</p>
+
+<div class="arch">
+
+  <!-- FRONTEND -->
+  <div class="fe">
+    <div class="layer">
+      <div class="layer-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9l3 3-3 3M13 15h3"/></svg>
+        Frontend · Vue 3 SPA
+      </div>
+
+      <div class="card">
+        <div class="card-title">Runtime</div>
+        <ul class="card-items">
+          <li>Vue 3 — Composition API</li>
+          <li>Vite 5.2 (dev + build)</li>
+          <li>Vue Router 4.3</li>
+          <li>Axios (HTTP client)</li>
+          <li>Served on :3000</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Views (7 routes)</div>
+        <ul class="card-items">
+          <li>/ → Dashboard.vue</li>
+          <li>/inventory → Inventory.vue</li>
+          <li>/orders → Orders.vue</li>
+          <li>/spending → Spending.vue</li>
+          <li>/demand → Demand.vue</li>
+          <li>/reports → Reports.vue</li>
+          <li>/restocking → Restocking.vue</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Composables (shared logic)</div>
+        <ul class="card-items">
+          <li>useFilters.js — global filter state</li>
+          <li>useI18n.js — EN/JA + USD/JPY</li>
+          <li>useAuth.js — mock user session</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">API Layer</div>
+        <ul class="card-items">
+          <li>api.js — all Axios calls</li>
+          <li>Base URL: localhost:8001/api</li>
+          <li>Query params carry filters</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Internationalisation</div>
+        <ul class="card-items">
+          <li>locales/en.js · locales/ja.js</li>
+          <li>Currency: USD ↔ JPY (1:150)</li>
+          <li>Persisted in localStorage</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW 1 -->
+  <div class="arrow">
+    <div class="arrow-double">
+      <svg width="16" height="10" viewBox="0 0 16 10" fill="none"><path d="M0 5h14M10 1l4 4-4 4" stroke="#4b5563" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div class="arrow-label">HTTP REST<br>JSON</div>
+      <svg width="16" height="10" viewBox="0 0 16 10" fill="none" style="transform:rotate(180deg)"><path d="M0 5h14M10 1l4 4-4 4" stroke="#4b5563" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+
+  <!-- BACKEND -->
+  <div class="be">
+    <div class="layer">
+      <div class="layer-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Backend · FastAPI
+      </div>
+
+      <div class="card">
+        <div class="card-title">Runtime</div>
+        <ul class="card-items">
+          <li>Python 3.11 + FastAPI 0.110</li>
+          <li>Uvicorn ASGI server</li>
+          <li>Pydantic 2.5 (validation)</li>
+          <li>Listens on :8001</li>
+          <li>CORS: allow all origins (dev)</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Endpoints</div>
+        <div class="endpoints">
+          <div class="ep"><span class="method get">GET</span><span class="ep-path">/api/inventory[/{id}]</span></div>
+          <div class="ep"><span class="method get">GET</span><span class="ep-path">/api/orders[/{id}]</span></div>
+          <div class="ep"><span class="method get">GET</span><span class="ep-path">/api/demand</span></div>
+          <div class="ep"><span class="method get">GET</span><span class="ep-path">/api/backlog</span></div>
+          <div class="ep"><span class="method get">GET</span><span class="ep-path">/api/dashboard/summary</span></div>
+          <div class="ep"><span class="method get">GET</span><span class="ep-path">/api/spending/{summary|monthly|categories|transactions}</span></div>
+          <div class="ep"><span class="method get">GET</span><span class="ep-path">/api/reports/{quarterly|monthly-trends}</span></div>
+          <div class="ep"><span class="method get">GET</span><span class="ep-path">/api/restocking</span></div>
+          <div class="ep"><span class="method post">POST</span><span class="ep-path">/api/tasks</span><span class="ep-note">stub</span></div>
+          <div class="ep"><span class="method get">GET</span><span class="ep-path">/api/tasks</span><span class="ep-note">stub</span></div>
+          <div class="ep"><span class="method patch">PATCH</span><span class="ep-path">/api/tasks/{id}</span><span class="ep-note">stub</span></div>
+          <div class="ep"><span class="method del">DEL</span><span class="ep-path">/api/tasks/{id}</span><span class="ep-note">stub</span></div>
+          <div class="ep"><span class="method post">POST</span><span class="ep-path">/api/purchase-orders</span><span class="ep-note">stub</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Core Logic</div>
+        <ul class="card-items">
+          <li>apply_filters() — warehouse/category/status</li>
+          <li>filter_by_month() — month or quarter</li>
+          <li>Restocking: stock ≤ reorder_point</li>
+          <li>Aggregations computed on-the-fly</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW 2 -->
+  <div class="arrow">
+    <div class="arrow-double">
+      <svg width="16" height="10" viewBox="0 0 16 10" fill="none"><path d="M0 5h14M10 1l4 4-4 4" stroke="#4b5563" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <div class="arrow-label">Load at<br>startup</div>
+    </div>
+  </div>
+
+  <!-- DATA -->
+  <div class="data">
+    <div class="layer">
+      <div class="layer-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        Data · JSON Files (in-memory)
+      </div>
+
+      <div class="card">
+        <div class="card-title">inventory.json</div>
+        <ul class="card-items">
+          <li>SKU, name, category, warehouse</li>
+          <li>quantity_on_hand, reorder_point</li>
+          <li>unit_cost, location</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">orders.json <span style="color:#64748b;font-size:0.65rem">~150 KB</span></div>
+        <ul class="card-items">
+          <li>order_id, status, warehouse</li>
+          <li>category, date, total_value</li>
+          <li>customer, items[]</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">demand_forecasts.json</div>
+        <ul class="card-items">
+          <li>item_sku, forecasted_demand</li>
+          <li>trend: increasing | stable | decreasing</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">spending.json + transactions.json</div>
+        <ul class="card-items">
+          <li>spending_summary, monthly_spending</li>
+          <li>category_spending</li>
+          <li>transactions list (~13 KB)</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">backlog_items.json + purchase_orders.json</div>
+        <ul class="card-items">
+          <li>shortage tracking, priority levels</li>
+          <li>purchase_orders: stub (3 bytes)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item"><div class="dot dot-fe"></div> Vue 3 SPA · :3000</div>
+  <div class="legend-item"><div class="dot dot-be"></div> FastAPI · :8001</div>
+  <div class="legend-item"><div class="dot dot-data"></div> In-memory JSON (no DB)</div>
+</div>
+
+<!-- Notes -->
+<div class="notes">
+  <h3>Architectural notes &amp; gaps</h3>
+  <ul>
+    <li>No database — all data loaded from JSON at server startup; writes are not persisted across restarts <span class="tag tag-warn">gap</span></li>
+    <li>Task management endpoints (GET/POST/PATCH/DELETE /api/tasks) are stubs — frontend calls fail silently <span class="tag tag-warn">gap</span></li>
+    <li>Purchase order creation endpoint is a stub — backlog workflow is incomplete <span class="tag tag-warn">gap</span></li>
+    <li>No authentication or authorisation on any endpoint — open CORS + no API keys <span class="tag tag-warn">gap</span></li>
+    <li>No global state library (Pinia/Vuex) — shared state managed via composables <span class="tag tag-ok">intentional</span></li>
+    <li>Custom SVG charts — no external charting dependency (Chart.js, etc.) <span class="tag tag-ok">intentional</span></li>
+    <li>i18n implemented without a library — locale + currency switching via useI18n.js composable <span class="tag tag-ok">delivered</span></li>
+    <li>Restocking recommendation logic is computed server-side on each request — no caching layer <span class="tag tag-warn">gap</span></li>
+  </ul>
+</div>
+
+</body>
+</html>
