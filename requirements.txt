@@ -1,0 +1,9 @@
+# Backend runtime dependencies — used by `server/main.py`
+fastapi>=0.128.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.12.0
+
+# Backend test dependencies — used by `tests/backend/`
+pytest>=9.0.0
+pytest-asyncio>=1.3.0
+httpx>=0.28.0
