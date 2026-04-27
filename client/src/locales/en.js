@@ -6,6 +6,8 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    reports: 'Reports',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -309,6 +311,80 @@ export default {
     english: 'English',
     japanese: 'Japanese',
     selectLanguage: 'Select Language'
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    subtitle: 'Purchase order recommendations based on stock levels, demand forecast, and your budget',
+    budgetLabel: 'Budget Ceiling',
+    budgetPlaceholder: 'Enter budget (e.g. 50000)',
+    calculate: 'Calculate',
+    noData: 'No items require restocking with the current filters',
+    noBudget: 'Enter a budget ceiling above to see purchase recommendations',
+    summary: {
+      budget: 'Budget',
+      totalSpend: 'Recommended Spend',
+      itemsAtRisk: 'Items at Risk',
+      itemsCovered: 'Items Covered',
+      budgetRemaining: 'Budget Remaining'
+    },
+    table: {
+      sku: 'SKU',
+      name: 'Item Name',
+      warehouse: 'Warehouse',
+      category: 'Category',
+      currentStock: 'Current Stock',
+      daysOfStock: 'Days of Stock',
+      qtyToOrder: 'Qty to Order',
+      unitCost: 'Unit Cost',
+      lineTotal: 'Line Total',
+      urgency: 'Urgency',
+      status: 'Status'
+    },
+    urgency: {
+      high: 'High',
+      medium: 'Medium',
+      low: 'Low'
+    },
+    status: {
+      covered: 'Covered',
+      partial: 'Partial',
+      uncovered: 'Uncovered'
+    }
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    subtitle: 'View quarterly performance metrics and monthly trends',
+    loading: 'Loading reports...',
+    noData: 'No data available for selected filters',
+    quarterly: {
+      title: 'Quarterly Performance',
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate'
+    },
+    monthlyChart: {
+      title: 'Monthly Revenue Trend'
+    },
+    monthlyAnalysis: {
+      title: 'Month-over-Month Analysis',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    },
+    stats: {
+      ytdRevenue: 'Total Revenue (YTD)',
+      avgMonthly: 'Avg Monthly Revenue',
+      ytdOrders: 'Total Orders (YTD)',
+      bestQuarter: 'Best Performing Quarter'
+    }
   },
 
   // Common
