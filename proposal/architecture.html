@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Meridian Inventory Dashboard — Architecture Overview (R4)</title>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --panel: #ffffff;
+    --ink: #0f172a;
+    --muted: #475569;
+    --line: #cbd5e1;
+    --accent: #2563eb;
+    --warn: #b45309;
+    --ok: #047857;
+    --code-bg: #f1f5f9;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.55;
+    font-size: 15px;
+  }
+  header.page {
+    background: var(--ink);
+    color: #f8fafc;
+    padding: 32px 48px;
+    border-bottom: 4px solid var(--accent);
+  }
+  header.page .meta {
+    color: #94a3b8;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  header.page h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 600;
+  }
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 48px 80px;
+  }
+  section {
+    margin-bottom: 40px;
+  }
+  h2 {
+    font-size: 20px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+  h3 {
+    font-size: 16px;
+    margin-top: 24px;
+    margin-bottom: 8px;
+  }
+  p { color: var(--ink); }
+  .muted { color: var(--muted); }
+
+  /* Layered diagram */
+  .stack {
+    display: grid;
+    gap: 12px;
+  }
+  .layer {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 16px 20px;
+    position: relative;
+  }
+  .layer .layer-title {
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .layer .nodes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .node {
+    background: var(--code-bg);
+    border: 1px solid var(--line);
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12.5px;
+  }
+  .node.primary {
+    background: #dbeafe;
+    border-color: #93c5fd;
+  }
+  .arrow {
+    text-align: center;
+    color: var(--muted);
+    font-size: 18px;
+    line-height: 0.8;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  th {
+    background: var(--code-bg);
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-size: 11.5px;
+    letter-spacing: 0.05em;
+  }
+  tr:last-child td { border-bottom: none; }
+  td code {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    background: var(--code-bg);
+    padding: 2px 5px;
+    border-radius: 3px;
+  }
+
+  /* Callouts */
+  .callout {
+    background: #fef3c7;
+    border-left: 4px solid var(--warn);
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .callout.note {
+    background: #dbeafe;
+    border-left-color: var(--accent);
+  }
+  .callout strong { color: var(--ink); }
+
+  ul.tight { margin: 6px 0 6px 20px; padding: 0; }
+  ul.tight li { margin: 2px 0; }
+
+  footer.page {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12.5px;
+    padding: 20px;
+    border-top: 1px solid var(--line);
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+<header class="page">
+  <h1>Meridian Inventory Dashboard — Architecture Overview</h1>
+  <div class="meta">RFP MC-2026-0417 · Requirement R4 · Working draft, generated from codebase 2026-04-27 · Accenture engagement team</div>
+</header>
+
+<main>
+
+<section>
+  <h2>1. Purpose &amp; Status</h2>
+  <p>This document is the architecture overview committed in §3.5 of our proposal. It is generated directly from the codebase rather than written separately, so it remains accurate to what is deployed. It is a <strong>living artifact</strong> — this version reflects the as-handed-over state from the previous vendor; we update it through the engagement and deliver the final version to Meridian IT at handoff (week 8) alongside the source.</p>
+  <p>The intended audience is Meridian IT and Operations leadership. Reading time: ~10 minutes.</p>
+</section>
+
+<section>
+  <h2>2. System at a Glance</h2>
+  <svg viewBox="0 0 1000 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Component diagram of the Meridian inventory dashboard" style="width:100%;height:auto;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 4px;display:block;">
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+      </marker>
+      <marker id="arrow-warn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#b45309"/>
+      </marker>
+    </defs>
+
+    <!-- Tier 1: Browser SPA -->
+    <g>
+      <rect x="20" y="40" width="220" height="200" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+      <text x="130" y="62" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#0f172a">Vue 3 SPA</text>
+      <text x="130" y="78" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#475569">browser · port 3000 (Vite)</text>
+      <text x="34" y="104" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#0f172a">Views (6, router-bound)</text>
+      <text x="34" y="120" font-family="monospace" font-size="10.5" fill="#475569">Dashboard · Inventory · Orders</text>
+      <text x="34" y="134" font-family="monospace" font-size="10.5" fill="#475569">Demand · Spending · Reports</text>
+      <text x="34" y="158" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#0f172a">Composables (3)</text>
+      <text x="34" y="174" font-family="monospace" font-size="10.5" fill="#475569">useFilters · useI18n · useAuth</text>
+      <text x="34" y="198" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#0f172a">Components</text>
+      <text x="34" y="214" font-family="monospace" font-size="10.5" fill="#475569">FilterBar · 5 modals · nav</text>
+    </g>
+
+    <!-- Tier 2: API client -->
+    <g>
+      <rect x="280" y="40" width="200" height="200" rx="6" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/>
+      <text x="380" y="62" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#0f172a">api.js (axios)</text>
+      <text x="380" y="78" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#475569">centralised HTTP client</text>
+      <text x="294" y="104" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#0f172a">15 methods</text>
+      <text x="294" y="120" font-family="monospace" font-size="10.5" fill="#475569">getInventory · getOrders</text>
+      <text x="294" y="134" font-family="monospace" font-size="10.5" fill="#475569">getDashboardSummary …</text>
+      <text x="294" y="158" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#b45309">⚠ 6 orphaned</text>
+      <text x="294" y="174" font-family="monospace" font-size="10.5" fill="#475569">tasks (×4), purchase-orders (×2)</text>
+      <text x="294" y="190" font-family="sans-serif" font-size="10.5" fill="#475569">— no backend route</text>
+      <text x="294" y="214" font-family="sans-serif" font-size="10.5" fill="#475569">Hardcoded base URL ⚠</text>
+    </g>
+
+    <!-- Tier 3: FastAPI -->
+    <g>
+      <rect x="520" y="40" width="200" height="200" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+      <text x="620" y="62" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#0f172a">FastAPI service</text>
+      <text x="620" y="78" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#475569">port 8001 · main.py</text>
+      <text x="534" y="104" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#0f172a">14 routes</text>
+      <text x="534" y="120" font-family="monospace" font-size="10.5" fill="#475569">/api/inventory /orders /demand</text>
+      <text x="534" y="134" font-family="monospace" font-size="10.5" fill="#475569">/dashboard /spending /reports</text>
+      <text x="534" y="158" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#0f172a">Cross-cutting</text>
+      <text x="534" y="174" font-family="monospace" font-size="10.5" fill="#475569">Pydantic response models</text>
+      <text x="534" y="188" font-family="monospace" font-size="10.5" fill="#475569">apply_filters · filter_by_month</text>
+      <text x="534" y="214" font-family="sans-serif" font-size="10.5" fill="#b45309">CORS open (*) — dev-only</text>
+    </g>
+
+    <!-- Tier 4: Data store -->
+    <g>
+      <rect x="760" y="40" width="220" height="200" rx="6" fill="#f1f5f9" stroke="#475569" stroke-width="1.5"/>
+      <text x="870" y="62" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="700" fill="#0f172a">JSON store</text>
+      <text x="870" y="78" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#475569">server/data/ · in-memory</text>
+      <text x="774" y="104" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#0f172a">7 files, loaded at boot</text>
+      <text x="774" y="120" font-family="monospace" font-size="10.5" fill="#475569">inventory · orders · demand</text>
+      <text x="774" y="134" font-family="monospace" font-size="10.5" fill="#475569">backlog · purchase_orders</text>
+      <text x="774" y="148" font-family="monospace" font-size="10.5" fill="#475569">spending · transactions</text>
+      <text x="774" y="172" font-family="sans-serif" font-size="11.5" font-weight="600" fill="#0f172a">Properties</text>
+      <text x="774" y="188" font-family="sans-serif" font-size="10.5" fill="#475569">Read-only at runtime</text>
+      <text x="774" y="202" font-family="sans-serif" font-size="10.5" fill="#475569">Mutations not persisted</text>
+      <text x="774" y="216" font-family="sans-serif" font-size="10.5" fill="#475569">No referential integrity</text>
+    </g>
+
+    <!-- Connecting arrows -->
+    <line x1="240" y1="140" x2="278" y2="140" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <line x1="480" y1="140" x2="518" y2="140" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <line x1="720" y1="140" x2="758" y2="140" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <!-- Arrow labels -->
+    <text x="259" y="132" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">HTTP</text>
+    <text x="259" y="155" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">/JSON</text>
+    <text x="499" y="132" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">REST</text>
+    <text x="499" y="155" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">+ filters</text>
+    <text x="739" y="132" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">read</text>
+
+    <!-- Orphan dashed arrow -->
+    <line x1="380" y1="240" x2="380" y2="290" stroke="#b45309" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-warn)"/>
+    <rect x="270" y="290" width="220" height="50" rx="4" fill="#fef3c7" stroke="#b45309" stroke-width="1.2"/>
+    <text x="380" y="310" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="600" fill="#0f172a">404 — no backend route</text>
+    <text x="380" y="326" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#475569">tasks endpoints, PO create/lookup</text>
+
+    <!-- Title -->
+    <text x="500" y="22" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="600" fill="#0f172a">Component diagram — current state, generated 2026-04-27</text>
+  </svg>
+
+  <div class="callout note">
+    <strong>Data flow:</strong> Vue view → composable (filters) → <code>api.js</code> → axios GET with query params → FastAPI route → in-memory list filtering → Pydantic-validated JSON response → Vue <code>ref</code> / <code>computed</code> for render.
+  </div>
+</section>
+
+<section>
+  <h2>3. API Surface</h2>
+  <p>15 endpoints, all under <code>/api/</code>, all REST-style GET except for tasks and purchase-orders mutations. Filter parameters follow a single convention — <code>?warehouse=X&amp;category=Y&amp;status=Z&amp;month=…</code> — implemented through the shared <code>apply_filters()</code> and <code>filter_by_month()</code> helpers in <code>main.py</code>.</p>
+  <table>
+    <thead><tr><th>Domain</th><th>Endpoint</th><th>Filters</th><th>Method</th></tr></thead>
+    <tbody>
+      <tr><td>Inventory</td><td><code>/api/inventory</code></td><td>warehouse, category</td><td>GET</td></tr>
+      <tr><td>Inventory</td><td><code>/api/inventory/{id}</code></td><td>—</td><td>GET</td></tr>
+      <tr><td>Orders</td><td><code>/api/orders</code></td><td>warehouse, category, status, month</td><td>GET</td></tr>
+      <tr><td>Orders</td><td><code>/api/orders/{id}</code></td><td>—</td><td>GET</td></tr>
+      <tr><td>Demand</td><td><code>/api/demand</code></td><td>—</td><td>GET</td></tr>
+      <tr><td>Backlog</td><td><code>/api/backlog</code></td><td>—</td><td>GET</td></tr>
+      <tr><td>Dashboard</td><td><code>/api/dashboard/summary</code></td><td>warehouse, category, status, month</td><td>GET</td></tr>
+      <tr><td>Spending</td><td><code>/api/spending/summary</code></td><td>—</td><td>GET</td></tr>
+      <tr><td>Spending</td><td><code>/api/spending/monthly</code></td><td>—</td><td>GET</td></tr>
+      <tr><td>Spending</td><td><code>/api/spending/categories</code></td><td>—</td><td>GET</td></tr>
+      <tr><td>Spending</td><td><code>/api/spending/transactions</code></td><td>—</td><td>GET</td></tr>
+      <tr><td>Reports</td><td><code>/api/reports/quarterly</code></td><td>—</td><td>GET</td></tr>
+      <tr><td>Reports</td><td><code>/api/reports/monthly-trends</code></td><td>—</td><td>GET</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>Reports filter inconsistency.</strong> The Reports endpoints (<code>quarterly</code>, <code>monthly-trends</code>) accept <em>no</em> filter parameters, even though Orders and Dashboard accept four. The Reports view nonetheless renders local filter controls outside the shared <code>FilterBar</code> pattern. This is one of the alignment gaps recorded for the Reports module remediation work.
+  </div>
+
+  <div class="callout">
+    <strong>Wiring gap — orphaned client methods.</strong> Six methods in <code>client/src/api.js</code> call backend routes that do not exist:
+    <ul class="tight" style="margin-top:6px;">
+      <li><code>getTasks</code> · <code>createTask</code> · <code>deleteTask</code> · <code>toggleTask</code> → <code>/api/tasks</code> (no data file, no model, no route)</li>
+      <li><code>createPurchaseOrder</code> · <code>getPurchaseOrderByBacklogItem</code> → <code>/api/purchase-orders</code> (data and Pydantic models exist; no route)</li>
+    </ul>
+    The corresponding UI elements (TasksModal, purchase-order creation from backlog items) will fail with HTTP 404 at runtime. Symptomatic of "previous vendor work in progress" beyond the Reports module specifically. <strong>Recorded as a discovery finding</strong> for calibration with Meridian — it sits outside the current Reports remediation scope and warrants a deliberate scope decision (complete the wiring, remove the dead client code, or accept as known limitation).
+  </div>
+</section>
+
+<section>
+  <h2>4. Frontend — Views, Composables &amp; Consumers</h2>
+
+  <h3>Views (router-bound, <code>client/src/views/</code>)</h3>
+  <table>
+    <thead><tr><th>Route</th><th>View</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><code>/</code></td><td>Dashboard.vue</td><td>Stable</td></tr>
+      <tr><td><code>/inventory</code></td><td>Inventory.vue</td><td>Stable</td></tr>
+      <tr><td><code>/orders</code></td><td>Orders.vue</td><td>Stable</td></tr>
+      <tr><td><code>/demand</code></td><td>Demand.vue</td><td>Stable</td></tr>
+      <tr><td><code>/spending</code></td><td>Spending.vue</td><td>Stable</td></tr>
+      <tr><td><code>/reports</code></td><td>Reports.vue</td><td><span style="color:var(--warn)">Pattern-divergent — R1 scope</span></td></tr>
+    </tbody>
+  </table>
+  <p class="muted">Backlog.vue exists in source but is not currently routed; reachable through modals from Orders.</p>
+
+  <h3>Composables (<code>client/src/composables/</code>)</h3>
+  <table>
+    <thead><tr><th>Composable</th><th>Purpose</th><th>Consumers</th></tr></thead>
+    <tbody>
+      <tr><td><code>useFilters</code></td><td>Shared filter state — warehouse, category, status, period</td><td>Dashboard, Inventory, Orders, Demand, Spending, Backlog (not Reports)</td></tr>
+      <tr><td><code>useI18n</code></td><td>Locale switching, string lookup against <code>locales/en.js</code> &amp; <code>ja.js</code></td><td>App.vue, all standard views, LanguageSwitcher, modals (not Reports)</td></tr>
+      <tr><td><code>useAuth</code></td><td>Session/profile state for the user menu</td><td>App.vue, ProfileMenu, ProfileDetailsModal</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <strong>Two recurring exclusions:</strong> Reports.vue does not consume <code>useFilters</code> or <code>useI18n</code>. The nav entry for Reports in <code>App.vue:26</code> is a literal English string rather than <code>t('nav.reports')</code>. Both are direct inputs to R1 remediation and to D2 (i18n extension).
+  </div>
+
+  <h3>Components (<code>client/src/components/</code>)</h3>
+  <p class="muted">FilterBar (global), LanguageSwitcher, ProfileMenu, and five detail modals (Backlog, Cost, Inventory, Product, ProfileDetails) plus TasksModal. Modals follow a uniform <code>:is-open</code> + <code>@close</code> contract.</p>
+</section>
+
+<section>
+  <h2>5. Backend — Structure &amp; Patterns</h2>
+  <p>Single module (<code>main.py</code>) with co-located Pydantic models, two filtering helpers, and route handlers. Data is loaded once via <code>mock_data.py</code> from <code>server/data/*.json</code> at process start; runtime mutations (POST /tasks, POST /purchase-orders) are not persisted across restarts.</p>
+  <ul class="tight">
+    <li><strong>Filtering:</strong> centralized in <code>apply_filters()</code> (warehouse, category, status) and <code>filter_by_month()</code> (direct month or quarter via <code>QUARTER_MAP</code>).</li>
+    <li><strong>Validation:</strong> Pydantic <code>response_model</code> declared on most read endpoints; spending and reports endpoints return raw dicts.</li>
+    <li><strong>Errors:</strong> 404 via <code>HTTPException</code> on item-not-found; no auth, no rate limiting (acknowledged in <code>server/CLAUDE.md</code>).</li>
+    <li><strong>CORS:</strong> wide open (<code>allow_origins=["*"]</code>) — appropriate for development, must be tightened before any deployment beyond Meridian's internal network.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. Data Store — JSON Files</h2>
+  <p>The previous vendor chose JSON-on-disk over a database. The choice is fine for the current data volume and was a reasonable accelerator during initial build. It carries explicit limits we want named so future scope decisions are made eyes-open:</p>
+  <ul class="tight">
+    <li><strong>No persistence of mutations.</strong> Anything written through the API (tasks, purchase orders) is lost on restart. R2 will introduce a "PO-issued" state transition; this constraint is what keeps it ephemeral until persistence is in scope.</li>
+    <li><strong>No concurrency control.</strong> All reads operate on the same in-memory list; writes are last-write-wins.</li>
+    <li><strong>Filter cost is O(N).</strong> Acceptable at &lt;10K items; not at &gt;100K.</li>
+    <li><strong>No referential integrity.</strong> Cross-file references (e.g., orders → inventory SKUs, purchase_orders → backlog_items) are validated by convention, not by schema.</li>
+  </ul>
+  <div class="callout note">
+    <strong>Implication for R2:</strong> the restocking algorithm reads inventory + demand-forecast + backlog cleanly from the existing endpoints. No data-store rework is required for v1. If Meridian elects cross-warehouse rebalancing (the §3.7-A4 calibration trigger), the JSON store remains adequate; the change is algorithmic, not structural.
+  </div>
+</section>
+
+<section>
+  <h2>7. Test Coverage Map</h2>
+  <table>
+    <thead><tr><th>Layer</th><th>Location</th><th>State at handover</th><th>Engagement target</th></tr></thead>
+    <tbody>
+      <tr><td>Backend (pytest)</td><td><code>tests/backend/</code></td><td><span style="color:var(--ok)">Present — dashboard, inventory, misc endpoint suites</span></td><td>Extend to cover <code>/api/recommendations</code> (R2)</td></tr>
+      <tr><td>Frontend unit (Vitest)</td><td>—</td><td><span style="color:var(--warn)">None</span></td><td>Selective — <code>useFilters</code>, <code>useI18n</code>, R2 algorithm</td></tr>
+      <tr><td>End-to-end (Playwright)</td><td>—</td><td><span style="color:var(--warn)">None</span></td><td>Ten critical flows (proposal §3.3), CI-blocking</td></tr>
+    </tbody>
+  </table>
+  <p>Per §3.3 we treat the existing pytest suite as a foundation rather than rewrite it; R3 adds the layers that are missing.</p>
+</section>
+
+<section>
+  <h2>8. Pattern Inventory — What "Aligned" Looks Like</h2>
+  <p>Two repository CLAUDE.md files (<code>client/CLAUDE.md</code>, <code>server/CLAUDE.md</code>) document the conventions the previous vendor was working toward. R1 remediation aligns Reports.vue with these; future R2 and stretch work continues them.</p>
+  <ul class="tight">
+    <li><strong>Frontend:</strong> Composition API, <code>ref</code>/<code>computed</code> data layer, scoped styles, shared composables for cross-view state, centralized API client, locale strings via <code>useI18n</code>.</li>
+    <li><strong>Backend:</strong> Pydantic <code>response_model</code> on read endpoints, query-param filters via shared helpers, <code>HTTPException</code> for not-found, lowercase comparison for case-insensitive filters.</li>
+    <li><strong>Cross-cutting:</strong> ISO date strings, lowercase enum-like values for status and category, CORS-open in dev (closed in deployment).</li>
+  </ul>
+</section>
+
+<section>
+  <h2>9. How the Engagement Scope Lands on This System</h2>
+  <p>The architecture above shapes — and is shaped by — the work in flight. This table records, in plain terms, what each engagement priority touches and what we have learned from the codebase that informs the work.</p>
+  <table>
+    <thead><tr><th>Engagement priority</th><th>What the system tells us</th></tr></thead>
+    <tbody>
+      <tr><td>Reports module remediation</td><td><code>Reports.vue</code> is the only view excluded from both shared composables (<code>useFilters</code>, <code>useI18n</code>). Its backend endpoints accept no filter parameters while every other domain does. Bringing the view into pattern alignment is the substance of the remediation work.</td></tr>
+      <tr><td>Restocking capability</td><td>The inputs the recommendation engine needs — inventory levels, demand forecasts, backlog — are already exposed cleanly. A new <code>/api/recommendations</code> endpoint extends the existing query-param pattern. No reshape of the data layer is required.</td></tr>
+      <tr><td>Test coverage</td><td>Backend pytest exists and is reused. Frontend has no automated coverage today — Playwright (end-to-end) and selective Vitest (composables and recommendation logic) are net-new and deliver the change-confidence Meridian IT has asked for.</td></tr>
+      <tr><td>Architecture documentation</td><td>This document. Maintained as a living artifact through delivery and finalised at handover alongside the source.</td></tr>
+      <tr><td>Internationalisation extension</td><td>Reports is the largest gap and is addressed during the Reports remediation work. Remaining views are audited and Tokyo-locale strings extended where currently English-only.</td></tr>
+      <tr><td>UI light refresh</td><td>Slate/gray palette and CSS-variable structure are already in place. A typography, spacing, and chart-styling pass is in scope; a design-system rebuild is not.</td></tr>
+      <tr><td>Dark mode</td><td>The existing variable structure makes this a theming layer rather than a redesign. Operator-selectable preference, modest effort, high warehouse-floor value.</td></tr>
+      <tr><td>Discovery findings</td><td>Two items are recorded for joint scope decision with Meridian, separate from the locked Reports remediation: (1) the orphaned API client methods detailed in §3, (2) any further Reports defects categorised in the audit deliverable.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+<footer class="page">
+  Living artifact — updated through engagement delivery. Not the final handoff version.
+</footer>
+
+</body>
+</html>

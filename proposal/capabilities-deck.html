@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modernizing Meridian's Inventory Dashboard — Accenture × Meridian Components</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4/dist/theme/white.css">
+
+    <style>
+        :root {
+            --slate-900: #0f172a;
+            --slate-700: #334155;
+            --slate-500: #64748b;
+            --slate-300: #cbd5e1;
+            --slate-100: #e2e8f0;
+            --slate-50: #f8fafc;
+            --accent: #3b82f6;
+        }
+
+        .reveal {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: var(--slate-900);
+        }
+
+        .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: var(--slate-900);
+            text-transform: none;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .reveal h1 { font-size: 2.4em; }
+        .reveal h2 { font-size: 1.8em; }
+        .reveal h3 { font-size: 1.2em; color: var(--slate-700); margin-bottom: 0.5em; }
+        .reveal h4 { font-size: 0.9em; }
+
+        .reveal p, .reveal li { color: var(--slate-700); }
+
+        .reveal section { text-align: left; }
+
+        .slide-footer {
+            position: fixed;
+            bottom: 12px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 32px;
+            font-size: 0.55em;
+            color: var(--slate-500);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .reveal .slide-number {
+            color: var(--slate-500);
+            background: transparent;
+            font-size: 0.7em;
+        }
+
+        .title-slide { text-align: center !important; }
+        .title-slide h1 { font-size: 2.6em; margin-bottom: 0.3em; }
+        .title-slide .subtitle { color: var(--slate-500); font-size: 0.9em; margin-top: 0.5em; }
+        .accent-line { width: 60px; height: 3px; background: var(--accent); margin: 32px auto; }
+
+        .hero {
+            font-size: 1.6em;
+            font-weight: 600;
+            color: var(--slate-900);
+            line-height: 1.3;
+            margin: 0.4em 0;
+        }
+
+        .lede {
+            color: var(--slate-500);
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+
+        .persona-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .persona-card {
+            background: var(--slate-50);
+            border-left: 3px solid var(--accent);
+            padding: 20px;
+            border-radius: 4px;
+        }
+
+        .persona-card h4 {
+            margin: 0 0 8px;
+            color: var(--slate-900);
+            font-size: 1em;
+        }
+
+        .persona-card .role {
+            color: var(--slate-500);
+            font-size: 0.65em;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+        }
+
+        .persona-card p {
+            font-size: 0.7em;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .principles {
+            list-style: none;
+            padding: 0;
+            margin: 32px 0;
+        }
+
+        .principles li {
+            padding: 16px 0;
+            border-bottom: 1px solid var(--slate-100);
+            font-size: 0.95em;
+        }
+
+        .principles li:last-child { border-bottom: none; }
+
+        .principles .num {
+            display: inline-block;
+            width: 28px;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .principles .principle {
+            color: var(--slate-900);
+            font-weight: 600;
+        }
+
+        .principles .gloss {
+            color: var(--slate-500);
+            font-size: 0.8em;
+            margin-left: 28px;
+            margin-top: 4px;
+            font-weight: normal;
+        }
+
+        .formula {
+            font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+            background: var(--slate-50);
+            padding: 14px 20px;
+            border-radius: 4px;
+            color: var(--slate-900);
+            font-size: 0.7em;
+            margin: 16px 0;
+            border-left: 3px solid var(--accent);
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        .reveal ul.tight li {
+            margin: 6px 0;
+            font-size: 0.78em;
+            color: var(--slate-700);
+        }
+
+        .timeline {
+            display: grid;
+            grid-template-columns: 1fr 3fr 1fr;
+            gap: 12px;
+            margin-top: 24px;
+            font-size: 0.75em;
+        }
+
+        .timeline-phase {
+            background: var(--slate-50);
+            padding: 16px;
+            border-top: 3px solid var(--accent);
+            border-radius: 0 0 4px 4px;
+        }
+
+        .timeline-phase h4 {
+            margin: 0 0 8px;
+            color: var(--slate-900);
+            font-size: 0.95em;
+        }
+
+        .timeline-phase .weeks {
+            color: var(--accent);
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .timeline-phase ul {
+            margin: 0;
+            padding-left: 16px;
+            color: var(--slate-700);
+            font-size: 0.85em;
+        }
+
+        .price-tag {
+            font-size: 2.6em;
+            font-weight: 700;
+            color: var(--slate-900);
+            letter-spacing: -0.03em;
+            margin: 0;
+        }
+
+        .price-payment-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 24px 0;
+        }
+
+        .payment-card {
+            background: var(--slate-50);
+            padding: 14px 8px;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 0.7em;
+        }
+
+        .payment-card .pct {
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 1.5em;
+        }
+
+        .payment-card .label {
+            color: var(--slate-500);
+            margin-top: 4px;
+            line-height: 1.3;
+        }
+
+        .findings {
+            background: var(--slate-50);
+            padding: 16px 20px;
+            border-radius: 4px;
+            margin-top: 12px;
+        }
+
+        .findings ul {
+            margin: 8px 0 0 0;
+            padding-left: 20px;
+            font-size: 0.72em;
+            color: var(--slate-700);
+        }
+
+        .findings li { margin: 4px 0; }
+
+        code {
+            font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 0.85em;
+            color: var(--slate-900);
+            background: white;
+            padding: 1px 6px;
+            border-radius: 2px;
+        }
+
+        .closing { text-align: center; }
+        .closing h2 { margin-bottom: 24px; }
+
+        .desired-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 16px;
+        }
+
+        .desired-grid .item h4 {
+            color: var(--accent);
+            font-size: 0.7em;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 6px;
+        }
+
+        .desired-grid .item p {
+            font-size: 0.75em;
+            margin: 0;
+            color: var(--slate-700);
+            line-height: 1.5;
+        }
+
+        .reveal a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <section class="title-slide">
+                <h1>Modernizing Meridian's<br>inventory dashboard</h1>
+                <div class="accent-line"></div>
+                <p class="subtitle">Accenture response to RFP MC-2026-0417</p>
+                <p class="subtitle"><em>May 2026</em></p>
+            </section>
+
+            <section>
+                <h3>Our reading</h3>
+                <p class="hero">One engagement, not four deliverables.</p>
+                <p class="lede">
+                    The RFP separates Reports remediation, Restocking, automated testing, and architecture documentation. The goal underneath is single — restoring Meridian's confidence to evolve a system that today carries unfinished work, no test coverage, and a Reports module that has not behaved as the operations team needs.
+                </p>
+            </section>
+
+            <section>
+                <h3>Three lenses, one proposal</h3>
+                <p class="lede">The proposal speaks to the people who will read it — and the ones whose buy-in matters most.</p>
+                <div class="persona-grid">
+                    <div class="persona-card">
+                        <div class="role">Operations</div>
+                        <h4>The champion</h4>
+                        <p>Restocking is her team's ask. We treat their input as a delivery dependency, not a wish list.</p>
+                    </div>
+                    <div class="persona-card">
+                        <div class="role">IT</div>
+                        <h4>The gatekeeper</h4>
+                        <p>Test coverage is the prerequisite that unblocks every change after us.</p>
+                    </div>
+                    <div class="persona-card">
+                        <div class="role">Procurement</div>
+                        <h4>The process</h4>
+                        <p>Predictable delivery against a single fixed-fee envelope, no scope creep.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h3>Three principles shape our approach</h3>
+                <ul class="principles">
+                    <li>
+                        <span class="num">1.</span><span class="principle">We deliver with your operators, not just for them.</span>
+                        <div class="gloss">A working session in week 1 calibrates the restocking algorithm against real lead times, supplier preferences, and stockout tolerance.</div>
+                    </li>
+                    <li>
+                        <span class="num">2.</span><span class="principle">Earning your IT team's confidence is the first thing we have to do.</span>
+                        <div class="gloss">We publish the critical-flow list and propose an IT calibration step in week 1, before remediation work commits.</div>
+                    </li>
+                    <li>
+                        <span class="num">3.</span><span class="principle">Pricing is structured to make delivery predictable.</span>
+                        <div class="gloss">A single fixed-fee envelope with one calibration point at end of discovery — not an open-ended adjustment cycle.</div>
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h3>Restocking (R2) — operations' ask, our anchor</h3>
+                <p class="lede">A reorder-point model with operator-allocated budget logic.</p>
+                <div class="formula">
+                    reorder_threshold = demand-forecast × lead-time + safety-stock
+                </div>
+                <div class="two-col">
+                    <div>
+                        <h4>v1 in scope</h4>
+                        <ul class="tight">
+                            <li>Per-warehouse evaluation</li>
+                            <li>Service-level priority allocation</li>
+                            <li>Margin and volume tiebreakers</li>
+                            <li>Operator overrides supported</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Phase 2 — Calibration trigger</h4>
+                        <ul class="tight">
+                            <li>Cross-warehouse rebalancing</li>
+                            <li>SF ↔ London ↔ Tokyo movement</li>
+                            <li>Single change order if elected</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h3>Test coverage (R3) — IT's confidence layer</h3>
+                <p class="lede">Existing backend pytest is a foundation, not a problem. We extend it.</p>
+                <div class="two-col">
+                    <div>
+                        <h4>End-to-end (Playwright)</h4>
+                        <p style="font-size: 0.78em; color: var(--slate-500); margin: 4px 0;">Ten critical user flows. Pass or fail in a real browser against a real backend. The layer that gives IT the strongest confidence to approve future change.</p>
+                    </div>
+                    <div>
+                        <h4>Frontend unit + component (Vitest)</h4>
+                        <p style="font-size: 0.78em; color: var(--slate-500); margin: 4px 0;">Selective coverage on shared composables and the new R2 logic. Where it hardens the gates downstream changes most often touch.</p>
+                    </div>
+                </div>
+                <p class="lede" style="margin-top: 24px;"><strong style="color: var(--slate-900);">Discovery week 1:</strong> written exchange with IT, routed through procurement, to confirm or amend the flow list.</p>
+            </section>
+
+            <section>
+                <h3>Reports (R1) — audit-then-fix, not fix-blind</h3>
+                <p class="lede">A review of <code>client/src/views/Reports.vue</code> confirms the RFP's account.</p>
+                <div class="findings">
+                    <strong style="font-size: 0.78em; color: var(--slate-900);">What's already visible in the code:</strong>
+                    <ul>
+                        <li>Thirteen <code>console.log</code> statements left in shipping code (lines 145–256)</li>
+                        <li>Absent filter UI controls — backend exposes parameters; frontend ignores them</li>
+                        <li>Hardcoded API URLs bypassing the codebase's abstracted client (lines 156, 162)</li>
+                        <li>Missing internationalization integration unique to this view</li>
+                        <li>Inline growth-rate calculation diverging from backend-computed-summary pattern</li>
+                    </ul>
+                </div>
+                <p class="lede" style="margin-top: 14px; font-size: 0.78em;">Discovery week categorizes defects: genuine bugs vs unfinished feature work. Fixed-fee follows the audit, not the other way around.</p>
+            </section>
+
+            <section>
+                <h3>Architecture (R4) and desired capabilities (D1–D3)</h3>
+                <div class="desired-grid">
+                    <div class="item">
+                        <h4>R4 — Architecture documentation</h4>
+                        <p>Self-contained HTML overview generated from the codebase. Living artifact, kept current through the engagement.</p>
+                    </div>
+                    <div class="item">
+                        <h4>D1 — UI light refresh</h4>
+                        <p>Typography, spacing, status colors, chart styling. Full design-system rebuild deferred — not a side-effect of this engagement.</p>
+                    </div>
+                    <div class="item">
+                        <h4>D2 — i18n extension</h4>
+                        <p>Tokyo team is the operational driver. Existing <code>useI18n</code> composable extended; remaining views audited.</p>
+                    </div>
+                    <div class="item">
+                        <h4>D3 — Dark mode</h4>
+                        <p>Operator-selectable theme. CSS variable layer over existing slate palette. Modest effort, real value on warehouse floor.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h3>Timeline — eight weeks, three phases</h3>
+                <div class="timeline">
+                    <div class="timeline-phase">
+                        <div class="weeks">Week 1</div>
+                        <h4>Discovery</h4>
+                        <ul>
+                            <li>R1 audit</li>
+                            <li>R2 calibration with VP Ops</li>
+                            <li>R3 IT alignment</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-phase">
+                        <div class="weeks">Weeks 2–7</div>
+                        <h4>Parallel delivery</h4>
+                        <ul>
+                            <li>R1 remediation (wks 2–4)</li>
+                            <li>R2 restocking build (wks 2–6)</li>
+                            <li>R3 test harness (wks 2–7)</li>
+                            <li>D1, D2, D3 (back half)</li>
+                        </ul>
+                    </div>
+                    <div class="timeline-phase">
+                        <div class="weeks">Week 8</div>
+                        <h4>Handover</h4>
+                        <ul>
+                            <li>R4 architecture doc</li>
+                            <li>IT walkthrough</li>
+                            <li>Closeout</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="lede" style="margin-top: 24px; font-size: 0.78em;">Locked Statement of Work at end of week 1. From week 2, the fixed fee is committed.</p>
+            </section>
+
+            <section>
+                <h3>Pricing — single fixed fee</h3>
+                <p class="price-tag">USD $325,000</p>
+                <p class="lede" style="margin-top: 4px;">Inclusive of discovery, parallel delivery, handover, and all desired-capabilities scope.</p>
+                <div class="price-payment-grid">
+                    <div class="payment-card">
+                        <div class="pct">25%</div>
+                        <div class="label">Kickoff</div>
+                    </div>
+                    <div class="payment-card">
+                        <div class="pct">25%</div>
+                        <div class="label">SOW lock<br>(end of wk 1)</div>
+                    </div>
+                    <div class="payment-card">
+                        <div class="pct">25%</div>
+                        <div class="label">Mid-point<br>(end of wk 4)</div>
+                    </div>
+                    <div class="payment-card">
+                        <div class="pct">25%</div>
+                        <div class="label">Handover<br>(end of wk 8)</div>
+                    </div>
+                </div>
+                <p class="lede" style="font-size: 0.72em;"><strong style="color: var(--slate-900);">Discovery Calibration Clause:</strong> one change order if cross-warehouse rebalancing is elected at end of discovery. None thereafter.</p>
+            </section>
+
+            <section>
+                <h3>Why Accenture</h3>
+                <p class="hero">We size for delivery, not for the bid.</p>
+                <p class="lede">
+                    The previous vendor was, by Meridian's read, capable but over-committed. Discovery-first delivery — week 1 included in the fixed fee, locked SOW before week 2, one calibration point and one only — is the structural answer to that pattern.
+                </p>
+                <p class="lede" style="margin-top: 16px;">
+                    The proposal itself is the first proof: specific where we should be, hedged where we genuinely are, and ready to be challenged where Meridian sees something we have not.
+                </p>
+            </section>
+
+            <section class="closing">
+                <h2>Next step</h2>
+                <div class="accent-line"></div>
+                <p class="hero" style="font-size: 1.3em;">Working session with VP Operations<br>and IT contact in week 1 of the engagement.</p>
+                <p class="lede" style="margin-top: 32px;">Questions welcome.</p>
+            </section>
+
+        </div>
+    </div>
+
+    <div class="slide-footer">
+        <span>Accenture × Meridian Components</span>
+        <span></span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4/dist/reveal.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: 'c/t',
+            controls: true,
+            progress: true,
+            center: false,
+            transition: 'fade',
+            transitionSpeed: 'fast',
+            width: 1200,
+            height: 740,
+            margin: 0.06
+        });
+    </script>
+</body>
+</html>
