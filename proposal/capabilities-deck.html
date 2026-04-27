@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accenture — Meridian Components Capabilities Presentation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #0f172a;
+    color: #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    gap: 24px;
+  }
+
+  .deck-title {
+    font-size: 13px;
+    color: #64748b;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .slide {
+    width: 100%;
+    max-width: 900px;
+    background: #1e293b;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    padding: 56px 64px;
+    min-height: 480px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+
+  .slide-number {
+    position: absolute;
+    top: 20px;
+    right: 28px;
+    font-size: 12px;
+    color: #475569;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .slide-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6366f1;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: #f8fafc;
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #f8fafc;
+    margin-bottom: 20px;
+  }
+
+  .subtitle {
+    font-size: 18px;
+    color: #94a3b8;
+    line-height: 1.5;
+    max-width: 600px;
+  }
+
+  .meta {
+    margin-top: 40px;
+    font-size: 13px;
+    color: #475569;
+  }
+
+  p {
+    font-size: 16px;
+    color: #cbd5e1;
+    line-height: 1.7;
+    margin-bottom: 16px;
+    max-width: 720px;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 8px;
+  }
+
+  .card {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 24px;
+  }
+
+  .card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #6366f1;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+
+  .card p {
+    font-size: 14px;
+    color: #94a3b8;
+    margin-bottom: 0;
+  }
+
+  ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  ul li {
+    font-size: 16px;
+    color: #cbd5e1;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: #6366f1;
+    font-size: 14px;
+  }
+
+  .req-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+  }
+
+  .req-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 8px 12px;
+    border-bottom: 1px solid #334155;
+  }
+
+  .req-table td {
+    font-size: 14px;
+    color: #cbd5e1;
+    padding: 12px 12px;
+    border-bottom: 1px solid #1e293b;
+    vertical-align: top;
+  }
+
+  .req-table tr:last-child td { border-bottom: none; }
+
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-required { background: #1e3a5f; color: #60a5fa; }
+  .badge-desired  { background: #1a2e22; color: #4ade80; }
+
+  .timeline-row {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 0;
+    align-items: stretch;
+  }
+
+  .timeline-phase {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .phase-block {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 16px;
+    align-items: start;
+    padding: 14px 0;
+    border-bottom: 1px solid #334155;
+  }
+
+  .phase-block:last-child { border-bottom: none; }
+
+  .phase-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6366f1;
+    padding-top: 2px;
+  }
+
+  .phase-weeks {
+    font-size: 11px;
+    color: #475569;
+    margin-top: 2px;
+  }
+
+  .phase-desc {
+    font-size: 14px;
+    color: #94a3b8;
+    line-height: 1.5;
+  }
+
+  .price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid #334155;
+    font-size: 15px;
+    color: #cbd5e1;
+  }
+
+  .price-row:last-child { border-bottom: none; }
+
+  .price-row.total {
+    font-weight: 700;
+    font-size: 17px;
+    color: #f8fafc;
+    margin-top: 4px;
+    padding-top: 18px;
+    border-top: 1px solid #6366f1;
+    border-bottom: none;
+  }
+
+  .price-val {
+    font-variant-numeric: tabular-nums;
+    color: #a5b4fc;
+  }
+
+  .why-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-top: 8px;
+  }
+
+  .why-card {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 24px 20px;
+  }
+
+  .why-card .icon {
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+
+  .why-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+  }
+
+  .why-card p {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0;
+  }
+
+  .closing-accent {
+    font-size: 28px;
+    font-weight: 700;
+    color: #6366f1;
+    line-height: 1.3;
+    margin-bottom: 20px;
+    max-width: 680px;
+  }
+
+  .nav {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #334155;
+    padding: 0 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="deck-title">Accenture — Meridian Components · RFP #MC-2026-0417</div>
+
+<!-- Slide 1: Title -->
+<div class="slide" style="flex-direction: row; align-items: center; gap: 48px; padding: 48px 56px;">
+  <div style="flex: 1; min-width: 0;">
+    <div class="slide-number">1 / 12</div>
+    <div class="slide-label">Capabilities Presentation</div>
+    <h1>Modernizing Meridian's Inventory Dashboard</h1>
+    <p class="subtitle">Our approach to remediating, extending, and future-proofing your operations platform.</p>
+    <div class="meta">Accenture · April 2026 · Prepared for J. Okafor, Director of Procurement</div>
+  </div>
+  <div style="flex-shrink: 0;">
+    <svg width="280" height="280" viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Background panel -->
+      <rect x="20" y="20" width="240" height="240" rx="16" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
+
+      <!-- Top bar -->
+      <rect x="36" y="36" width="208" height="28" rx="6" fill="#1e293b"/>
+      <circle cx="52" cy="50" r="5" fill="#ef4444" opacity="0.7"/>
+      <circle cx="66" cy="50" r="5" fill="#f59e0b" opacity="0.7"/>
+      <circle cx="80" cy="50" r="5" fill="#22c55e" opacity="0.7"/>
+      <rect x="96" y="44" width="80" height="12" rx="3" fill="#334155"/>
+
+      <!-- KPI cards row -->
+      <rect x="36" y="76" width="60" height="44" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <rect x="40" y="82" width="28" height="6" rx="2" fill="#334155"/>
+      <rect x="40" y="92" width="48" height="10" rx="2" fill="#6366f1" opacity="0.8"/>
+      <rect x="40" y="106" width="20" height="5" rx="2" fill="#22c55e" opacity="0.6"/>
+
+      <rect x="104" y="76" width="60" height="44" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <rect x="108" y="82" width="28" height="6" rx="2" fill="#334155"/>
+      <rect x="108" y="92" width="48" height="10" rx="2" fill="#6366f1" opacity="0.8"/>
+      <rect x="108" y="106" width="20" height="5" rx="2" fill="#ef4444" opacity="0.6"/>
+
+      <rect x="172" y="76" width="72" height="44" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <rect x="176" y="82" width="28" height="6" rx="2" fill="#334155"/>
+      <rect x="176" y="92" width="60" height="10" rx="2" fill="#6366f1" opacity="0.8"/>
+      <rect x="176" y="106" width="20" height="5" rx="2" fill="#22c55e" opacity="0.6"/>
+
+      <!-- Bar chart -->
+      <rect x="36" y="132" width="120" height="90" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <rect x="44" y="138" width="40" height="6" rx="2" fill="#334155"/>
+      <!-- bars -->
+      <rect x="46" y="178" width="14" height="34" rx="2" fill="#6366f1" opacity="0.5"/>
+      <rect x="64" y="165" width="14" height="47" rx="2" fill="#6366f1" opacity="0.7"/>
+      <rect x="82" y="172" width="14" height="40" rx="2" fill="#6366f1" opacity="0.5"/>
+      <rect x="100" y="158" width="14" height="54" rx="2" fill="#6366f1"/>
+      <rect x="118" y="168" width="14" height="44" rx="2" fill="#6366f1" opacity="0.6"/>
+
+      <!-- Line chart -->
+      <rect x="164" y="132" width="80" height="90" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <rect x="170" y="138" width="40" height="6" rx="2" fill="#334155"/>
+      <polyline points="170,195 183,183 196,188 209,172 222,176 235,162" stroke="#6366f1" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <polyline points="170,205 183,200 196,202 209,195 222,198 235,190" stroke="#22c55e" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+
+      <!-- Table / list rows -->
+      <rect x="36" y="232" width="208" height="14" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <rect x="42" y="236" width="50" height="6" rx="2" fill="#334155"/>
+      <rect x="100" y="236" width="30" height="6" rx="2" fill="#334155"/>
+      <rect x="180" y="236" width="36" height="6" rx="2" fill="#22c55e" opacity="0.5"/>
+
+      <!-- Glow accent -->
+      <circle cx="140" cy="140" r="100" fill="url(#glow)" opacity="0.06"/>
+      <defs>
+        <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#6366f1"/>
+          <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+    </svg>
+  </div>
+</div>
+
+<!-- Slide 2: The situation -->
+<div class="slide">
+  <div class="slide-number">2 / 12</div>
+  <div class="slide-label">The Situation</div>
+  <h2>A system that works — but not well enough</h2>
+  <div class="two-col">
+    <div class="card">
+      <h3>What's there</h3>
+      <p>A Vue 3 / FastAPI inventory dashboard covering stock, orders, supplier spend, and demand forecasts across three warehouses.</p>
+    </div>
+    <div class="card">
+      <h3>What's missing</h3>
+      <p>Eight known defects in Reports. No automated tests. No architecture docs. A Restocking feature your ops team has been waiting for. And Tokyo staff working in English-only views.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 3: Who we're building for -->
+<div class="slide">
+  <div class="slide-number">3 / 12</div>
+  <div class="slide-label">Stakeholders</div>
+  <h2>We build for the people who use it daily</h2>
+  <ul>
+    <li><strong>R. Tanaka, VP Operations</strong> — her team lives in this dashboard. The Restocking feature is her ask. She needs a vendor who finishes what they start.</li>
+    <li><strong>Meridian IT</strong> — has blocked changes because there are no tests. R3 isn't a nice-to-have; it's what unlocks everything else.</li>
+    <li><strong>Tokyo warehouse staff</strong> — 12 people navigating an English-only interface. A solvable problem.</li>
+  </ul>
+</div>
+
+<!-- Slide 4: Scope overview -->
+<div class="slide">
+  <div class="slide-number">4 / 12</div>
+  <div class="slide-label">Scope of Work</div>
+  <h2>Four required deliverables, three optional</h2>
+  <table class="req-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Deliverable</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>R1</td><td>Reports module — full defect remediation</td><td><span class="badge badge-required">Required</span></td></tr>
+      <tr><td>R2</td><td>Restocking recommendations view</td><td><span class="badge badge-required">Required</span></td></tr>
+      <tr><td>R3</td><td>Automated browser test suite (Playwright)</td><td><span class="badge badge-required">Required</span></td></tr>
+      <tr><td>R4</td><td>Architecture documentation</td><td><span class="badge badge-required">Required</span></td></tr>
+      <tr><td>D1–D3</td><td>UI refresh · Internationalization · Dark mode</td><td><span class="badge badge-desired">Desired</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Slide 5: Our approach -->
+<div class="slide">
+  <div class="slide-number">5 / 12</div>
+  <div class="slide-label">Our Approach</div>
+  <h2>Understand before we build. Test before we ship.</h2>
+  <ul>
+    <li>We begin with an architecture review — our own orientation, not just a client artifact. It surfaces what the previous vendor's notes left out.</li>
+    <li>Every defect fix in R1 comes with a regression test. We don't mark something resolved until a test proves it.</li>
+    <li>R3 (browser tests) is woven through the engagement, not bolted on at the end. Tests are written alongside fixes and new features.</li>
+    <li>Required scope is locked before desired scope begins. No phase closes without Meridian sign-off.</li>
+  </ul>
+</div>
+
+<!-- Slide 6: R1 — Reports -->
+<div class="slide">
+  <div class="slide-number">6 / 12</div>
+  <div class="slide-label">R1 — Reports Remediation</div>
+  <h2>Fix it properly, or don't call it fixed</h2>
+  <p>The Reports module has at least eight documented defects: unwired filters, internationalization gaps, API pattern inconsistencies, and console noise. We will audit the full module before writing a single line of fix code.</p>
+  <p>Our standard: every defect gets a root-cause diagnosis, a fix, and a regression test. We will provide Meridian with a full defect log on completion — something the previous vendor never delivered.</p>
+</div>
+
+<!-- Slide 7: R2 — Restocking -->
+<div class="slide">
+  <div class="slide-number">7 / 12</div>
+  <div class="slide-label">R2 — Restocking Recommendations</div>
+  <h2>A purchase order view your ops team can trust</h2>
+  <div class="two-col">
+    <div class="card">
+      <h3>Inputs</h3>
+      <p>Current stock levels · Demand forecast · Operator-supplied budget ceiling</p>
+    </div>
+    <div class="card">
+      <h3>Output</h3>
+      <p>Ranked purchase order recommendations per SKU and warehouse, with the reasoning visible to ops staff — not a black box.</p>
+    </div>
+  </div>
+  <p style="margin-top: 24px;">Built on the existing Vue 3 frontend and FastAPI backend. The recommendation algorithm will be documented in plain language so your team can verify and trust the output.</p>
+</div>
+
+<!-- Slide 8: R3 — Testing -->
+<div class="slide">
+  <div class="slide-number">8 / 12</div>
+  <div class="slide-label">R3 — Automated Testing</div>
+  <h2>The coverage your IT team needs to say yes</h2>
+  <p>We'll use Playwright — already configured in the project — to build end-to-end tests covering all filter interactions across all core views. Every filter combination. Every page.</p>
+  <p>The test suite will be documented for Meridian IT, including how to run locally and how to integrate with a CI pipeline. We don't assume prior Playwright experience on your side.</p>
+  <p>Once this is in place, your IT team has the coverage they need to approve ongoing changes with confidence.</p>
+</div>
+
+<!-- Slide 9: Timeline -->
+<div class="slide">
+  <div class="slide-number">9 / 12</div>
+  <div class="slide-label">Timeline</div>
+  <h2>12 weeks, four phases</h2>
+  <div class="timeline-phase">
+    <div class="phase-block">
+      <div><div class="phase-label">Phase 1</div><div class="phase-weeks">Weeks 1–2</div></div>
+      <div class="phase-desc">Onboarding, codebase review, architecture documentation (R4)</div>
+    </div>
+    <div class="phase-block">
+      <div><div class="phase-label">Phase 2</div><div class="phase-weeks">Weeks 3–5</div></div>
+      <div class="phase-desc">Reports remediation (R1) + Playwright test scaffold (R3)</div>
+    </div>
+    <div class="phase-block">
+      <div><div class="phase-label">Phase 3</div><div class="phase-weeks">Weeks 6–8</div></div>
+      <div class="phase-desc">Restocking feature (R2) + full browser test suite (R3 complete)</div>
+    </div>
+    <div class="phase-block">
+      <div><div class="phase-label">Phase 4</div><div class="phase-weeks">Weeks 9–12</div></div>
+      <div class="phase-desc">Desired items: UI refresh · i18n · Dark mode (conditional on scope confirmation)</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 10: Pricing -->
+<div class="slide">
+  <div class="slide-number">10 / 12</div>
+  <div class="slide-label">Pricing</div>
+  <h2>Fixed-fee. No surprises.</h2>
+  <div class="price-row"><span>R4 — Architecture documentation</span><span class="price-val">$8,000</span></div>
+  <div class="price-row"><span>R1 — Reports remediation</span><span class="price-val">$22,000</span></div>
+  <div class="price-row"><span>R3 — Automated test suite</span><span class="price-val">$18,000</span></div>
+  <div class="price-row"><span>R2 — Restocking recommendations</span><span class="price-val">$32,000</span></div>
+  <div class="price-row total"><span>Required scope (R1–R4) — not to exceed</span><span class="price-val">$80,000</span></div>
+  <p style="margin-top: 20px; font-size: 13px; color: #475569;">D1–D3 available as add-ons. Full required + desired scope not to exceed $115,000.</p>
+</div>
+
+<!-- Slide 11: Why Accenture -->
+<div class="slide">
+  <div class="slide-number">11 / 12</div>
+  <div class="slide-label">Why Accenture</div>
+  <h2>We've done this before</h2>
+  <div class="why-grid">
+    <div class="why-card">
+      <div class="icon">🔧</div>
+      <h3>Inherited codebases</h3>
+      <p>We regularly take over from prior vendors. We know how to orient quickly and fix without breaking.</p>
+    </div>
+    <div class="why-card">
+      <div class="icon">🧪</div>
+      <h3>Test-first delivery</h3>
+      <p>Every engagement we deliver includes automated coverage. It's not a line item — it's how we work.</p>
+    </div>
+    <div class="why-card">
+      <div class="icon">🏭</div>
+      <h3>Operations context</h3>
+      <p>We've built inventory and procurement tooling for mid-market distributors. We understand the domain.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 12: Close -->
+<div class="slide">
+  <div class="slide-number">12 / 12</div>
+  <div class="slide-label">Next Steps</div>
+  <div class="closing-accent">"We define done as done."</div>
+  <p>Meridian deserves a vendor who finishes what they start. We're ready to begin on contract execution and can deliver the full required scope within twelve weeks.</p>
+  <p>Questions? We're available before the April 28 deadline for any clarifications.</p>
+  <div class="meta" style="margin-top: 32px;">Marianna Grieco · marianna.grieco@accenture.com · Accenture</div>
+</div>
+
+</body>
+</html>

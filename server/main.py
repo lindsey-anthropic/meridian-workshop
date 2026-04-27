@@ -228,12 +228,15 @@ def get_recent_transactions():
     return recent_transactions
 
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
     """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
+    filtered = apply_filters(orders, warehouse, category)
     quarters = {}
 
-    for order in orders:
+    for order in filtered:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -274,11 +277,15 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
     """Get month-over-month trends"""
+    filtered = apply_filters(orders, warehouse, category)
     months = {}
 
-    for order in orders:
+    for order in filtered:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
@@ -303,6 +310,67 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+@app.get("/api/restocking")
+def get_restocking_recommendations(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    budget: Optional[float] = None
+):
+    """Get restocking recommendations ranked by urgency.
+
+    Algorithm:
+    - Items at or below reorder_point are candidates
+    - qty_to_order restores stock to 2x reorder_point
+    - urgency_score = stock_deficit * trend_multiplier
+      (trend multipliers: increasing=1.5, stable=1.0, decreasing=0.5)
+    - Sorted by urgency_score descending
+    - If budget provided, marks items within_budget in priority order
+    """
+    TREND_MULTIPLIERS = {'increasing': 1.5, 'stable': 1.0, 'decreasing': 0.5}
+
+    forecast_by_sku = {f['item_sku']: f for f in demand_forecasts}
+    filtered = apply_filters(inventory_items, warehouse, category)
+    candidates = [item for item in filtered if item['quantity_on_hand'] <= item['reorder_point']]
+
+    recommendations = []
+    for item in candidates:
+        forecast = forecast_by_sku.get(item['sku'], {})
+        trend = forecast.get('trend', 'stable')
+        stock_deficit = item['reorder_point'] - item['quantity_on_hand']
+        urgency_score = round(stock_deficit * TREND_MULTIPLIERS.get(trend, 1.0), 2)
+        qty_to_order = (item['reorder_point'] * 2) - item['quantity_on_hand']
+        estimated_cost = round(qty_to_order * item['unit_cost'], 2)
+
+        recommendations.append({
+            'id': item['id'],
+            'sku': item['sku'],
+            'name': item['name'],
+            'category': item['category'],
+            'warehouse': item['warehouse'],
+            'quantity_on_hand': item['quantity_on_hand'],
+            'reorder_point': item['reorder_point'],
+            'qty_to_order': qty_to_order,
+            'unit_cost': item['unit_cost'],
+            'estimated_cost': estimated_cost,
+            'trend': trend,
+            'urgency_score': urgency_score,
+            'within_budget': True
+        })
+
+    recommendations.sort(key=lambda x: x['urgency_score'], reverse=True)
+
+    if budget is not None:
+        cumulative = 0.0
+        for rec in recommendations:
+            if cumulative + rec['estimated_cost'] <= budget:
+                cumulative += rec['estimated_cost']
+                rec['within_budget'] = True
+            else:
+                rec['within_budget'] = False
+
+    return recommendations
+
 
 if __name__ == "__main__":
     import uvicorn
