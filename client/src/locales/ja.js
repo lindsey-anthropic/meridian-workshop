@@ -6,6 +6,7 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    restocking: '補充推奨',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -223,6 +224,34 @@ export default {
     low: '低'
   },
 
+  // Restocking
+  restocking: {
+    title: '補充推奨',
+    description: '在庫レベルと需要予測に基づいた推奨発注書のレビュー',
+    budgetLabel: '予算上限',
+    budgetPlaceholder: '最大予算を入力（任意）',
+    urgentPriority: '緊急優先',
+    mediumPriority: '中優先',
+    lowPriority: '低優先',
+    recommendationsTable: '補充推奨',
+    priorities: {
+      urgent: '緊急',
+      medium: '中',
+      low: '低'
+    },
+    table: {
+      sku: 'SKU',
+      name: '品目名',
+      currentStock: '現在在庫',
+      reorderPoint: '発注点',
+      forecast: '予測需要',
+      recommendedQty: '推奨数量',
+      unitCost: '単価',
+      totalCost: '合計コスト',
+      priority: '優先度'
+    }
+  },
+
   // Categories
   categories: {
     circuitBoards: '回路基板',
@@ -309,6 +338,35 @@ export default {
     english: 'English',
     japanese: '日本語',
     selectLanguage: '言語を選択'
+  },
+
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    subtitle: '四半期ごとのパフォーマンス指標と月次トレンドを表示',
+    quarterly: {
+      title: '四半期パフォーマンス',
+      quarter: '四半期',
+      totalOrders: '合計注文数',
+      totalRevenue: '合計売上',
+      avgOrderValue: '平均注文額',
+      fulfillmentRate: '履行率'
+    },
+    monthly: {
+      chartTitle: '月次売上トレンド',
+      analysisTitle: '月次比較分析',
+      month: '月',
+      orders: '注文数',
+      revenue: '売上',
+      change: '変化',
+      growthRate: '成長率'
+    },
+    summary: {
+      totalRevenue: '合計売上（年度累計）',
+      avgMonthlyRevenue: '平均月次売上',
+      totalOrders: '合計注文数（年度累計）',
+      bestQuarter: '最高パフォーマンス四半期'
+    }
   },
 
   // Common
