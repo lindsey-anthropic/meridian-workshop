@@ -1,27 +1,27 @@
 <template>
   <div class="reports">
     <div class="page-header">
-      <h2>Performance Reports</h2>
-      <p>View quarterly performance metrics and monthly trends</p>
+      <h2>{{ t('reports.title') }}</h2>
+      <p>{{ t('reports.description') }}</p>
     </div>
 
-    <div v-if="loading" class="loading">Loading reports...</div>
+    <div v-if="loading" class="loading">{{ t('reports.loading') }}</div>
     <div v-else-if="error" class="error">{{ error }}</div>
     <div v-else>
       <!-- Quarterly Performance -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Quarterly Performance</h3>
+          <h3 class="card-title">{{ t('reports.quarterly.title') }}</h3>
         </div>
         <div class="table-container">
           <table class="reports-table">
             <thead>
               <tr>
-                <th>Quarter</th>
-                <th>Total Orders</th>
-                <th>Total Revenue</th>
-                <th>Avg Order Value</th>
-                <th>Fulfillment Rate</th>
+                <th>{{ t('reports.quarterly.quarter') }}</th>
+                <th>{{ t('reports.quarterly.totalOrders') }}</th>
+                <th>{{ t('reports.quarterly.totalRevenue') }}</th>
+                <th>{{ t('reports.quarterly.avgOrderValue') }}</th>
+                <th>{{ t('reports.quarterly.fulfillmentRate') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -44,7 +44,7 @@
       <!-- Monthly Trends Chart -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Monthly Revenue Trend</h3>
+          <h3 class="card-title">{{ t('reports.monthlyTrend.title') }}</h3>
         </div>
         <div class="chart-container">
           <div class="bar-chart">
@@ -65,17 +65,17 @@
       <!-- Month-over-Month Comparison -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Month-over-Month Analysis</h3>
+          <h3 class="card-title">{{ t('reports.momAnalysis.title') }}</h3>
         </div>
         <div class="table-container">
           <table class="reports-table">
             <thead>
               <tr>
-                <th>Month</th>
-                <th>Orders</th>
-                <th>Revenue</th>
-                <th>Change</th>
-                <th>Growth Rate</th>
+                <th>{{ t('reports.momAnalysis.month') }}</th>
+                <th>{{ t('reports.momAnalysis.orders') }}</th>
+                <th>{{ t('reports.momAnalysis.revenue') }}</th>
+                <th>{{ t('reports.momAnalysis.change') }}</th>
+                <th>{{ t('reports.momAnalysis.growthRate') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -104,19 +104,19 @@
       <!-- Summary Stats -->
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-label">Total Revenue (YTD)</div>
+          <div class="stat-label">{{ t('reports.stats.totalRevenueYTD') }}</div>
           <div class="stat-value">{{ formatCurrency(totalRevenue) }}</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Avg Monthly Revenue</div>
+          <div class="stat-label">{{ t('reports.stats.avgMonthlyRevenue') }}</div>
           <div class="stat-value">{{ formatCurrency(avgMonthlyRevenue) }}</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Total Orders (YTD)</div>
+          <div class="stat-label">{{ t('reports.stats.totalOrdersYTD') }}</div>
           <div class="stat-value">{{ totalOrders }}</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Best Performing Quarter</div>
+          <div class="stat-label">{{ t('reports.stats.bestQuarter') }}</div>
           <div class="stat-value">{{ bestQuarter }}</div>
         </div>
       </div>
@@ -128,11 +128,13 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { api } from '@/api'
 import { useFilters } from '@/composables/useFilters'
+import { useI18n } from '@/composables/useI18n'
 
 export default {
   name: 'Reports',
   setup() {
     const { selectedLocation, selectedCategory, getCurrentFilters } = useFilters()
+    const { t } = useI18n()
 
     const loading = ref(true)
     const error = ref(null)
@@ -199,7 +201,7 @@ export default {
       loading, error, quarterlyData, monthlyData,
       totalRevenue, avgMonthlyRevenue, totalOrders, bestQuarter,
       formatCurrency, formatNumber, formatMonth, getBarHeight,
-      getFulfillmentClass, getChangeValue, getChangeClass, getGrowthRate
+      getFulfillmentClass, getChangeValue, getChangeClass, getGrowthRate, t
     }
   }
 }

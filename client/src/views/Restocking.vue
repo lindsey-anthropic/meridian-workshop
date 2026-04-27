@@ -1,12 +1,12 @@
 <template>
   <div class="restocking">
     <div class="page-header">
-      <h2>Restocking Recommendations</h2>
-      <p>Purchase order recommendations based on stock levels and demand forecasts</p>
+      <h2>{{ t('restocking.title') }}</h2>
+      <p>{{ t('restocking.description') }}</p>
     </div>
 
     <div class="budget-control card">
-      <label class="budget-label">Budget Ceiling (USD)</label>
+      <label class="budget-label">{{ t('restocking.budgetLabel') }}</label>
       <div class="budget-input-row">
         <span class="currency-prefix">$</span>
         <input
@@ -14,58 +14,58 @@
           type="number"
           min="0"
           step="1000"
-          placeholder="No limit"
+          :placeholder="t('restocking.budgetPlaceholder')"
           class="budget-input"
         />
-        <button v-if="budgetInput" @click="budgetInput = null" class="clear-btn">Clear</button>
+        <button v-if="budgetInput" @click="budgetInput = null" class="clear-btn">{{ t('restocking.clearBudget') }}</button>
       </div>
     </div>
 
-    <div v-if="loading" class="loading">Loading recommendations...</div>
+    <div v-if="loading" class="loading">{{ t('restocking.loading') }}</div>
     <div v-else-if="error" class="error">{{ error }}</div>
     <div v-else>
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-label">Items Below Reorder Point</div>
+          <div class="stat-label">{{ t('restocking.stats.itemsBelowReorder') }}</div>
           <div class="stat-value">{{ items.length }}</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Total Estimated Cost</div>
+          <div class="stat-label">{{ t('restocking.stats.totalEstCost') }}</div>
           <div class="stat-value">{{ formatCurrency(totalCost) }}</div>
         </div>
         <div class="stat-card" v-if="budgetInput">
-          <div class="stat-label">Within Budget</div>
+          <div class="stat-label">{{ t('restocking.stats.withinBudget') }}</div>
           <div class="stat-value">{{ items.length }} items</div>
         </div>
         <div class="stat-card" v-if="budgetInput">
-          <div class="stat-label">Budget Remaining</div>
+          <div class="stat-label">{{ t('restocking.stats.budgetRemaining') }}</div>
           <div class="stat-value">{{ formatCurrency(budgetInput - totalCost) }}</div>
         </div>
       </div>
 
       <div class="card" v-if="items.length === 0">
-        <p class="empty-state">No items below reorder point for the selected filters.</p>
+        <p class="empty-state">{{ t('restocking.empty') }}</p>
       </div>
 
       <div class="card" v-else>
         <div class="card-header">
-          <h3 class="card-title">Recommended Purchase Orders</h3>
-          <span class="card-subtitle">Sorted by urgency (lowest days of coverage first)</span>
+          <h3 class="card-title">{{ t('restocking.table.title') }}</h3>
+          <span class="card-subtitle">{{ t('restocking.table.subtitle') }}</span>
         </div>
         <div class="table-container">
           <table class="restocking-table">
             <thead>
               <tr>
-                <th>SKU</th>
-                <th>Product</th>
-                <th>Warehouse</th>
-                <th>Category</th>
-                <th>Current Stock</th>
-                <th>Reorder Point</th>
-                <th>Days of Coverage</th>
-                <th>Rec. Qty</th>
-                <th>Est. Cost</th>
-                <th>Trend</th>
+                <th>{{ t('restocking.table.sku') }}</th>
+                <th>{{ t('restocking.table.product') }}</th>
+                <th>{{ t('restocking.table.warehouse') }}</th>
+                <th>{{ t('restocking.table.category') }}</th>
+                <th>{{ t('restocking.table.currentStock') }}</th>
+                <th>{{ t('restocking.table.reorderPoint') }}</th>
+                <th>{{ t('restocking.table.daysCoverage') }}</th>
+                <th>{{ t('restocking.table.recQty') }}</th>
+                <th>{{ t('restocking.table.estCost') }}</th>
+                <th>{{ t('restocking.table.trend') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -103,11 +103,13 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { api } from '@/api'
 import { useFilters } from '@/composables/useFilters'
+import { useI18n } from '@/composables/useI18n'
 
 export default {
   name: 'Restocking',
   setup() {
     const { selectedLocation, selectedCategory, getCurrentFilters } = useFilters()
+    const { t } = useI18n()
 
     const loading = ref(true)
     const error = ref(null)
@@ -143,7 +145,7 @@ export default {
 
     return {
       loading, error, items, budgetInput, totalCost,
-      formatCurrency, getUrgencyRowClass, getStockClass, getDaysClass, getTrendClass
+      formatCurrency, getUrgencyRowClass, getStockClass, getDaysClass, getTrendClass, t
     }
   }
 }

@@ -6,6 +6,8 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    reports: 'Reports',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -302,6 +304,69 @@ export default {
     dueDate: 'Due Date',
     addTask: 'Add Task',
     noTasks: 'No tasks yet. Add your first task above!'
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    loading: 'Loading reports...',
+    quarterly: {
+      title: 'Quarterly Performance',
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate'
+    },
+    monthlyTrend: {
+      title: 'Monthly Revenue Trend'
+    },
+    momAnalysis: {
+      title: 'Month-over-Month Analysis',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    },
+    stats: {
+      totalRevenueYTD: 'Total Revenue (YTD)',
+      avgMonthlyRevenue: 'Avg Monthly Revenue',
+      totalOrdersYTD: 'Total Orders (YTD)',
+      bestQuarter: 'Best Performing Quarter'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    description: 'Purchase order recommendations based on stock levels and demand forecasts',
+    loading: 'Loading recommendations...',
+    budgetLabel: 'Budget Ceiling (USD)',
+    budgetPlaceholder: 'No limit',
+    clearBudget: 'Clear',
+    stats: {
+      itemsBelowReorder: 'Items Below Reorder Point',
+      totalEstCost: 'Total Estimated Cost',
+      withinBudget: 'Within Budget',
+      budgetRemaining: 'Budget Remaining'
+    },
+    table: {
+      title: 'Recommended Purchase Orders',
+      subtitle: 'Sorted by urgency (lowest days of coverage first)',
+      sku: 'SKU',
+      product: 'Product',
+      warehouse: 'Warehouse',
+      category: 'Category',
+      currentStock: 'Current Stock',
+      reorderPoint: 'Reorder Point',
+      daysCoverage: 'Days of Coverage',
+      recQty: 'Rec. Qty',
+      estCost: 'Est. Cost',
+      trend: 'Trend'
+    },
+    empty: 'No items below reorder point for the selected filters.'
   },
 
   // Language
