@@ -6,6 +6,8 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    reports: 'Reports',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -309,6 +311,65 @@ export default {
     english: 'English',
     japanese: 'Japanese',
     selectLanguage: 'Select Language'
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    description: 'Enter a budget ceiling to get ranked purchase order recommendations',
+    budgetLabel: 'Budget Ceiling',
+    budgetPlaceholder: 'e.g. 50000',
+    getRecommendations: 'Get Recommendations',
+    noRecommendations: 'No restocking needed within this budget, or no items match the current filters.',
+    summary: {
+      items: 'items recommended',
+      totalCost: 'Total estimated cost',
+      remaining: 'Remaining budget'
+    },
+    table: {
+      rank: '#',
+      sku: 'SKU',
+      name: 'Product',
+      warehouse: 'Warehouse',
+      currentStock: 'Current Stock',
+      daysLeft: 'Days Left',
+      recommendedQty: 'Rec. Qty',
+      estimatedCost: 'Est. Cost',
+      trend: 'Trend',
+      justification: 'Reason'
+    },
+    urgency: {
+      critical: 'Critical',
+      urgent: 'Urgent',
+      ok: 'OK'
+    }
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    quarterlyPerformance: 'Quarterly Performance',
+    monthlyRevenueTrend: 'Monthly Revenue Trend',
+    monthOverMonth: 'Month-over-Month Analysis',
+    table: {
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    },
+    stats: {
+      totalRevenue: 'Total Revenue (YTD)',
+      avgMonthlyRevenue: 'Avg Monthly Revenue',
+      totalOrders: 'Total Orders (YTD)',
+      bestQuarter: 'Best Performing Quarter'
+    }
   },
 
   // Common

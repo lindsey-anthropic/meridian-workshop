@@ -6,6 +6,8 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    reports: 'レポート',
+    restocking: '補充推薦',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -360,6 +362,65 @@ export default {
     'USB-C PD 100W Power Supply': 'USB-C PD 100W電源',
     'Battery Backup Power Supply': 'バッテリバックアップ電源',
     'Adjustable Bench Power Supply': '可変ベンチ電源'
+  },
+
+  // Restocking
+  restocking: {
+    title: '補充推薦',
+    description: '予算上限を入力して、優先順位付きの発注推薦を取得',
+    budgetLabel: '予算上限',
+    budgetPlaceholder: '例：50000',
+    getRecommendations: '推薦を取得',
+    noRecommendations: 'この予算内で補充が必要な商品はありません。',
+    summary: {
+      items: '件の推薦',
+      totalCost: '推定合計コスト',
+      remaining: '残余予算'
+    },
+    table: {
+      rank: '#',
+      sku: 'SKU',
+      name: '商品名',
+      warehouse: '倉庫',
+      currentStock: '現在在庫',
+      daysLeft: '残り日数',
+      recommendedQty: '推薦数量',
+      estimatedCost: '推定コスト',
+      trend: 'トレンド',
+      justification: '理由'
+    },
+    urgency: {
+      critical: '緊急',
+      urgent: '要注意',
+      ok: '良好'
+    }
+  },
+
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期パフォーマンスと月次トレンドを確認',
+    quarterlyPerformance: '四半期パフォーマンス',
+    monthlyRevenueTrend: '月次収益トレンド',
+    monthOverMonth: '前月比分析',
+    table: {
+      quarter: '四半期',
+      totalOrders: '総注文数',
+      totalRevenue: '総収益',
+      avgOrderValue: '平均注文額',
+      fulfillmentRate: '履行率',
+      month: '月',
+      orders: '注文数',
+      revenue: '収益',
+      change: '変化',
+      growthRate: '成長率'
+    },
+    stats: {
+      totalRevenue: '総収益（年初来）',
+      avgMonthlyRevenue: '月平均収益',
+      totalOrders: '総注文数（年初来）',
+      bestQuarter: '最高パフォーマンス四半期'
+    }
   },
 
   // Customer Names
