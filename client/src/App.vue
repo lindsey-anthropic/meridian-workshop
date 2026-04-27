@@ -23,9 +23,28 @@
             {{ t('nav.demandForecast') }}
           </router-link>
           <router-link to="/reports" :class="{ active: $route.path === '/reports' }">
-            Reports
+            {{ t('nav.reports') }}
+          </router-link>
+          <router-link to="/restocking" :class="{ active: $route.path === '/restocking' }">
+            {{ t('nav.restocking') }}
           </router-link>
         </nav>
+        <button class="theme-toggle" @click="toggleTheme" :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'">
+          <svg v-if="isDark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
         <LanguageSwitcher />
         <ProfileMenu
           @show-profile-details="showProfileDetails = true"
@@ -80,6 +99,17 @@ export default {
     const showProfileDetails = ref(false)
     const showTasks = ref(false)
     const apiTasks = ref([])
+    const isDark = ref(localStorage.getItem('theme') === 'dark')
+
+    const applyTheme = (dark) => {
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
+      localStorage.setItem('theme', dark ? 'dark' : 'light')
+    }
+
+    const toggleTheme = () => {
+      isDark.value = !isDark.value
+      applyTheme(isDark.value)
+    }
 
     // Merge mock tasks from currentUser with API tasks
     const tasks = computed(() => {
@@ -146,10 +176,15 @@ export default {
       }
     }
 
-    onMounted(loadTasks)
+    onMounted(() => {
+      applyTheme(isDark.value)
+      loadTasks()
+    })
 
     return {
       t,
+      isDark,
+      toggleTheme,
       showProfileDetails,
       showTasks,
       tasks,
@@ -162,6 +197,58 @@ export default {
 </script>
 
 <style>
+:root {
+  --bg-page: #f8fafc;
+  --bg-nav: #ffffff;
+  --bg-card: #ffffff;
+  --bg-thead: #f8fafc;
+  --bg-row-hover: #f8fafc;
+  --bg-hover: #f1f5f9;
+  --bg-active-nav: #eff6ff;
+
+  --text-primary: #0f172a;
+  --text-body: #1e293b;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-label: #475569;
+  --text-active: #2563eb;
+
+  --border-default: #e2e8f0;
+  --border-subtle: #cbd5e1;
+
+  --color-primary: #2563eb;
+
+  --error-bg: #fef2f2;
+  --error-border: #fecaca;
+  --error-text: #991b1b;
+}
+
+[data-theme="dark"] {
+  --bg-page: #0f172a;
+  --bg-nav: #1e293b;
+  --bg-card: #1e293b;
+  --bg-thead: #0f172a;
+  --bg-row-hover: #263044;
+  --bg-hover: #334155;
+  --bg-active-nav: #1e3a8a;
+
+  --text-primary: #f1f5f9;
+  --text-body: #e2e8f0;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-label: #94a3b8;
+  --text-active: #60a5fa;
+
+  --border-default: #334155;
+  --border-subtle: #475569;
+
+  --color-primary: #3b82f6;
+
+  --error-bg: #450a0a;
+  --error-border: #7f1d1d;
+  --error-text: #fca5a5;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -170,8 +257,8 @@ export default {
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background: #f8fafc;
-  color: #1e293b;
+  background: var(--bg-page);
+  color: var(--text-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -183,8 +270,8 @@ body {
 }
 
 .top-nav {
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--bg-nav);
+  border-bottom: 1px solid var(--border-default);
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
@@ -218,16 +305,16 @@ body {
 .logo h1 {
   font-size: 1.375rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   letter-spacing: -0.025em;
 }
 
 .subtitle {
   font-size: 0.813rem;
-  color: #64748b;
+  color: var(--text-muted);
   font-weight: 400;
   padding-left: 0.75rem;
-  border-left: 1px solid #e2e8f0;
+  border-left: 1px solid var(--border-default);
 }
 
 .nav-tabs {
@@ -237,7 +324,7 @@ body {
 
 .nav-tabs a {
   padding: 0.625rem 1.25rem;
-  color: #64748b;
+  color: var(--text-muted);
   text-decoration: none;
   font-weight: 500;
   font-size: 0.938rem;
@@ -247,13 +334,13 @@ body {
 }
 
 .nav-tabs a:hover {
-  color: #0f172a;
-  background: #f1f5f9;
+  color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
 .nav-tabs a.active {
-  color: #2563eb;
-  background: #eff6ff;
+  color: var(--text-active);
+  background: var(--bg-active-nav);
 }
 
 .nav-tabs a.active::after {
@@ -263,7 +350,29 @@ body {
   left: 0;
   right: 0;
   height: 2px;
-  background: #2563eb;
+  background: var(--color-primary);
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-subtle);
 }
 
 .main-content {
@@ -281,13 +390,13 @@ body {
 .page-header h2 {
   font-size: 1.875rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   margin-bottom: 0.375rem;
   letter-spacing: -0.025em;
 }
 
 .page-header p {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.938rem;
 }
 
@@ -299,20 +408,20 @@ body {
 }
 
 .stat-card {
-  background: white;
+  background: var(--bg-card);
   padding: 1.25rem;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-default);
   transition: all 0.2s ease;
 }
 
 .stat-card:hover {
-  border-color: #cbd5e1;
+  border-color: var(--border-subtle);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .stat-label {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.875rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -323,7 +432,7 @@ body {
 .stat-value {
   font-size: 2.25rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   letter-spacing: -0.025em;
 }
 
@@ -340,14 +449,14 @@ body {
 }
 
 .stat-card.info .stat-value {
-  color: #2563eb;
+  color: var(--color-primary);
 }
 
 .card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 10px;
   padding: 1.25rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-default);
   margin-bottom: 1.25rem;
 }
 
@@ -357,13 +466,13 @@ body {
   align-items: center;
   margin-bottom: 1rem;
   padding-bottom: 0.875rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-default);
 }
 
 .card-title {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   letter-spacing: -0.025em;
 }
 
@@ -377,16 +486,16 @@ table {
 }
 
 thead {
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--bg-thead);
+  border-top: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--border-default);
 }
 
 th {
   text-align: left;
   padding: 0.5rem 0.75rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-label);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -394,8 +503,8 @@ th {
 
 td {
   padding: 0.5rem 0.75rem;
-  border-top: 1px solid #f1f5f9;
-  color: #334155;
+  border-top: 1px solid var(--border-default);
+  color: var(--text-secondary);
   font-size: 0.875rem;
 }
 
@@ -404,7 +513,7 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: #f8fafc;
+  background: var(--bg-row-hover);
 }
 
 .badge {
@@ -470,14 +579,14 @@ tbody tr:hover {
 .loading {
   text-align: center;
   padding: 3rem;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.938rem;
 }
 
 .error {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #991b1b;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  color: var(--error-text);
   padding: 1rem;
   border-radius: 8px;
   margin: 1rem 0;

@@ -6,6 +6,8 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    reports: 'レポート',
+    restocking: '補充',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -55,7 +57,12 @@ export default {
       daysDelayed: '遅延日数',
       priority: '優先度',
       unitsShort: '単位不足',
-      days: '日'
+      days: '日',
+      shortageAmount: '不足数量',
+      expectedDate: '予定日',
+      createPO: '発注書を作成',
+      viewPO: '発注書を確認',
+      modalTitle: '在庫不足の詳細'
     },
     topProducts: {
       title: '収益別トップ製品',
@@ -68,7 +75,9 @@ export default {
       unitsOrdered: '注文数量',
       firstOrder: '初回注文',
       inStock: '在庫あり',
-      lowStock: '在庫僅少'
+      lowStock: '在庫僅少',
+      modalTitle: '製品詳細',
+      currentStock: '現在の在庫'
     }
   },
 
@@ -188,6 +197,58 @@ export default {
     }
   },
 
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期パフォーマンス指標と月次トレンドを表示',
+    quarterlyPerformance: '四半期パフォーマンス',
+    monthlyRevenueTrend: '月次収益トレンド',
+    monthOverMonth: '前月比分析',
+    totalRevenueYTD: '総収益（年初来）',
+    avgMonthlyRevenue: '平均月次収益',
+    totalOrdersYTD: '総注文数（年初来）',
+    bestPerformingQuarter: '最高パフォーマンス四半期',
+    table: {
+      quarter: '四半期',
+      totalOrders: '総注文数',
+      totalRevenue: '総収益',
+      avgOrderValue: '平均注文額',
+      fulfillmentRate: '履行率',
+      month: '月',
+      orders: '注文数',
+      revenue: '収益',
+      change: '変化',
+      growthRate: '成長率'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: '補充推奨',
+    description: '再注文点を下回る品目（緊急度順）',
+    budgetLabel: '予算上限',
+    budgetPlaceholder: '上限なし',
+    totalItems: '補充対象品目',
+    totalCost: '総推定コスト',
+    withinBudget: '予算内',
+    noBelowReorder: 'すべての品目が再注文点を上回っています。',
+    table: {
+      item: '品目',
+      warehouse: '倉庫',
+      onHand: '手持在庫',
+      reorderPoint: '再注文点',
+      recommendedQty: '推奨数量',
+      estCost: '推定コスト',
+      trend: '需要トレンド',
+      action: 'アクション'
+    },
+    trend: {
+      increasing: '増加',
+      stable: '安定',
+      decreasing: '減少'
+    }
+  },
+
   // Filters
   filters: {
     timePeriod: '期間',
@@ -304,6 +365,23 @@ export default {
     noTasks: 'タスクがありません。上記からタスクを追加してください！'
   },
 
+  // Purchase Order Modal
+  po: {
+    createTitle: '発注書を作成',
+    viewTitle: '発注書の詳細',
+    supplier: 'サプライヤー',
+    supplierPlaceholder: 'サプライヤー名を入力',
+    quantity: '数量',
+    unitCost: '単価',
+    expectedDelivery: '予定納期',
+    notes: 'メモ',
+    notesPlaceholder: '任意のメモ',
+    status: 'ステータス',
+    submit: '発注書を作成',
+    errorSupplier: 'サプライヤー名は必須です。',
+    errorDate: '予定納期は必須です。'
+  },
+
   // Language
   language: {
     english: 'English',
@@ -323,7 +401,12 @@ export default {
     search: '検索',
     filter: 'フィルター',
     export: 'エクスポート',
-    items: '件'
+    items: '件',
+    units: '単位',
+    days: '日',
+    priority: '優先度',
+    ofTotal: '% 全体',
+    costBreakdown: 'コスト内訳'
   },
 
   // Product Names
