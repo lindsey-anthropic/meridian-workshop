@@ -3,12 +3,53 @@ export default {
   nav: {
     overview: '概要',
     inventory: '在庫',
+    restocking: '補充',
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
     reports: 'レポート',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
+  },
+
+  // Restocking
+  restocking: {
+    title: '補充推奨',
+    description: '在庫、需要、操作員指定の予算上限に基づく発注推奨',
+    budget: {
+      title: '予算上限',
+      label: '予算',
+      placeholder: '制限なし',
+      totalRecommended: '推奨額',
+      totalDeferred: '保留額',
+      utilization: '使用率'
+    },
+    table: {
+      sku: 'SKU',
+      name: '品目',
+      category: 'カテゴリ',
+      warehouse: '倉庫',
+      onHand: '手持在庫',
+      threshold: 'しきい値',
+      shortage: '不足',
+      recommendQty: '推奨数量',
+      unitCost: '単価',
+      estimatedCost: '予算額',
+      status: 'ステータス',
+      action: '操作'
+    },
+    status: {
+      recommended: '推奨',
+      deferred: '保留',
+      poIssued: '発注済'
+    },
+    actions: {
+      issuePo: '発注作成',
+      issuingPo: '処理中…',
+      poIssuedPill: '発注済'
+    },
+    empty: '選択したフィルターでは在庫不足はありません。',
+    poError: '発注に失敗しました'
   },
 
   // Reports

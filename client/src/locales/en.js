@@ -3,12 +3,53 @@ export default {
   nav: {
     overview: 'Overview',
     inventory: 'Inventory',
+    restocking: 'Restocking',
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
     reports: 'Reports',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    description: 'Recommended purchase orders given current stock, demand, and an operator-supplied budget ceiling',
+    budget: {
+      title: 'Budget Ceiling',
+      label: 'Budget',
+      placeholder: 'No limit',
+      totalRecommended: 'Recommended',
+      totalDeferred: 'Deferred',
+      utilization: 'Utilization'
+    },
+    table: {
+      sku: 'SKU',
+      name: 'Item',
+      category: 'Category',
+      warehouse: 'Warehouse',
+      onHand: 'On Hand',
+      threshold: 'Threshold',
+      shortage: 'Shortage',
+      recommendQty: 'Recommend Qty',
+      unitCost: 'Unit Cost',
+      estimatedCost: 'Est. Cost',
+      status: 'Status',
+      action: 'Action'
+    },
+    status: {
+      recommended: 'Recommended',
+      deferred: 'Deferred',
+      poIssued: 'PO Issued'
+    },
+    actions: {
+      issuePo: 'Issue PO',
+      issuingPo: 'Issuing…',
+      poIssuedPill: 'PO Issued'
+    },
+    empty: 'All items are well-stocked for the selected filters.',
+    poError: 'Failed to issue PO'
   },
 
   // Reports
