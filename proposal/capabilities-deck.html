@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accenture — Meridian Components RFP MC-2026-0417</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .deck {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+  }
+
+  .slide {
+    display: none;
+    width: 100%;
+    height: 100%;
+    padding: 64px 80px;
+    flex-direction: column;
+    justify-content: center;
+    position: absolute;
+    top: 0; left: 0;
+  }
+
+  .slide.active { display: flex; }
+
+  /* Layout variants */
+  .slide.top { justify-content: flex-start; padding-top: 72px; }
+
+  /*
+   * Color system — psicologia contestuale:
+   * --trust  (blu)     → fiducia, affidabilità, prevedibilità  (default)
+   * --pain   (ambra)   → empatia con il problema del cliente
+   * --resolve (verde)  → soluzione, deliverable, risultato positivo
+   */
+  :root {
+    --trust:   #2563eb;
+    --pain:    #f59e0b;
+    --resolve: #10b981;
+    --accent:  var(--trust);
+  }
+
+  .slide.pain   { --accent: var(--pain);    }
+  .slide.resolve { --accent: var(--resolve); }
+
+  /* Accent bar */
+  .slide::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 6px;
+    height: 100%;
+    background: var(--accent);
+    transition: background 0.3s;
+  }
+
+  /* Typography */
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    transition: color 0.3s;
+  }
+
+  h1 {
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #f8fafc;
+    margin-bottom: 24px;
+  }
+
+  h2 {
+    font-size: 36px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 32px;
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #f8fafc;
+    margin-bottom: 8px;
+  }
+
+  p, li {
+    font-size: 18px;
+    line-height: 1.6;
+    color: #94a3b8;
+  }
+
+  .subtitle {
+    font-size: 22px;
+    color: #94a3b8;
+    max-width: 640px;
+  }
+
+  /* Cards */
+  .cards {
+    display: grid;
+    gap: 20px;
+  }
+
+  .cards.cols-2 { grid-template-columns: 1fr 1fr; }
+  .cards.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cards.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+  .card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .card .num {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .card p { font-size: 15px; color: #94a3b8; margin-top: 6px; }
+
+  /* Timeline */
+  .phases { display: flex; flex-direction: column; gap: 16px; }
+
+  .phase {
+    display: grid;
+    grid-template-columns: 160px 1fr auto;
+    align-items: center;
+    gap: 20px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 18px 24px;
+  }
+
+  .phase-label { font-size: 13px; font-weight: 600; color: var(--accent); }
+  .phase-title { font-size: 16px; font-weight: 600; color: #f8fafc; }
+  .phase-desc { font-size: 14px; color: #64748b; margin-top: 2px; }
+  .phase-weeks { font-size: 13px; color: #475569; white-space: nowrap; }
+
+  /* Highlight box */
+  .highlight {
+    background: #1e293b;
+    border-left: 4px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 20px 24px;
+    margin-top: 24px;
+  }
+
+  .highlight p { font-size: 16px; color: #cbd5e1; }
+
+  /* Big number */
+  .big-stat {
+    font-size: 72px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .big-stat + p { margin-top: 8px; font-size: 16px; }
+
+  /* Stats row */
+  .stats { display: flex; gap: 48px; margin-top: 16px; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #475569;
+    text-align: left;
+    padding: 10px 16px;
+    border-bottom: 1px solid #334155;
+  }
+  td {
+    font-size: 15px;
+    color: #94a3b8;
+    padding: 12px 16px;
+    border-bottom: 1px solid #1e293b;
+  }
+  td:first-child { color: #f8fafc; font-weight: 500; }
+  td .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #064e3b;
+    color: #6ee7b7;
+  }
+
+  /* Navigation */
+  .nav {
+    position: fixed;
+    bottom: 32px;
+    right: 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 10;
+  }
+
+  .nav button {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #94a3b8;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background 0.15s;
+  }
+
+  .nav button:hover { background: #334155; color: #f8fafc; }
+  .nav button:disabled { opacity: 0.3; cursor: default; }
+
+  .nav .counter {
+    font-size: 13px;
+    color: #475569;
+    min-width: 48px;
+    text-align: center;
+  }
+
+  /* Progress bar */
+  .progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--trust);
+    transition: width 0.3s ease, background 0.3s;
+    z-index: 10;
+  }
+
+  /* Logo area */
+  .logo {
+    position: fixed;
+    top: 28px;
+    right: 40px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #334155;
+    z-index: 10;
+  }
+
+  ul { list-style: none; display: flex; flex-direction: column; gap: 12px; padding: 0; }
+  ul li { padding-left: 20px; position: relative; }
+  ul li::before { content: '—'; position: absolute; left: 0; color: var(--accent); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="logo">ACCENTURE</div>
+
+<div class="deck" id="deck">
+
+  <!-- 1. Title -->
+  <div class="slide active">
+    <div class="label">RFP MC-2026-0417 · Risposta Accenture</div>
+    <h1>Modernizzazione<br>Inventory Dashboard</h1>
+    <p class="subtitle">Proposta a Meridian Components, Inc.<br>Aprile 2026</p>
+  </div>
+
+  <!-- 2. Il problema -->
+  <div class="slide top pain">
+    <div class="label">Contesto</div>
+    <h2>Il sistema funziona.<br>Ma non abbastanza.</h2>
+    <div class="cards cols-3" style="margin-top: 8px;">
+      <div class="card">
+        <div class="num">PROBLEMA 1</div>
+        <h3>Reports difettoso</h3>
+        <p>Filtri non cablati, i18n incompleta, pattern API inconsistenti. Il vendor precedente ha chiuso il contratto senza risolvere.</p>
+      </div>
+      <div class="card">
+        <div class="num">PROBLEMA 2</div>
+        <h3>Zero test automatizzati</h3>
+        <p>IT non approva modifiche. Il sistema è bloccato: nessuna feature nuova può andare in produzione in sicurezza.</p>
+      </div>
+      <div class="card">
+        <div class="num">PROBLEMA 3</div>
+        <h3>Manca il Restocking</h3>
+        <p>Il team operativo gestisce gli ordini di acquisto a mano, senza supporto dalla dashboard. È la funzionalità più attesa.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. La nostra lettura -->
+  <div class="slide pain">
+    <div class="label">Analisi</div>
+    <h2>Come leggiamo la situazione</h2>
+    <div class="two-col">
+      <div>
+        <ul>
+          <li>IT è il gatekeeper: senza test (R3), niente va avanti. R3 sblocca tutto il resto.</li>
+          <li>Tanaka è la champion: il Restocking (R2) è la sua priorità operativa da mesi.</li>
+          <li>Okafor vuole prevedibilità: timeline e not-to-exceed valgono più del prezzo basso.</li>
+          <li>Il codice esistente è il punto di partenza, non l'handoff del vendor — che era minimale.</li>
+        </ul>
+      </div>
+      <div class="highlight">
+        <p>La sequenza giusta è: prima sbloccare il sistema (R3 + R1), poi estenderlo (R2), poi documentarlo per il passaggio IT (R4).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Scope R1 -->
+  <div class="slide resolve">
+    <div class="label">R1 — Obbligatorio</div>
+    <h2>Remediation Reports</h2>
+    <div class="two-col">
+      <ul>
+        <li>Discovery autonoma sul codice esistente</li>
+        <li>Audit filtri, i18n, pattern API, console noise</li>
+        <li>Fix incrementali con verifica manuale</li>
+        <li>Completato prima della scrittura dei test (R3)</li>
+      </ul>
+      <div class="card">
+        <div class="num">ASSUNZIONE</div>
+        <h3>Nessun elenco bug da Meridian</h3>
+        <p>La discovery è interamente a nostro carico. Stimiamo con margine conservativo.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Scope R2 -->
+  <div class="slide resolve">
+    <div class="label">R2 — Obbligatorio</div>
+    <h2>Vista Restocking</h2>
+    <div class="cards cols-3">
+      <div class="card">
+        <div class="num">INPUT</div>
+        <h3>Stock + Domanda + Budget</h3>
+        <p>L'operatore inserisce un budget ceiling. Il sistema incrocia stock attuale e forecast di domanda.</p>
+      </div>
+      <div class="card">
+        <div class="num">OUTPUT</div>
+        <h3>Ordini raccomandati</h3>
+        <p>Tabella per magazzino e categoria, con quantità e costo stimato. Modificabile prima della conferma.</p>
+      </div>
+      <div class="card">
+        <div class="num">STACK</div>
+        <h3>Vue 3 + FastAPI</h3>
+        <p>Nuovo endpoint <code style="font-size:13px;color:#6ee7b7">/api/restocking</code>. UX concordata con Tanaka prima dell'implementazione.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Scope R3 + R4 -->
+  <div class="slide resolve">
+    <div class="label">R3 + R4 — Obbligatori</div>
+    <h2>Test automatizzati e documentazione</h2>
+    <div class="cards cols-2">
+      <div class="card">
+        <div class="num">R3 — PLAYWRIGHT</div>
+        <h3>Suite di test browser</h3>
+        <p>Copertura sui flussi critici: Dashboard, Reports con filtri, Restocking. Eseguibile in CI. Scritto dopo R1 e R2, su comportamenti già corretti.</p>
+      </div>
+      <div class="card">
+        <div class="num">R4 — ARCHITETTURA</div>
+        <h3>Documentazione per IT</h3>
+        <p>Generata dal codice attuale, non dall'handoff del vendor. Formato HTML standalone: mappa componenti, schema API, flusso dati.</p>
+      </div>
+    </div>
+    <div class="highlight">
+      <p>R3 è il deliverable che sblocca IT per approvare modifiche future. È non-negoziabile anche se formalmente è uno dei quattro required.</p>
+    </div>
+  </div>
+
+  <!-- 7. Timeline -->
+  <div class="slide top">
+    <div class="label">Piano di consegna</div>
+    <h2>8 settimane, 4 fasi</h2>
+    <div class="phases">
+      <div class="phase">
+        <div><div class="phase-label">FASE 1</div><div class="phase-title">Onboarding + R4</div><div class="phase-desc">Discovery sul codice, documentazione architetturale</div></div>
+        <div style="width:100%;background:#0f172a;border-radius:4px;height:6px"><div style="width:25%;background:#2563eb;height:6px;border-radius:4px"></div></div>
+        <div class="phase-weeks">Sett. 1–2</div>
+      </div>
+      <div class="phase">
+        <div><div class="phase-label">FASE 2</div><div class="phase-title">R1 — Reports</div><div class="phase-desc">Audit e remediation dei difetti</div></div>
+        <div style="width:100%;background:#0f172a;border-radius:4px;height:6px"><div style="width:50%;background:#2563eb;height:6px;border-radius:4px"></div></div>
+        <div class="phase-weeks">Sett. 2–4</div>
+      </div>
+      <div class="phase">
+        <div><div class="phase-label">FASE 3</div><div class="phase-title">R2 — Restocking</div><div class="phase-desc">Design UX + implementazione frontend/backend</div></div>
+        <div style="width:100%;background:#0f172a;border-radius:4px;height:6px"><div style="width:75%;background:#2563eb;height:6px;border-radius:4px"></div></div>
+        <div class="phase-weeks">Sett. 4–7</div>
+      </div>
+      <div class="phase">
+        <div><div class="phase-label">FASE 4</div><div class="phase-title">R3 — Test + Go-live</div><div class="phase-desc">Suite Playwright, rilascio, approvazione IT</div></div>
+        <div style="width:100%;background:#0f172a;border-radius:4px;height:6px"><div style="width:100%;background:#2563eb;height:6px;border-radius:4px"></div></div>
+        <div class="phase-weeks">Sett. 7–8</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Pricing -->
+  <div class="slide top">
+    <div class="label">Pricing</div>
+    <h2>T&M con not-to-exceed</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Fase</th>
+          <th>Contenuto</th>
+          <th>Effort</th>
+          <th>Costo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Onboarding + R4</td><td>10 gg</td><td>€12.000</td></tr>
+        <tr><td>2</td><td>R1 Reports</td><td>20 gg</td><td>€21.000</td></tr>
+        <tr><td>3</td><td>R2 Restocking</td><td>30 gg</td><td>€31.500</td></tr>
+        <tr><td>4</td><td>R3 Test + rilascio</td><td>5 gg</td><td>€6.000</td></tr>
+        <tr><td style="color:#f59e0b">Contingency 15%</td><td>Discovery, iterazioni UX</td><td>—</td><td>€10.500</td></tr>
+        <tr><td style="color:#f8fafc;font-size:16px">Not-to-exceed</td><td></td><td style="color:#f8fafc">65 gg</td><td style="color:#f8fafc;font-size:18px;font-weight:700">€81.000</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 9. Esperienza -->
+  <div class="slide top resolve">
+    <div class="label">Esperienza rilevante</div>
+    <h2>Tre engagement analoghi</h2>
+    <div class="cards cols-3">
+      <div class="card">
+        <div class="num">ENGAGEMENT 1 · EMEA</div>
+        <h3>Dashboard operativa manifatturiera</h3>
+        <p>Rilevato e completato sistema incompleto da vendor precedente. Vue 3 + FastAPI. <span class="tag">R1 + R2</span></p>
+      </div>
+      <div class="card">
+        <div class="num">ENGAGEMENT 2 · SaaS</div>
+        <h3>Test automation logistics</h3>
+        <p>Suite Playwright end-to-end su frontend Vue 3 privo di test. IT come gatekeeper. <span class="tag">R3</span></p>
+      </div>
+      <div class="card">
+        <div class="num">ENGAGEMENT 3 · APAC</div>
+        <h3>i18n + UI refresh warehouse</h3>
+        <p>Estensione i18n a team giapponese e refresh design system. <span class="tag">D1 + D2</span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. Desired items -->
+  <div class="slide">
+    <div class="label">D1 · D2 · D3 — Desiderati</div>
+    <h2>Pronti quando il perimetro lo permette</h2>
+    <div class="cards cols-3">
+      <div class="card">
+        <div class="num">D1</div>
+        <h3>UI modernization</h3>
+        <p>Refresh visivo con design tokens. Direzione concordata con il team operativo, non imposta.</p>
+      </div>
+      <div class="card">
+        <div class="num">D2</div>
+        <h3>Internazionalizzazione</h3>
+        <p>Estensione i18n al team di Tokyo (giapponese). Esperienza diretta su contesti simili.</p>
+      </div>
+      <div class="card">
+        <div class="num">D3</div>
+        <h3>Dark mode</h3>
+        <p>Toggle lato operatore con CSS custom properties. Ideale per le stazioni in ambienti a bassa luminosità.</p>
+      </div>
+    </div>
+    <div class="highlight">
+      <p>Stima separata disponibile su richiesta. Orientativamente 3–4 settimane aggiuntive in continuità con l'engagement.</p>
+    </div>
+  </div>
+
+  <!-- 11. Perché noi -->
+  <div class="slide resolve">
+    <div class="label">Perché Accenture</div>
+    <h2>Lo stesso stack.<br>Lo stesso contesto.</h2>
+    <div class="two-col">
+      <ul style="gap: 20px;">
+        <li>Abbiamo già lavorato su sistemi Vue 3 + FastAPI lasciati incompleti da vendor precedenti.</li>
+        <li>Conosciamo il pattern IT-gatekeeper: R3 non è un optional, è il prerequisito di tutto.</li>
+        <li>Lavoriamo in modo incrementale: ogni fase ha un deliverable verificabile, non aspettate la fine per vedere risultati.</li>
+        <li>Not-to-exceed: la certezza sul budget è un impegno contrattuale, non una promessa.</li>
+      </ul>
+      <div>
+        <div class="big-stat">8</div>
+        <p>settimane per i 4 required</p>
+        <div class="big-stat" style="margin-top: 32px;">€81K</div>
+        <p>not-to-exceed</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12. Next steps -->
+  <div class="slide resolve">
+    <div class="label">Prossimi passi</div>
+    <h2>Come andiamo avanti</h2>
+    <div class="cards cols-3">
+      <div class="card">
+        <div class="num">STEP 1</div>
+        <h3>Aggiudicazione</h3>
+        <p>Firma contratto entro la settimana di aggiudicazione. Kick-off entro 3 giorni lavorativi.</p>
+      </div>
+      <div class="card">
+        <div class="num">STEP 2</div>
+        <h3>Accesso ambiente</h3>
+        <p>Accesso al repo e all'ambiente di sviluppo entro fine settimana 1. Dipendenza lato Meridian.</p>
+      </div>
+      <div class="card">
+        <div class="num">STEP 3</div>
+        <h3>Sessione con Tanaka</h3>
+        <p>~1 ora prima della Fase 3 per validare la UX del Restocking. Nessuna implementazione prima di questa.</p>
+      </div>
+    </div>
+    <div class="highlight" style="margin-top: 32px;">
+      <p>Domande? Contatto: procurement@meridiancomponents.example · Scadenza chiarimenti: 28 aprile 2026</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="nav">
+  <button id="prev" onclick="navigate(-1)" disabled>&#8592;</button>
+  <span class="counter" id="counter">1 / 12</span>
+  <button id="next" onclick="navigate(1)">&#8594;</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  function navigate(dir) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(total - 1, current + dir));
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('prev').disabled = current === 0;
+    document.getElementById('next').disabled = current === total - 1;
+    document.getElementById('progress').style.width = ((current + 1) / total * 100) + '%';
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navigate(-1);
+  });
+
+  document.getElementById('progress').style.width = (1 / total * 100) + '%';
+</script>
+</body>
+</html>

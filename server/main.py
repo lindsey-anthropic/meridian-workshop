@@ -228,12 +228,17 @@ def get_recent_transactions():
     return recent_transactions
 
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
+def get_quarterly_reports(warehouse: Optional[str] = None, category: Optional[str] = None):
     """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
+    filtered_orders = orders
+    if warehouse and warehouse != 'all':
+        filtered_orders = [o for o in filtered_orders if o.get('warehouse') == warehouse]
+    if category and category != 'all':
+        filtered_orders = [o for o in filtered_orders if o.get('category', '').lower() == category.lower()]
+
     quarters = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -253,20 +258,29 @@ def get_quarterly_reports():
                 'total_orders': 0,
                 'total_revenue': 0,
                 'delivered_orders': 0,
+                'completed_orders': 0,
                 'avg_order_value': 0
             }
 
         quarters[quarter]['total_orders'] += 1
         quarters[quarter]['total_revenue'] += order.get('total_value', 0)
-        if order.get('status') == 'Delivered':
+        status = order.get('status')
+        if status in ('Delivered', 'Backordered'):
+            quarters[quarter]['completed_orders'] += 1
+        if status == 'Delivered':
             quarters[quarter]['delivered_orders'] += 1
 
     # Calculate averages and fulfillment rate
+    # Rate is calculated only on completed orders (terminal states) to avoid
+    # artificially deflating recent quarters where orders are still in transit.
     result = []
     for q, data in quarters.items():
         if data['total_orders'] > 0:
             data['avg_order_value'] = round(data['total_revenue'] / data['total_orders'], 2)
-            data['fulfillment_rate'] = round((data['delivered_orders'] / data['total_orders']) * 100, 1)
+        if data['completed_orders'] > 0:
+            data['fulfillment_rate'] = round((data['delivered_orders'] / data['completed_orders']) * 100, 1)
+        else:
+            data['fulfillment_rate'] = None
         result.append(data)
 
     # Sort by quarter
@@ -274,11 +288,17 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
+def get_monthly_trends(warehouse: Optional[str] = None, category: Optional[str] = None):
     """Get month-over-month trends"""
+    filtered_orders = orders
+    if warehouse and warehouse != 'all':
+        filtered_orders = [o for o in filtered_orders if o.get('warehouse') == warehouse]
+    if category and category != 'all':
+        filtered_orders = [o for o in filtered_orders if o.get('category', '').lower() == category.lower()]
+
     months = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
@@ -303,6 +323,91 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+class RestockingRecommendation(BaseModel):
+    sku: str
+    item_name: str
+    warehouse: str
+    category: str
+    current_stock: int
+    reorder_point: int
+    forecasted_demand: int
+    trend: str
+    recommended_qty: int
+    unit_cost: float
+    estimated_cost: float
+    priority: str
+    within_budget: bool
+
+@app.get("/api/restocking", response_model=List[RestockingRecommendation])
+def get_restocking_recommendations(
+    budget: float,
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
+    """Recommend purchase orders based on stock levels, demand forecast, and budget ceiling."""
+    filtered_inventory = inventory_items
+    if warehouse and warehouse != 'all':
+        filtered_inventory = [i for i in filtered_inventory if i.get('warehouse') == warehouse]
+    if category and category != 'all':
+        filtered_inventory = [i for i in filtered_inventory if i.get('category', '').lower() == category.lower()]
+
+    # Build demand lookup by SKU
+    demand_by_sku = {d['item_sku']: d for d in demand_forecasts}
+
+    candidates = []
+    for item in filtered_inventory:
+        sku = item.get('sku', '')
+        qty = item.get('quantity_on_hand', 0)
+        reorder = item.get('reorder_point', 0)
+        unit_cost = item.get('unit_cost', 0.0)
+        demand = demand_by_sku.get(sku, {})
+        forecasted = demand.get('forecasted_demand', 0)
+        trend = demand.get('trend', 'stable')
+
+        below_reorder = qty < reorder
+        rising = trend == 'increasing'
+
+        if not below_reorder and not rising:
+            continue
+
+        if below_reorder and rising:
+            priority = 'high'
+        elif below_reorder or rising:
+            priority = 'medium'
+        else:
+            priority = 'low'
+
+        recommended_qty = max(reorder - qty, forecasted, 1)
+        estimated_cost = round(recommended_qty * unit_cost, 2)
+
+        candidates.append({
+            'sku': sku,
+            'item_name': item.get('name', ''),
+            'warehouse': item.get('warehouse', ''),
+            'category': item.get('category', ''),
+            'current_stock': qty,
+            'reorder_point': reorder,
+            'forecasted_demand': forecasted,
+            'trend': trend,
+            'recommended_qty': recommended_qty,
+            'unit_cost': unit_cost,
+            'estimated_cost': estimated_cost,
+            'priority': priority,
+            'within_budget': False,
+        })
+
+    priority_order = {'high': 0, 'medium': 1, 'low': 2}
+    candidates.sort(key=lambda x: (priority_order[x['priority']], -x['estimated_cost']))
+
+    cumulative = 0.0
+    for item in candidates:
+        if cumulative + item['estimated_cost'] <= budget:
+            item['within_budget'] = True
+            cumulative += item['estimated_cost']
+
+    return candidates
+
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,13 +1,20 @@
-# API Tests
+# Tests
 
-Comprehensive test suite for the Factory Inventory Management System backend APIs.
+Comprehensive test suite for the Meridian Components inventory dashboard.
 
 ## Test Structure
 
 ```
 tests/
 ├── pytest.ini          # Pytest configuration
-├── backend/            # Backend API tests
+├── backend/            # Backend API tests (pytest)
+├── e2e/                # Browser tests (Playwright)
+│   ├── playwright.config.js
+│   ├── package.json
+│   └── specs/
+│       ├── dashboard.spec.js   # Dashboard KPIs, tables, filters
+│       ├── reports.spec.js     # Reports page, quarterly data, filters
+│       └── restocking.spec.js  # Budget flow, recommendations table
 │   ├── conftest.py     # Test fixtures and configuration
 │   ├── test_inventory.py      # Inventory endpoint tests (10 tests)
 │   ├── test_orders.py         # Orders endpoint tests (15 tests)
@@ -16,7 +23,30 @@ tests/
 └── README.md           # This file
 ```
 
-## Running Tests
+## Running Browser Tests (E2E)
+
+Requires the app running on localhost:3000 (`/start`).
+
+```bash
+cd tests/e2e
+npm install
+npx playwright install chromium
+npx playwright test
+```
+
+Open the HTML report after a run:
+```bash
+npx playwright show-report
+```
+
+### E2E Coverage (20 tests)
+- **Dashboard (6 tests)**: title, nav, KPI cards, shortages table, top products, warehouse filter
+- **Reports (7 tests)**: title, 4 quarters, fulfillment rate %, monthly chart, MoM table, summary stats, warehouse filter
+- **Restocking (7 tests)**: title, disabled Calculate, empty state, recommendations table, stats bar, within/exceeds budget badges, warehouse filter
+
+---
+
+## Running Backend Tests (API)
 
 ### Run all tests
 ```bash

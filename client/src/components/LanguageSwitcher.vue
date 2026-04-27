@@ -64,7 +64,8 @@ const isDropdownOpen = ref(false)
 
 const languageNames = {
   en: 'English',
-  ja: '日本語'
+  ja: '日本語',
+  it: 'Italiano'
 }
 
 const getLanguageName = (locale) => {
