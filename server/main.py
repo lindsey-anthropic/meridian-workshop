@@ -228,12 +228,19 @@ def get_recent_transactions():
     return recent_transactions
 
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
     """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
+    filtered_orders = apply_filters(orders, warehouse, category, status)
+    filtered_orders = filter_by_month(filtered_orders, month)
+
     quarters = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -274,11 +281,19 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
     """Get month-over-month trends"""
+    filtered_orders = apply_filters(orders, warehouse, category, status)
+    filtered_orders = filter_by_month(filtered_orders, month)
+
     months = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
@@ -303,6 +318,63 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+@app.get("/api/restocking")
+def get_restocking_recommendations(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
+    """Get ranked restocking recommendations based on stock levels and demand forecasts"""
+    filtered_inventory = apply_filters(inventory_items, warehouse, category)
+
+    forecast_map = {f["item_sku"]: f for f in demand_forecasts}
+    backlog_map = {b["item_sku"]: b for b in backlog_items}
+
+    result = []
+    for item in filtered_inventory:
+        sku = item["sku"]
+        qty = item["quantity_on_hand"]
+        reorder = item["reorder_point"]
+        backlog = backlog_map.get(sku)
+        forecast = forecast_map.get(sku)
+
+        needs_restock = qty < reorder or backlog is not None
+        if not needs_restock:
+            continue
+
+        stock_deficit = max(0, reorder - qty)
+        recommended_qty = forecast["forecasted_demand"] if forecast else stock_deficit
+        estimated_cost = round(recommended_qty * item["unit_cost"], 2)
+        trend = forecast["trend"] if forecast else "stable"
+
+        if backlog:
+            priority = "high"
+        elif trend == "increasing":
+            priority = "medium"
+        else:
+            priority = "low"
+
+        result.append({
+            "sku": sku,
+            "name": item["name"],
+            "category": item["category"],
+            "warehouse": item["warehouse"],
+            "quantity_on_hand": qty,
+            "reorder_point": reorder,
+            "stock_deficit": stock_deficit,
+            "recommended_qty": recommended_qty,
+            "unit_cost": item["unit_cost"],
+            "estimated_cost": estimated_cost,
+            "forecasted_demand": forecast["forecasted_demand"] if forecast else None,
+            "trend": trend,
+            "priority": priority,
+            "days_delayed": backlog["days_delayed"] if backlog else None
+        })
+
+    priority_order = {"high": 0, "medium": 1, "low": 2}
+    result.sort(key=lambda x: (priority_order.get(x["priority"], 3), -x["estimated_cost"]))
+    return result
+
 
 if __name__ == "__main__":
     import uvicorn

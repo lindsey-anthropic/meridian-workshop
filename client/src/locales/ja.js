@@ -6,6 +6,8 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    restocking: '補充',
+    reports: 'レポート',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -55,7 +57,10 @@ export default {
       daysDelayed: '遅延日数',
       priority: '優先度',
       unitsShort: '単位不足',
-      days: '日'
+      days: '日',
+      actions: 'アクション',
+      createPO: '発注作成',
+      viewPO: '発注確認'
     },
     topProducts: {
       title: '収益別トップ製品',
@@ -316,6 +321,7 @@ export default {
     loading: '読み込み中...',
     error: 'エラー',
     noData: 'データがありません',
+    loadError: 'データの読み込みに失敗しました。もう一度お試しください。',
     viewDetails: '詳細を見る',
     close: '閉じる',
     save: '保存',
@@ -324,6 +330,80 @@ export default {
     filter: 'フィルター',
     export: 'エクスポート',
     items: '件'
+  },
+
+  // Restocking
+  restocking: {
+    title: '補充推奨',
+    subtitle: '在庫レベルと需要予測に基づく発注推奨',
+    budgetCeiling: '予算上限',
+    budgetPlaceholder: '予算を入力（円）',
+    totalItems: '補充が必要な品目',
+    totalCost: '推定総費用',
+    withinBudget: '予算内の品目',
+    item: '品目',
+    warehouse: '倉庫',
+    stockStatus: '在庫状況',
+    demandTrend: '需要トレンド',
+    recommendedQty: '推奨数量',
+    estimatedCost: '推定費用',
+    priority: '優先度',
+    budgetStatus: '予算',
+    high: '高',
+    medium: '中',
+    low: '低',
+    included: '含む',
+    excluded: '除外',
+    noItems: '現在のフィルターでは補充不要です',
+    daysDelayed: '{days}日遅延'
+  },
+
+  // Backlog
+  backlog: {
+    title: 'バックログ管理',
+    subtitle: '在庫不足の追跡と解決',
+    loading: 'バックログを読み込み中...',
+    highPriority: '高優先度',
+    mediumPriority: '中優先度',
+    lowPriority: '低優先度',
+    totalItems: 'バックログ品目数',
+    cardTitle: 'バックログ品目',
+    noItems: 'バックログなし — すべての注文を履行できます！',
+    table: {
+      orderId: '注文ID',
+      sku: 'SKU',
+      itemName: '品目名',
+      quantityNeeded: '必要数量',
+      quantityAvailable: '在庫数量',
+      shortage: '不足',
+      daysDelayed: '遅延日数',
+      priority: '優先度'
+    },
+    unitsShort: '単位不足',
+    days: '日'
+  },
+
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    subtitle: '四半期パフォーマンス指標と月次トレンドを表示',
+    quarterlyPerformance: '四半期パフォーマンス',
+    monthlyRevenueTrend: '月次売上トレンド',
+    monthOverMonth: '前月比分析',
+    quarter: '四半期',
+    totalOrders: '総注文数',
+    totalRevenue: '総売上',
+    avgOrderValue: '平均注文額',
+    fulfillmentRate: '履行率',
+    month: '月',
+    orders: '注文数',
+    revenue: '売上',
+    change: '変化',
+    growthRate: '成長率',
+    totalRevenueYTD: '年間総売上',
+    avgMonthlyRevenue: '月平均売上',
+    totalOrdersYTD: '年間総注文数',
+    bestQuarter: '最高パフォーマンス四半期'
   },
 
   // Product Names
