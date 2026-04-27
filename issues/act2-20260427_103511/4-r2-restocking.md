@@ -1,28 +1,28 @@
 # 4 — R2 Restocking View
-> File da creare: `server/main.py` (endpoint), `client/src/views/Restocking.vue`
-> File da modificare: `client/src/api.js`, `client/src/App.vue` (nav)
-> Usa Plan Mode (Shift+Tab) prima di iniziare
+> Files to create: `server/main.py` (endpoint), `client/src/views/Restocking.vue`
+> Files to modify: `client/src/api.js`, `client/src/App.vue` (nav entry)
+> Use Plan Mode (Shift+Tab) before starting
 
-## Architettura
+## Architecture
 
 ```
-Operatore inserisce budget ceiling + filtri opzionali
+Operator enters budget ceiling + optional filters
     ↓
 GET /api/restocking?budget=50000&warehouse=SF&category=Sensors
     ↓
 FastAPI:
-  1. Filtra inventory items sotto reorder point
-  2. Incrocia con demand forecasts per trend
-  3. Calcola priority score per item
-  4. Ordina per priority score DESC
-  5. Taglia lista al budget ceiling
+  1. Filter inventory items below reorder point
+  2. Cross-reference with demand forecasts for trend
+  3. Calculate priority score per item
+  4. Sort by priority score DESC
+  5. Trim list to fit within budget ceiling
     ↓
 [ { sku, name, qty_to_order, unit_cost, total_cost, priority_score, trend }, ... ]
     ↓
-Vue: tabella raccomandazioni + budget tracker
+Vue: recommendations table + budget tracker bar
 ```
 
-## Backend — nuovo endpoint
+## Backend — new endpoint
 
 **File:** `server/main.py`
 
@@ -44,7 +44,7 @@ class RestockingRecommendation(BaseModel):
     days_to_stockout: Optional[int] = None
 ```
 
-### Logica priority score
+### Priority score logic
 ```python
 TREND_WEIGHT = {"increasing": 1.5, "stable": 1.0, "decreasing": 0.5}
 
@@ -54,7 +54,7 @@ def calc_priority(item, forecast):
     return round(stock_gap * trend_w * item["unit_cost"], 2)
 ```
 
-### Endpoint
+### Endpoint signature
 ```python
 @app.get("/api/restocking", response_model=List[RestockingRecommendation])
 def get_restocking_recommendations(
@@ -64,7 +64,7 @@ def get_restocking_recommendations(
 ):
 ```
 
-## Frontend — nuova vista
+## Frontend — new view
 
 **File:** `client/src/views/Restocking.vue`
 
@@ -83,7 +83,7 @@ def get_restocking_recommendations(
 └─────────────────────────────────────────┘
 ```
 
-### Composizione Composition API
+### Composition API structure
 ```javascript
 setup() {
   const budget = ref(50000)
@@ -105,7 +105,7 @@ setup() {
 }
 ```
 
-## api.js — aggiungere
+## api.js — add
 
 ```javascript
 async getRestockingRecommendations(budget, filters = {}) {
@@ -119,22 +119,22 @@ async getRestockingRecommendations(budget, filters = {}) {
 },
 ```
 
-## App.vue — aggiungere voce nav
+## App.vue — add nav entry
 
 ```javascript
 { path: '/restocking', name: 'Restocking', icon: '📦' }
 ```
 
-## Prompt utile
+## Suggested prompt
 
 ```
 [Shift+Tab — Plan Mode]
-Voglio costruire la Restocking view per Meridian.
-Backend: nuovo endpoint GET /api/restocking in server/main.py
-  - parametri: budget (required), warehouse, category
-  - logica: items sotto reorder point × demand trend → priority score → taglia al budget
+I want to build the Restocking view for Meridian.
+Backend: new GET /api/restocking endpoint in server/main.py
+  - params: budget (required), warehouse, category
+  - logic: items below reorder point × demand trend → priority score → trim to budget
 Frontend: client/src/views/Restocking.vue
-  - input budget + filtri, tabella raccomandazioni, budget tracker
-Composition API, stesso stile viste esistenti.
-Proponi il piano prima di scrivere.
+  - budget input + filters, recommendations table, budget tracker
+Composition API, consistent with existing views.
+Propose the plan before writing any code.
 ```

@@ -1,84 +1,84 @@
 # RFP Analysis — MC-2026-0417
-> Semilavorato Act 1 / Step 1–2. Alimenta: executive-summary, technical-approach, clarifying-questions.
+> Work-in-progress Act 1 / Step 1–2. Feeds: executive-summary, technical-approach, clarifying-questions.
 
 ---
 
-## Requisiti obbligatori (R)
+## Mandatory requirements (R)
 
-| # | Titolo | Dettaglio | Peso strategico |
+| # | Title | Detail | Strategic weight |
 |---|---|---|---|
-| R1 | Reports remediation | Almeno 8 bug noti: filtri non cablati, i18n gaps, console noise, API pattern inconsistenti | Alto — il cliente li ha già contati |
-| R2 | Restocking view | Nuova schermata: stock attuale + demand forecast + budget ceiling → raccomandazioni PO | Alto — richiesta diretta di R. Tanaka (VP Ops) |
-| R3 | Browser testing | E2E coverage su critical flows con Playwright | **Non negoziabile** — IT lo usa come gatekeeper per bloccare qualsiasi cambio |
-| R4 | Architecture docs | Current-state overview per handoff a Meridian IT | Basso sforzo, alto valore percepito |
+| R1 | Reports remediation | At least 8 known bugs: unwired filters, i18n gaps, console noise, inconsistent API patterns | High — the client has already counted them |
+| R2 | Restocking view | New screen: current stock + demand forecast + budget ceiling → PO recommendations | High — direct request from R. Tanaka (VP Ops) |
+| R3 | Browser testing | E2E coverage on critical flows with Playwright | **Non-negotiable** — IT uses it as a gatekeeper to block any change |
+| R4 | Architecture docs | Current-state overview for handoff to Meridian IT | Low effort, high perceived value |
 
-## Requisiti desiderati (D)
+## Desired requirements (D)
 
-| # | Titolo | Note |
+| # | Title | Notes |
 |---|---|---|
-| D1 | UI modernization | "Current standards" non definito — serve chiarimento o assunzione |
-| D2 | i18n | Driver: team Tokyo ~12 persone, inglese non fluente. Lingue target non specificate (presumibilmente JA) |
-| D3 | Dark mode | Use case: stazioni in ambienti low-light nei magazzini |
+| D1 | UI modernization | "Current standards" undefined — clarification or assumption needed |
+| D2 | i18n | Driver: Tokyo team ~12 people, non-fluent in English. Target languages unspecified (presumably JA) |
+| D3 | Dark mode | Use case: stations in low-light warehouse environments |
 
 ---
 
-## Ambiguità e gap nell'RFP
+## Ambiguities and gaps in the RFP
 
-| Ambiguità | Impatto | Assunzione di fallback |
+| Ambiguity | Impact | Fallback assumption |
 |---|---|---|
-| "Current standards" per UI (D1) | Non si sa verso cosa modernizzare | Assumere minor visual refresh (colori, spaziatura) senza redesign completo |
-| Nessun budget indicativo | Impossibile calibrare la stima | Proposta T&M con not-to-exceed; chiedere in clarifying questions |
-| "Critical flows" per R3 non definiti | Non si sa quanti/quali test scrivere | Coprire: inventory view, orders filter, reports filter, restocking workflow |
-| "At least eight issues" su Reports (R1) | Il numero è un floor, non un ceiling — potrebbero essere di più | Fare audit completo prima di stimare; mettere buffer |
-| Lingue per D2 | Solo Tokyo citato, ma possibili altre lingue future | Assumere JA come prima lingua + architettura i18n estendibile |
-| Infrastruttura di deployment | Non menzionata — attualmente è solo locale | Assumere deploy su infrastruttura Meridian esistente, fuori scope |
+| "Current standards" for UI (D1) | Unknown modernization target | Assume minor visual refresh (colors, spacing) without full redesign |
+| No indicative budget | Cannot calibrate the estimate | T&M proposal with not-to-exceed; ask in clarifying questions |
+| "Critical flows" for R3 not defined | Unknown number/which tests to write | Cover: inventory view, orders filter, reports filter, restocking workflow |
+| "At least eight issues" on Reports (R1) | The number is a floor, not a ceiling — there may be more | Conduct full audit before estimating; add buffer |
+| Languages for D2 | Only Tokyo mentioned, but other future languages possible | Assume JA as first language + extensible i18n architecture |
+| Deployment infrastructure | Not mentioned — currently local only | Assume deploy on existing Meridian infrastructure, out of scope |
 
 ---
 
-## Analisi del cliente (da meridian-background.md)
+## Client analysis (from meridian-background.md)
 
-**Buying committee — chi conta davvero:**
+**Buying committee — who really matters:**
 
-- **J. Okafor** (Director Procurement) — firma il contratto, vuole prevedibilità su timeline e prezzo
-- **R. Tanaka** (VP Operations) — champion reale, usa il dashboard ogni giorno, ha richiesto personalmente R2 (Restocking). **Frustra col vendor precedente** → opportunità di differenziazione
-- **IT (non nominato)** — gatekeeper: ha bloccato modifiche perché non ci sono test. R3 sblocca tutto il resto → trattarlo come priorità anche se è "solo" R3
+- **J. Okafor** (Director Procurement) — signs the contract, wants predictability on timeline and price
+- **R. Tanaka** (VP Operations) — real champion, uses the dashboard every day, personally requested R2 (Restocking). **Frustrated with previous vendor** → differentiation opportunity
+- **IT (unnamed)** — gatekeeper: has blocked changes because there are no tests. R3 unblocks everything else → treat it as a priority even if it's "just" R3
 
-**Come usare queste info in proposta:**
-- Executive summary: parlare ai pain di Tanaka (operativi), non solo alla lista tecnica
-- Technical approach: rendere esplicito che R3 è il prerequisito che sblocca gli altri
-- Timeline: R3 in fase 1 insieme a R4, così IT può approvare subito
+**How to use this in the proposal:**
+- Executive summary: address Tanaka's pain points (operational), not just the technical list
+- Technical approach: make explicit that R3 is the prerequisite that unblocks the rest
+- Timeline: R3 in phase 1 alongside R4, so IT can approve immediately
 
 ---
 
-## Analisi vendor-handoff (da vendor-handoff.md)
+## Vendor handoff analysis (from vendor-handoff.md)
 
-**Cosa hanno lasciato:**
+**What they left:**
 - Stack: Vue 3 + FastAPI + JSON mock data (no DB)
-- Documentazione: **minima** — file map e API list, nessun diagramma, nessun design decision
-- Known issues ammessi: Reports filtri non cablati, zero test, Options API migration incompleta
+- Documentation: **minimal** — file map and API list, no diagrams, no design decisions
+- Admitted known issues: Reports filters not wired, zero tests, incomplete Options API migration
 
-**Finding critico:** La scarsità della handoff documentation è essa stessa un rischio che il cliente dovrebbe conoscere. Va citato nel Technical Approach come parte dell'onboarding plan (R4).
+**Critical finding:** The scarcity of handoff documentation is itself a risk the client should be aware of. It should be cited in the Technical Approach as part of the onboarding plan (R4).
 
-**Implicazioni tecniche:**
-- No database: tutti i dati sono JSON in memoria → R2 (Restocking) è solo logica front/back, nessuna migrazione
-- Options API mista a Composition API → rischio di regressioni durante R1 Reports fix
-- Nessun test → qualsiasi modifica è a rischio fino a quando R3 non è consegnato
-
----
-
-## Domande per procurement (deadline 28 apr)
-
-1. **Budget**: Esiste una fascia di riferimento o un not-to-exceed complessivo?
-2. **Critical flows R3**: Quali sono i 3-5 flussi utente che il vostro IT team considera critici da coprire con i test automatizzati?
-3. **UI standards D1**: Avete un design system o brand guidelines esistenti da rispettare, o il refresh è a discrezione del vendor?
-4. **i18n D2**: Oltre al giapponese per il team di Tokyo, ci sono altre lingue target? Esiste già un sistema di localizzazione (file `.json`, libreria i18n) o è da costruire da zero?
-5. **Deployment**: Il sistema è attualmente ospitato su infrastruttura Meridian o è ancora in locale? Il deployment è in scope?
+**Technical implications:**
+- No database: all data is JSON in memory → R2 (Restocking) is purely front/back logic, no migration needed
+- Options API mixed with Composition API → regression risk during R1 Reports fix
+- No tests → any change is at risk until R3 is delivered
 
 ---
 
-## Note per la proposta
+## Questions for procurement (deadline Apr 28)
 
-- **Differenziatore chiave**: dimostrare che abbiamo già letto il codice e identificato i problemi — il vendor precedente non l'ha fatto
-- **Tono**: parlare a Tanaka (operazioni), non solo a Okafor (procurement)
-- **R3 come prerequisito**: rendere esplicito che i test sono ciò che sblocca il resto, non solo un deliverable
-- **Onestà sui rischi**: handoff doc lacunosa = buffer di contingenza nella stima
+1. **Budget**: Is there a reference range or an overall not-to-exceed figure?
+2. **Critical flows R3**: What are the 3–5 user flows your IT team considers critical to cover with automated tests?
+3. **UI standards D1**: Do you have an existing design system or brand guidelines to follow, or is the refresh at the vendor's discretion?
+4. **i18n D2**: Beyond Japanese for the Tokyo team, are there other target languages? Does an existing localization system already exist (`.json` files, i18n library) or does it need to be built from scratch?
+5. **Deployment**: Is the system currently hosted on Meridian infrastructure or is it still local? Is deployment in scope?
+
+---
+
+## Notes for the proposal
+
+- **Key differentiator**: demonstrate that we have already read the code and identified the problems — the previous vendor did not
+- **Tone**: speak to Tanaka (operations), not just to Okafor (procurement)
+- **R3 as prerequisite**: make explicit that tests are what unblocks the rest, not just a deliverable
+- **Honesty about risks**: thin handoff docs = contingency buffer in the estimate

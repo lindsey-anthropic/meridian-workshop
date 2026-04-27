@@ -1,86 +1,86 @@
 # Act 1 — Completed
-> Data: 2026-04-27 | Sessione: VS Code + Claude Code
+> Date: 2026-04-27 | Session: VS Code + Claude Code
 
 ---
 
-## Stato finale: ✅ Completato
+## Final status: ✅ Completed
 
-Tutti i deliverable richiesti dall'RFP §4 sono stati prodotti in `proposal/`.
+All deliverables required by RFP §4 have been produced in `proposal/`.
 
 ---
 
-## Deliverable prodotti
+## Produced deliverables
 
-| File | Descrizione | Stato |
+| File | Description | Status |
 |---|---|---|
-| `proposal/executive-summary.md` | 1 pagina, problema + approccio + differenziatori | ✅ |
-| `proposal/technical-approach.md` | R1–R4 con dettaglio tecnico + assunzioni A1–A5 | ✅ |
-| `proposal/timeline.md` | 3 fasi, 6 settimane, milestone + rischi | ✅ |
-| `proposal/pricing.md` | T&M not-to-exceed, $90K required / $122K con optional | ✅ |
-| `proposal/capabilities-deck.html` | 10 slide HTML autocontenuto, navigabile con ←→ | ✅ |
+| `proposal/executive-summary.md` | 1 page, problem + approach + differentiators | ✅ |
+| `proposal/technical-approach.md` | R1–R4 with technical detail + assumptions A1–A5 | ✅ |
+| `proposal/timeline.md` | 3 phases, 6 weeks, milestones + risks | ✅ |
+| `proposal/pricing.md` | T&M not-to-exceed, $90K required / $122K with optional | ✅ |
+| `proposal/capabilities-deck.html` | 10-slide self-contained HTML, navigable with ←→ | ✅ |
 
 ---
 
-## Semilavorati usati (questa cartella)
+## Work-in-progress files used (this folder)
 
-| File | Alimenta |
+| File | Feeds |
 |---|---|
 | `rfp-analysis.md` | executive-summary, technical-approach |
 | `research-notes.md` | executive-summary, technical-approach, pricing |
-| `clarifying-questions.md` | technical-approach (sezione Assumptions A1–A5) |
+| `clarifying-questions.md` | technical-approach (Assumptions section A1–A5) |
 
 ---
 
-## Sintesi del lavoro per step
+## Work summary by step
 
 **Step 1 — Read & Analyze RFP**
-- 4 requisiti obbligatori (R1–R4), 3 desiderati (D1–D3)
-- 5 ambiguità identificate: budget, critical flows R3, UI standards D1, lingue i18n D2, deployment
-- Insight chiave: R3 testing è il gatekeeper IT — va consegnato in Phase 1
+- 4 mandatory requirements (R1–R4), 3 desired (D1–D3)
+- 5 ambiguities identified: budget, critical flows R3, UI standards D1, i18n languages D2, deployment
+- Key insight: R3 testing is the IT gatekeeper — must be delivered in Phase 1
 
 **Step 2 — Research the Client**
-- Buying committee: Okafor (procurement), Tanaka (VP Ops, champion), IT anonimo (gatekeeper)
-- Vendor precedente: handoff di 57 righe, zero test, migrazione Composition API incompleta
-- Differenziatore: abbiamo letto il codice prima di scrivere la proposta
+- Buying committee: Okafor (procurement), Tanaka (VP Ops, champion), anonymous IT (gatekeeper)
+- Previous vendor: 57-line handoff, zero tests, incomplete Composition API migration
+- Differentiator: we read the code before writing the proposal
 
 **Step 3 — Clarifying Questions**
-- 5 domande a procurement (deadline 28 apr): budget, critical flows, UI standards, lingue i18n, deployment
-- Per ciascuna: assunzione di fallback usata nel technical approach
+- 5 questions to procurement (deadline Apr 28): budget, critical flows, UI standards, i18n languages, deployment
+- For each: fallback assumption used in the technical approach
 
 **Step 4 — Write the Proposal**
-- Executive summary: tono operativo (parla a Tanaka, non solo a Okafor)
-- Technical approach: R1 audit-first + 20% buffer, R2 logica restocking, R3 in Phase 1, R4 all'onboarding
-- Timeline: 3 fasi con gate e sign-off scritto a ogni milestone
-- Pricing: T&M NTE, $90K required, $122K con D1–D3, pagamento in 3 tranche
+- Executive summary: operational tone (speaks to Tanaka, not just Okafor)
+- Technical approach: R1 audit-first + 20% buffer, R2 restocking logic, R3 in Phase 1, R4 at onboarding
+- Timeline: 3 phases with gate and written sign-off at each milestone
+- Pricing: T&M NTE, $90K required, $122K with D1–D3, payment in 3 tranches
 
 **Step 5 — Capabilities Deck**
-- 10 slide HTML, stile dark/light, serif, accent arancio
-- Navigabile con tasti freccia e anchor `#N`
-- Aperto nel browser, pronto per iterazione
+- 10-slide HTML, dark/light style, serif, orange accent
+- Navigable with arrow keys and anchor `#N`
+- Opened in browser, ready for iteration
 
 ---
 
-## Lezione implicita di Act 1
+## Implicit lesson of Act 1
 
-Ogni step ha dimostrato una tecnica concreta di collaborazione con Claude Code:
+Each step demonstrated a concrete collaboration technique with Claude Code:
 
-| Step | Tecnica dimostrata |
+| Step | Demonstrated technique |
 |---|---|
-| 1 | Claude come research partner su documenti |
-| 2 | Sintesi multi-documento → insight strategici |
-| 3 | Claude che genera domande + assunzioni di fallback |
-| 4 | Collaboration loop: Brief → Draft → Review → Refine, una sezione alla volta |
-| 5 | Claude che genera artefatti visivi (HTML deck) da semilavorati testuali |
+| 1 | Claude as research partner on documents |
+| 2 | Multi-document synthesis → strategic insights |
+| 3 | Claude generating questions + fallback assumptions |
+| 4 | Collaboration loop: Brief → Draft → Review → Refine, one section at a time |
+| 5 | Claude generating visual artifacts (HTML deck) from text work-in-progress |
 
 ---
 
-## Prossimo passo: Act 2
+## Next step: Act 2
 
 *"We submitted. Two weeks later Meridian picked us. Everything up to now has been documents — from here it's hands on keyboard in the actual codebase."*
 
-Aprire Claude Code nel terminale:
+Open Claude Code in the terminal:
 ```bash
 cd meridian-workshop
 claude
 ```
-Poi digitare `/start` per avviare backend e frontend, e iniziare da R4 (architecture) o R1 (reports audit).
+Then type `/start` to launch the backend and frontend, and begin from R4 (architecture) or R1 (reports audit).

@@ -1,92 +1,92 @@
 # 2 — R3 Automated Browser Testing
-> Output: `tests/e2e/*.spec.js` — baseline Playwright sui 5 critical flows
-> Prerequisito: MCP Playwright connesso (`/mcp` in Claude Code)
+> Output: `tests/e2e/*.spec.js` — Playwright baseline on 5 critical flows
+> Prerequisite: MCP Playwright connected (run `/mcp` in Claude Code)
 
-## Verifica MCP
+## Verify MCP connection
 
 ```
 /mcp
 ```
-Deve mostrare `playwright` come connesso. Se non appare: riavvia Claude Code nella cartella
-e approva i server MCP alla richiesta di avvio.
+Must show `playwright` as connected. If not: restart Claude Code in this folder
+and approve MCP servers when prompted on startup.
 
-## 5 Critical flows da coprire
+## 5 Critical flows
 
 ### Flow 1 — Inventory
 **File:** `tests/e2e/inventory.spec.js`
 
 ```
-- Apri localhost:3000
-- Naviga a Inventory
-- Verifica che la tabella carichi (almeno 1 riga)
-- Applica filtro warehouse → verifica che i risultati cambino
-- Applica filtro category → verifica che i risultati cambino
-- Applica entrambi → verifica risultati filtrati
-- Reset filtri → verifica ritorno a lista completa
+- Open localhost:3000
+- Navigate to Inventory
+- Verify table loads (at least 1 row)
+- Apply warehouse filter → verify results change
+- Apply category filter → verify results change
+- Apply both → verify combined filter
+- Reset filters → verify full list returns
 ```
 
 ### Flow 2 — Orders
 **File:** `tests/e2e/orders.spec.js`
 
 ```
-- Naviga a Orders
-- Verifica caricamento tabella
-- Filtra per status "Delivered" → solo delivered visibili
-- Filtra per mese → risultati ridotti
-- Filtra status + mese insieme
+- Navigate to Orders
+- Verify table loads
+- Filter by status "Delivered" → only delivered visible
+- Filter by month → results reduced
+- Filter status + month together
 ```
 
-### Flow 3 — Reports (baseline — alcuni test saranno rossi)
+### Flow 3 — Reports (baseline — some tests will be red)
 **File:** `tests/e2e/reports.spec.js`
 
 ```
-- Naviga a Reports
-- Verifica che Quarterly Performance table carichi
-- Verifica che Monthly Revenue chart carichi
-- Applica filtro warehouse → [ATTESO FALLIMENTO - bug R1]
-- Verifica che i dati NON cambino (documenta il bug)
+- Navigate to Reports
+- Verify Quarterly Performance table loads
+- Verify Monthly Revenue chart loads
+- Apply warehouse filter → [EXPECTED FAILURE — R1 bug]
+- Verify data does NOT change (documents the bug)
 ```
-> Questi test rossi sono la baseline che dimostra i bug. Non sono errori del test.
+> Red tests here are the baseline that proves the bugs exist. They are not test errors.
 
 ### Flow 4 — Dashboard
 **File:** `tests/e2e/dashboard.spec.js`
 
 ```
-- Naviga a Dashboard
-- Verifica presenza KPI (total inventory value, low stock, pending orders)
-- Applica filtro warehouse → KPI si aggiornano
-- Applica filtro category → KPI si aggiornano
-- Verifica che i numeri siano > 0
+- Navigate to Dashboard
+- Verify KPIs present (total inventory value, low stock, pending orders)
+- Apply warehouse filter → KPIs update
+- Apply category filter → KPIs update
+- Verify values are > 0
 ```
 
-### Flow 5 — Restocking (scritto dopo R2)
+### Flow 5 — Restocking (write after R2 is built)
 **File:** `tests/e2e/restocking.spec.js`
 
 ```
-- Naviga a Restocking (dopo che R2 è implementato)
-- Inserisci budget ceiling (es. $50,000)
-- Verifica che le raccomandazioni appaiano
-- Verifica che il totale non superi il budget
-- Filtra per warehouse → raccomandazioni si aggiornano
+- Navigate to Restocking
+- Enter budget ceiling (e.g. $50,000)
+- Verify recommendations appear
+- Verify total cost does not exceed budget
+- Apply warehouse filter → recommendations update
 ```
 
-## Struttura file test
+## File structure
 
 ```
 tests/
 └── e2e/
     ├── inventory.spec.js
     ├── orders.spec.js
-    ├── reports.spec.js      ← alcuni test rossi = documentazione bug R1
+    ├── reports.spec.js      ← some red tests = R1 bug documentation
     ├── dashboard.spec.js
-    └── restocking.spec.js   ← dopo R2
+    └── restocking.spec.js   ← after R2
 ```
 
-## Prompt utile
+## Suggested prompt
 
 ```
-Verifica che playwright MCP sia connesso con /mcp.
-Poi scrivi tests/e2e/inventory.spec.js e tests/e2e/orders.spec.js
-usando mcp__playwright__* tools contro localhost:3000.
-Eseguili e riporta i risultati.
+Verify playwright MCP is connected with /mcp.
+Then write tests/e2e/inventory.spec.js and tests/e2e/orders.spec.js
+using mcp__playwright__* tools against localhost:3000.
+Run them and report results.
 ```

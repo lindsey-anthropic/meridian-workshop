@@ -1,59 +1,59 @@
 # Research Notes — Meridian Components
-> Semilavorato Act 1 / Step 2. Fonti: meridian-background.md + vendor-handoff.md + codice.
-> Alimenta: executive-summary, technical-approach, clarifying-questions.
+> Work-in-progress Act 1 / Step 2. Sources: meridian-background.md + vendor-handoff.md + code.
+> Feeds: executive-summary, technical-approach, clarifying-questions.
 
 ---
 
-## Profilo cliente
+## Client profile
 
-| Campo | Dettaglio |
+| Field | Detail |
 |---|---|
-| Azienda | Meridian Components, Inc. — privata, fondata 2009, HQ San Francisco |
-| Settore | Distribuzione parti per automazione industriale (sensori, attuatori, controller, circuit board, power supply) |
+| Company | Meridian Components, Inc. — private, founded 2009, HQ San Francisco |
+| Sector | Distribution of parts for industrial automation (sensors, actuators, controllers, circuit boards, power supplies) |
 | Revenue | ~$9.6M (FY25) |
-| Dipendenti | ~180 |
-| Warehouse | San Francisco (HQ + distribuzione primaria), London (EMEA), Tokyo (aperto 2023, APAC OEM) |
-| Team Tokyo | ~12 persone, inglese variabile → driver reale dell'i18n ask |
+| Employees | ~180 |
+| Warehouse | San Francisco (HQ + primary distribution), London (EMEA), Tokyo (opened 2023, APAC OEM) |
+| Tokyo team | ~12 people, variable English → real driver of the i18n ask |
 
 ---
 
-## Buying committee — chi decide e cosa vuole
+## Buying committee — who decides and what they want
 
-| Persona | Ruolo | Priorità | Come parlargli |
+| Person | Role | Priority | How to speak to them |
 |---|---|---|---|
-| **J. Okafor** | Director of Procurement | Timeline e prevedibilità del prezzo | Criteri RFP, milestone chiare, no sorprese |
-| **R. Tanaka** | VP Operations | Vuole il Restocking (R2). Frustrata col vendor precedente | Parlare ai pain operativi quotidiani, non al tech stack |
-| **IT (anonimo)** | Gatekeeper tecnico | Ha bloccato modifiche perché non ci sono test | R3 testing è il prerequisito — va consegnato per primo |
+| **J. Okafor** | Director of Procurement | Timeline and price predictability | RFP criteria, clear milestones, no surprises |
+| **R. Tanaka** | VP Operations | Wants the Restocking (R2). Frustrated with previous vendor | Speak to daily operational pain points, not the tech stack |
+| **IT (anonymous)** | Technical gatekeeper | Has blocked changes because there are no tests | R3 testing is the prerequisite — must be delivered first |
 
-**Insight strategico:** Tanaka è il champion interno. Se la proposta parla solo alla lista tecnica di Okafor, perdiamo l'alleato che può spingere internamente. L'executive summary deve rispecchiare i pain di chi usa il dashboard ogni giorno.
-
----
-
-## Analisi vendor precedente (vendor-handoff.md)
-
-### Cosa hanno consegnato
-- Stack funzionante: Vue 3 + FastAPI + JSON mock data
-- Documentazione: file map + lista API endpoint — **nient'altro**
-- Nessun test, nessun diagramma, nessuna decision log
-
-### Cosa NON hanno consegnato (finding espliciti nel loro stesso handoff)
-- Reports: filtri non cablati
-- Test: zero copertura
-- Migrazione Composition API: incompleta — alcune view ancora in Options API
-
-### Finding impliciti (leggendo il codice)
-- `/api/reports/quarterly` e `/api/reports/monthly-trends` non supportano i filtri warehouse/category/status che tutti gli altri endpoint hanno → inconsistenza API
-- `vendor-handoff.md` è 57 righe per un sistema con 6+ viste e 15+ endpoint → documentazione inadeguata per un handoff professionale
-
-### Come usare questo nella proposta
-- **Non attaccare il vendor precedente** — dire che "la documentazione ricevuta è limitata, come da prassi in questi handoff, e il nostro onboarding plan prevede un audit completo prima di stimare il remediation"
-- Il contrasto implicito ("noi facciamo diversamente") emerge da solo dal nostro approccio strutturato
+**Strategic insight:** Tanaka is the internal champion. If the proposal only speaks to Okafor's technical list, we lose the ally who can push internally. The executive summary must reflect the pain of someone who uses the dashboard every day.
 
 ---
 
-## Analisi tecnica del codebase (da code inspection)
+## Previous vendor analysis (vendor-handoff.md)
 
-### Architettura attuale
+### What they delivered
+- Working stack: Vue 3 + FastAPI + JSON mock data
+- Documentation: file map + API endpoint list — **nothing else**
+- No tests, no diagrams, no decision log
+
+### What they did NOT deliver (explicit findings in their own handoff)
+- Reports: filters not wired
+- Tests: zero coverage
+- Composition API migration: incomplete — some views still in Options API
+
+### Implicit findings (from reading the code)
+- `/api/reports/quarterly` and `/api/reports/monthly-trends` do not support the warehouse/category/status filters that all other endpoints have → API inconsistency
+- `vendor-handoff.md` is 57 lines for a system with 6+ views and 15+ endpoints → documentation inadequate for a professional handoff
+
+### How to use this in the proposal
+- **Do not attack the previous vendor** — say that "the documentation received is limited, as is common in these handoffs, and our onboarding plan includes a full audit before estimating the remediation"
+- The implicit contrast ("we do it differently") emerges naturally from our structured approach
+
+---
+
+## Technical analysis of the codebase (from code inspection)
+
+### Current architecture
 
 ```
 Browser (Vue 3 / Vite / port 3000)
@@ -63,28 +63,28 @@ FastAPI (Python / port 8001)
 mock_data.py → server/data/*.json  (no database)
 ```
 
-### Viste esistenti
+### Existing views
 - Dashboard (summary + KPI)
-- Inventory (filtri: warehouse, category)
-- Orders (filtri: warehouse, category, status, month)
-- Reports (problemi noti)
+- Inventory (filters: warehouse, category)
+- Orders (filters: warehouse, category, status, month)
+- Reports (known issues)
 - Spending (summary, monthly, categories, transactions)
 - Backlog + Purchase Orders
 
-### Rischi tecnici identificati
+### Identified technical risks
 
-| Rischio | Probabilità | Impatto | Mitigazione |
+| Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| Options API mista a Composition API | Alta | Regressioni durante R1 fix | Audit completo prima di toccare Reports |
-| No database → mock data | Bassa (per ora) | R2 Restocking solo in memoria | Accettabile per scope attuale; notare in proposta |
-| Zero test | Certezza | Qualsiasi fix può rompere altro | R3 in fase 1 prima di R1 |
-| Handoff doc lacunosa | Certezza | Sottostima delle ore | Buffer del 20% sulla stima R1 |
+| Options API mixed with Composition API | High | Regressions during R1 fix | Full audit before touching Reports |
+| No database → mock data | Low (for now) | R2 Restocking only in memory | Acceptable for current scope; note in proposal |
+| Zero tests | Certain | Any fix can break something else | R3 in phase 1 before R1 |
+| Thin handoff docs | Certain | Underestimation of hours | 20% buffer on R1 estimate |
 
 ---
 
-## Opportunità di differenziazione
+## Differentiation opportunities
 
-1. **Abbiamo già letto il codice** — nessun altro offerente lo ha fatto (o lo dichiara). Citarlo nell'executive summary.
-2. **R3 come sblocco** — IT è un gatekeeper. Chi capisce questo vince la fiducia del buying committee.
-3. **Proposta parlante per Tanaka** — se la nostra exec summary parla di "operations team che non può fidarsi dei dati di Reports" invece di "remediation of module defects", siamo gli unici a parlare la sua lingua.
-4. **Onestà sui rischi** — Meridian è stata scottata da un vendor che ha sotto-consegnato. Trasparenza su rischi e assunzioni vale più del prezzo più basso.
+1. **We have already read the code** — no other bidder has done this (or states it). Cite it in the executive summary.
+2. **R3 as the unlocker** — IT is a gatekeeper. Whoever understands this wins the buying committee's trust.
+3. **Proposal speaking to Tanaka** — if our exec summary talks about "the operations team that cannot trust the Reports data" instead of "remediation of module defects," we are the only ones speaking their language.
+4. **Honesty about risks** — Meridian was burned by a vendor who under-delivered. Transparency about risks and assumptions is worth more than the lowest price.

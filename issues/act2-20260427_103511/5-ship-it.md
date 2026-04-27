@@ -1,22 +1,22 @@
 # 5 — Ship it
-> Commit + Push + PR sul fork personale
+> Commit + Push + PR on personal fork
 
-## Prerequisiti
+## Prerequisites checklist
 
-- [ ] R4 architecture.html in `proposal/`
-- [ ] R3 test baseline verde (o rosso documentato per Reports)
-- [ ] R1 tutti i bug fixati
-- [ ] R2 Restocking view funzionante
-- [ ] App avviata e verificata manualmente su localhost:3000
+- [ ] R4 `proposal/architecture.html` generated and opened in browser
+- [ ] R3 test baseline written (red on Reports = expected, documents bug)
+- [ ] R1 all 8+ bugs fixed with tests
+- [ ] R2 Restocking view working end-to-end
+- [ ] App manually verified on localhost:3000
 
-## Comandi
+## Commands
 
 ```bash
-# Verifica stato
+# Check state
 git status
 git diff
 
-# Stage e commit
+# Stage specific files
 git add proposal/architecture.html
 git add tests/e2e/
 git add server/main.py
@@ -31,26 +31,26 @@ git commit -m "feat: deliver R1-R4 for Meridian Components engagement
 - R1: fix Reports module - wire filters, migrate to Composition API, remove console noise
 - R2: add Restocking view with budget ceiling and PO recommendations"
 
-# Push al fork
+# Push to fork
 git push origin main
 
-# Apri PR
+# Open PR
 gh pr create \
   --title "Meridian engagement: R1 Reports fix, R2 Restocking, R3 Tests, R4 Architecture" \
   --body "..."
 ```
 
-## Prompt utile
+## Suggested prompt
 
 ```
-Crea un commit con tutti i cambiamenti di Act 2 e apri una PR sul mio fork.
-Il titolo deve coprire R1, R2, R3 e R4.
-Includi nel body: summary dei cambiamenti, test plan, screenshot se disponibili.
+Create a commit with all Act 2 changes and open a PR on my fork.
+Title should cover R1, R2, R3 and R4.
+Include in the body: change summary, test plan, and any screenshots if available.
 ```
 
-## Opzionale — GitHub App per review automatica
+## Optional — GitHub App for automated review
 
 ```
 /install-github-app
 ```
-Segui il flusso OAuth nel browser — Claude non può farlo per te.
+Follow the OAuth flow in the browser — Claude cannot do this step for you.

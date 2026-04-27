@@ -1,22 +1,22 @@
 # Act 2 — Deliver the Engagement
-> Scenario: Meridian ha scelto noi. Ora mettiamo le mani nel codice.
+> Scenario: Meridian chose us. Now we get our hands in the code.
 > Stack: Vue 3 (port 3000) + FastAPI (port 8001) + JSON mock data
 
 ---
 
 ## 0. Get it running
 
-**Obiettivo:** Avviare backend e frontend e verificare che l'app giri prima di toccare qualsiasi cosa.
+**Goal:** Start the backend and frontend and verify the app runs before touching anything.
 
-**Attività:**
-- Nel terminale Claude Code, digita `/start` (slash command del progetto)
-- In alternativa: `./scripts/start.sh`
-- Apri `http://localhost:3000` nel browser
-- Clicca tutte le pagine — nota cosa sembra rotto (Reports è il candidato principale)
+**Activities:**
+- In the Claude Code terminal, type `/start` (project slash command)
+- Alternatively: `./scripts/start.sh`
+- Open `http://localhost:3000` in the browser
+- Click through all pages — note what looks broken (Reports is the main candidate)
 
-**Output:** App funzionante in locale. Lista visiva dei problemi evidenti.
+**Output:** App running locally. Visual list of obvious issues.
 
-**Prompt utile:**
+**Useful prompt:**
 ```
 /start
 ```
@@ -25,167 +25,167 @@
 
 ## 1. R4 — Architecture Documentation
 
-**Obiettivo:** Capire il codebase prima di modificarlo. Produrre doc utile a Meridian IT.
+**Goal:** Understand the codebase before modifying it. Produce documentation useful to Meridian IT.
 
-**Attività:**
-- Esplora la struttura: `client/src/views/`, `client/src/api.js`, `server/main.py`, `server/mock_data.py`
-- Mappa i flussi: Vue component → api.js → FastAPI endpoint → JSON data
-- Identifica il tech debt: Options API residua, endpoint senza filtri, zero test
-- Genera `proposal/architecture.html` — diagramma interattivo, catalogue endpoint, component map
+**Activities:**
+- Explore the structure: `client/src/views/`, `client/src/api.js`, `server/main.py`, `server/mock_data.py`
+- Map the flows: Vue component → api.js → FastAPI endpoint → JSON data
+- Identify tech debt: residual Options API, endpoints without filters, zero tests
+- Generate `proposal/architecture.html` — interactive diagram, endpoint catalogue, component map
 
 **Output:** `proposal/architecture.html`
 
-**Prompt utile:**
+**Useful prompt:**
 ```
-Esplora il codebase e genera proposal/architecture.html con:
-- diagramma architettura (Vue → api.js → FastAPI → JSON)
-- tabella endpoint con filtri supportati
-- component map per ogni vista
-- lista tech debt trovato
-Aprilo nel browser quando fatto.
+Explore the codebase and generate proposal/architecture.html with:
+- architecture diagram (Vue → api.js → FastAPI → JSON)
+- endpoint table with supported filters
+- component map for each view
+- list of tech debt found
+Open it in the browser when done.
 ```
 
 ---
 
 ## 2. R3 — Automated Browser Testing
 
-**Obiettivo:** Stabilire la baseline di test PRIMA di correggere qualsiasi bug.
-Consegnato in Phase 1 — sblocca IT per approvare tutti i cambiamenti successivi.
+**Goal:** Establish the test baseline BEFORE fixing any bugs.
+Delivered in Phase 1 — unblocks IT to approve all subsequent changes.
 
-**Prerequisito:** MCP Playwright connesso. Verifica con `/mcp` nel prompt Claude Code.
-Se non connesso: riavvia Claude Code nella cartella e approva i server MCP alla richiesta.
+**Prerequisite:** MCP Playwright connected. Verify with `/mcp` in the Claude Code prompt.
+If not connected: restart Claude Code in the folder and approve MCP servers when prompted.
 
-**Attività:**
-- Digita `/mcp` per confermare che `playwright` è connesso
-- Scrivi test per i 5 critical flows (usando `mcp__playwright__*` tools):
+**Activities:**
+- Type `/mcp` to confirm `playwright` is connected
+- Write tests for the 5 critical flows (using `mcp__playwright__*` tools):
 
-| Flow | File test | Cosa coprire |
+| Flow | Test file | What to cover |
 |---|---|---|
-| Inventory | `tests/e2e/inventory.spec.js` | Caricamento, filtro warehouse, filtro category, combinato |
-| Orders | `tests/e2e/orders.spec.js` | Filtro status, filtro mese, combinato |
-| Reports | `tests/e2e/reports.spec.js` | Quarterly load, monthly trends, filtri (anche se rotti — baseline) |
-| Dashboard | `tests/e2e/dashboard.spec.js` | KPI presenti, filtri aggiornano i valori |
-| Restocking | `tests/e2e/restocking.spec.js` | Scritto dopo R2, ma pianificato ora |
+| Inventory | `tests/e2e/inventory.spec.js` | Load, warehouse filter, category filter, combined |
+| Orders | `tests/e2e/orders.spec.js` | Status filter, month filter, combined |
+| Reports | `tests/e2e/reports.spec.js` | Quarterly load, monthly trends, filters (even if broken — baseline) |
+| Dashboard | `tests/e2e/dashboard.spec.js` | KPIs present, filters update values |
+| Restocking | `tests/e2e/restocking.spec.js` | Written after R2, but planned now |
 
-**Output:** `tests/e2e/*.spec.js` — baseline verde (o rosso dove i bug esistono, documentato)
+**Output:** `tests/e2e/*.spec.js` — green baseline (or red where bugs exist, documented)
 
-**Prompt utile:**
+**Useful prompt:**
 ```
-Verifica che playwright MCP sia connesso, poi scrivi i test Playwright per i critical flows
-inventory e orders. Eseguili contro localhost:3000 e riporta i risultati.
+Verify that playwright MCP is connected, then write Playwright tests for the critical flows
+inventory and orders. Run them against localhost:3000 and report the results.
 ```
 
 ---
 
 ## 3. R1 — Reports Module Remediation
 
-**Obiettivo:** Correggere tutti i bug della pagina Reports. Ogni fix va con un test.
+**Goal:** Fix all bugs on the Reports page. Every fix comes with a test.
 
-**Bug noti da correggere (da audit pre-engagement):**
+**Known bugs to fix (from pre-engagement audit):**
 
 | # | Bug | File | Fix |
 |---|---|---|---|
-| B1 | `/api/reports/quarterly` non ha filtri warehouse/category/status | `server/main.py` | Aggiungere parametri + `apply_filters()` |
-| B2 | `/api/reports/monthly-trends` non ha filtri | `server/main.py` | Aggiungere parametri + `apply_filters()` |
-| B3 | Frontend Reports non passa i filtri agli endpoint | `client/src/views/ReportsView.vue` | Cablare i filtri globali alla chiamata API |
-| B4 | Options API residua nei componenti Reports | `client/src/views/ReportsView.vue` | Migrare a Composition API |
-| B5 | Console errors su filter state change | da identificare durante audit | Investigate + fix |
-| B6–B8+ | Da identificare durante audit completo | TBD | TBD |
+| B1 | `/api/reports/quarterly` has no warehouse/category/status filters | `server/main.py` | Add parameters + `apply_filters()` |
+| B2 | `/api/reports/monthly-trends` has no filters | `server/main.py` | Add parameters + `apply_filters()` |
+| B3 | Frontend Reports does not pass filters to endpoints | `client/src/views/ReportsView.vue` | Wire global filters to API call |
+| B4 | Residual Options API in Reports components | `client/src/views/ReportsView.vue` | Migrate to Composition API |
+| B5 | Console errors on filter state change | to be identified during audit | Investigate + fix |
+| B6–B8+ | To be identified during full audit | TBD | TBD |
 
-**Attività:**
-- Audit completo della pagina Reports — enumerare tutti i bug prima di fixare
-- Fix in ordine di impatto operativo (filtri prima, poi i18n, poi console noise)
-- Ogni fix → test Playwright corrispondente
-- Chiudi con checklist di accettazione
+**Activities:**
+- Full audit of the Reports page — enumerate all bugs before fixing
+- Fix in order of operational impact (filters first, then i18n, then console noise)
+- Each fix → corresponding Playwright test
+- Close with acceptance checklist
 
-**Prompt utile:**
+**Useful prompt:**
 ```
-Fai un audit completo della pagina Reports: leggi ReportsView.vue e gli endpoint
-/api/reports/* in main.py. Elenca tutti i bug trovati prima di toccare il codice.
-Poi proponi l'ordine di fix.
+Do a full audit of the Reports page: read ReportsView.vue and the
+/api/reports/* endpoints in main.py. List all bugs found before touching the code.
+Then propose the fix order.
 ```
 
 ---
 
 ## 4. R2 — Restocking View
 
-**Obiettivo:** Nuova vista che raccomanda purchase orders dato stock + demand + budget.
+**Goal:** New view that recommends purchase orders given stock + demand + budget.
 
-**Attività:**
+**Activities:**
 
-### Backend — nuovo endpoint
+### Backend — new endpoint
 - File: `server/main.py`
 - Endpoint: `GET /api/restocking?budget=&warehouse=&category=`
-- Logica:
-  1. Prendi items sotto il reorder point da `/api/inventory`
-  2. Incrocia con demand forecast da `/api/demand`
-  3. Calcola priority score: (reorder_point - quantity_on_hand) × demand_trend_weight
-  4. Calcola PO quantity per coprire la domanda prevista
-  5. Ordina per priority score, taglia al budget ceiling
-- Modello Pydantic: `RestockingRecommendation`
+- Logic:
+  1. Get items below reorder point from `/api/inventory`
+  2. Cross-reference with demand forecast from `/api/demand`
+  3. Calculate priority score: (reorder_point - quantity_on_hand) × demand_trend_weight
+  4. Calculate PO quantity to cover projected demand
+  5. Sort by priority score, cut to budget ceiling
+- Pydantic model: `RestockingRecommendation`
 
-### Frontend — nuova vista
+### Frontend — new view
 - File: `client/src/views/RestockingView.vue`
-- Componenti: input budget, filtri warehouse/category, tabella raccomandazioni, budget tracker
-- Pattern: Composition API, stesso stile delle viste esistenti
-- Aggiungere voce di menu in `App.vue` o router
+- Components: budget input, warehouse/category filters, recommendations table, budget tracker
+- Pattern: Composition API, same style as existing views
+- Add menu entry in `App.vue` or router
 
-> Usa **Plan Mode** (`Shift+Tab`) prima di iniziare il build — è il momento giusto per allinearsi sull'architettura prima di scrivere codice.
+> Use **Plan Mode** (`Shift+Tab`) before starting the build — this is the right moment to align on the architecture before writing code.
 
-**Prompt utile:**
+**Useful prompt:**
 ```
-[Shift+Tab per Plan Mode]
-Voglio costruire la Restocking view: endpoint FastAPI + vista Vue 3.
-Input: budget ceiling + filtri opzionali.
-Output: lista PO raccomandati ordinati per priorità, budget tracker.
-Proponi l'architettura prima di scrivere il codice.
+[Shift+Tab for Plan Mode]
+I want to build the Restocking view: FastAPI endpoint + Vue 3 view.
+Input: budget ceiling + optional filters.
+Output: list of recommended POs sorted by priority, budget tracker.
+Propose the architecture before writing the code.
 ```
 
 ---
 
 ## 5. Ship it — Commit, Push, PR
 
-**Obiettivo:** Consegnare il lavoro come farebbe un vero engagement.
+**Goal:** Deliver the work as a real engagement would.
 
-**Attività:**
-- `git add` dei file modificati
-- `git commit` con messaggio descrittivo
-- `git push` al fork personale
-- Aprire PR su GitHub con summary delle modifiche
-- Opzionale: installare GitHub App per review automatica (`/install-github-app`)
+**Activities:**
+- `git add` modified files
+- `git commit` with a descriptive message
+- `git push` to personal fork
+- Open PR on GitHub with a summary of changes
+- Optional: install GitHub App for automatic review (`/install-github-app`)
 
-**Prompt utile:**
+**Useful prompt:**
 ```
-Crea un commit con tutti i cambiamenti di Act 2, apri una PR sul mio fork con
-un summary che copra R1, R2, R3 e R4.
+Create a commit with all Act 2 changes, open a PR on my fork with
+a summary covering R1, R2, R3 and R4.
 ```
 
 ---
 
-## Checklist di completamento Act 2
+## Act 2 Completion Checklist
 
-- [ ] App avviata con `/start` e verificata nel browser
-- [ ] `proposal/architecture.html` generato e aperto
-- [ ] MCP Playwright connesso (`/mcp`)
-- [ ] Test baseline scritti per inventory e orders
-- [ ] Audit Reports completato — tutti i bug enumerati
-- [ ] R1 Reports — tutti i bug fixati con test
-- [ ] R2 Restocking — endpoint backend funzionante
-- [ ] R2 Restocking — vista frontend funzionante
-- [ ] R3 Test Restocking flow aggiunto
-- [ ] Commit + Push + PR aperta
+- [ ] App started with `/start` and verified in the browser
+- [ ] `proposal/architecture.html` generated and opened
+- [ ] MCP Playwright connected (`/mcp`)
+- [ ] Baseline tests written for inventory and orders
+- [ ] Reports audit completed — all bugs enumerated
+- [ ] R1 Reports — all bugs fixed with tests
+- [ ] R2 Restocking — backend endpoint working
+- [ ] R2 Restocking — frontend view working
+- [ ] R3 Restocking flow test added
+- [ ] Commit + Push + PR opened
 
 ---
 
-## Tecniche Claude Code da usare in Act 2
+## Claude Code techniques to use in Act 2
 
-| Momento | Tecnica |
+| Moment | Technique |
 |---|---|
-| Avvio app | `/start` — slash command di progetto |
-| Verifica MCP | `/mcp` — controlla i server connessi |
-| Prima di R2 build | `Shift+Tab` — Plan Mode per allinearsi sull'architettura |
-| Context pesante | `/compact` — compatta la conversazione |
-| Subagent frontend | `.claude/agents/vue-expert.md` — se il lavoro Vue diventa sostanziale |
-| Riferimento a file | `@nomefile` — porta un file nel contesto |
-| Riferimento a doc | `#` — cerca nei file del progetto |
-| Fine lavoro | `git commit` + `gh pr create` via Claude |
+| App startup | `/start` — project slash command |
+| MCP check | `/mcp` — check connected servers |
+| Before R2 build | `Shift+Tab` — Plan Mode to align on architecture |
+| Heavy context | `/compact` — compact the conversation |
+| Frontend subagent | `.claude/agents/vue-expert.md` — if Vue work becomes substantial |
+| File reference | `@filename` — bring a file into context |
+| Doc reference | `#` — search project files |
+| End of work | `git commit` + `gh pr create` via Claude |

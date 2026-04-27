@@ -1,129 +1,129 @@
 # Act 1 — Respond to the RFP
-> Scenario: Meridian Components ha emesso l'RFP #MC-2026-0417. Sei il consulente che risponde.
-> Tutto l'output va in `proposal/`. Nessun codice in questo atto.
+> Scenario: Meridian Components has issued RFP #MC-2026-0417. You are the consultant responding.
+> All output goes in `proposal/`. No code in this act.
 
 ---
 
 ## 1. Read & Analyze the RFP
 
-**Obiettivo:** Capire cosa chiede il cliente prima di scrivere una sola parola.
+**Objective:** Understand what the client is asking for before writing a single word.
 
-**Attività:**
-- Leggi `docs/rfp/MC-2026-0417.md` integralmente
-- Separa i requisiti **obbligatori** (R1–R4) da quelli **desiderati** (D1–D3)
-- Identifica le **ambiguità deliberate** nel testo:
-  - "current standards" per la UI (D1) — non definito
-  - Nessun budget range indicato
-  - "critical flows" per i test (R3) — non specificato
-  - "at least eight issues" sui Reports (R1) — numero vago
-- Annota le domande che manderesti a procurement (§6 dell'RFP, deadline 28 aprile)
+**Activities:**
+- Read `docs/rfp/MC-2026-0417.md` in full
+- Separate the **mandatory** requirements (R1–R4) from the **desired** ones (D1–D3)
+- Identify the **deliberate ambiguities** in the text:
+  - "current standards" for the UI (D1) — undefined
+  - No budget range indicated
+  - "critical flows" for tests (R3) — unspecified
+  - "at least eight issues" on Reports (R1) — vague number
+- Note the questions you would send to procurement (§6 of the RFP, deadline April 28)
 
-**Output:** Lista mentale / note di lavoro — non un file.
+**Output:** Mental list / working notes — not a file.
 
-**Prompt utile:**
+**Useful prompt:**
 ```
-Leggi @docs/rfp/MC-2026-0417.md e dimmi: quali sono i requisiti obbligatori vs desiderati,
-cosa è ambiguo, e cosa chiederei al cliente prima di scrivere la proposta.
+Read @docs/rfp/MC-2026-0417.md and tell me: what are the mandatory vs desired requirements,
+what is ambiguous, and what would I ask the client before writing the proposal.
 ```
 
 ---
 
 ## 2. Research the Client
 
-**Obiettivo:** Capire chi è Meridian per personalizzare la proposta.
+**Objective:** Understand who Meridian is in order to personalize the proposal.
 
-**Attività:**
-- Leggi `docs/rfp/meridian-background.md` — profilo azienda, contesto operativo
-- Leggi `docs/rfp/vendor-handoff.md` — note del vendor precedente (thin = finding di per sé)
-- Identifica i pain point operativi: 3 warehouse (SF, London, Tokyo), staff multilingua, ambienti low-light
-- Valuta la qualità della documentazione lasciata — se è scarsa, è un rischio da menzionare in proposta
+**Activities:**
+- Read `docs/rfp/meridian-background.md` — company profile, operational context
+- Read `docs/rfp/vendor-handoff.md` — notes from the previous vendor (thin = a finding in itself)
+- Identify operational pain points: 3 warehouses (SF, London, Tokyo), multilingual staff, low-light environments
+- Evaluate the quality of the documentation left — if it is sparse, it is a risk to mention in the proposal
 
-**Output:** Nessun file, ma le informazioni alimentano tutte le sezioni successive.
+**Output:** No file, but the information feeds all subsequent sections.
 
-**Prompt utile:**
+**Useful prompt:**
 ```
-Leggi @docs/rfp/meridian-background.md e @docs/rfp/vendor-handoff.md.
-Cosa devo sapere su Meridian che potrebbe differenziare la nostra proposta?
+Read @docs/rfp/meridian-background.md and @docs/rfp/vendor-handoff.md.
+What do I need to know about Meridian that could differentiate our proposal?
 ```
 
 ---
 
 ## 3. Draft Clarifying Questions
 
-**Obiettivo:** Simulare le domande reali che si manderebbero a procurement.
+**Objective:** Simulate the real questions you would send to procurement.
 
-**Attività:**
-- Scrivi 3–5 domande di chiarimento basate sulle ambiguità trovate al punto 1
-- Per ciascuna, decidi un'**assunzione di fallback** da usare in proposta se non rispondi
-- Esempi tipici:
-  - *"Quali sono i 'critical flows' che il vostro IT team vuole coperti dai test?"*
-  - *"Esiste un budget indicativo o una fascia di riferimento?"*
-  - *"Avete un design system o brand guidelines per il refresh UI (D1)?"*
-  - *"Il personale di Tokyo opera in giapponese? Quali altre lingue servono per D2?"*
+**Activities:**
+- Write 3–5 clarifying questions based on the ambiguities found in step 1
+- For each, decide on a **fallback assumption** to use in the proposal if no reply is received
+- Typical examples:
+  - *"What are the 'critical flows' your IT team wants covered by the tests?"*
+  - *"Is there an indicative budget or reference range?"*
+  - *"Do you have a design system or brand guidelines for the UI refresh (D1)?"*
+  - *"Does the Tokyo staff work in Japanese? What other languages are needed for D2?"*
 
-**Output:** Le risposte diventano **assunzioni esplicite** nella proposta (sezione Technical Approach).
+**Output:** The answers become **explicit assumptions** in the proposal (Technical Approach section).
 
-**Prompt utile:**
+**Useful prompt:**
 ```
-Basandoti sull'RFP, scrivi 3-5 domande che manderesti a procurement@meridiancomponents.example.
-Per ciascuna includi l'assunzione che useremmo in proposta se non rispondono.
+Based on the RFP, write 3–5 questions you would send to procurement@meridiancomponents.example.
+For each, include the assumption we would use in the proposal if they don't reply.
 ```
 
 ---
 
 ## 4. Write the Proposal
 
-Ogni sezione va in un file separato in `proposal/`. Scrivi una sezione alla volta, fermati, rivedi, poi vai avanti.
+Each section goes in a separate file in `proposal/`. Write one section at a time, stop, review, then move forward.
 
 ### 4a. Executive Summary
 **File:** `proposal/executive-summary.md`
 
-**Contenuto:**
-- 1 pagina max (come richiesto dall'RFP §4)
-- Dimostra che hai capito il problema (non solo letto il testo)
-- Proposta di valore in 2-3 frasi: perché noi, perché ora
-- Richiamo ai 4 requisiti obbligatori senza entrare nel tecnico
+**Content:**
+- 1 page max (as required by RFP §4)
+- Demonstrate you understood the problem (not just read the text)
+- Value proposition in 2–3 sentences: why us, why now
+- Reference to the 4 mandatory requirements without going into technical detail
 
-**Prompt utile:**
+**Useful prompt:**
 ```
-[stage] Sei un senior consultant Accenture che risponde a un RFP per modernizzare un inventory dashboard.
-[task] Scrivi l'executive summary per proposal/executive-summary.md.
-[rules] Max 1 pagina. Tono professionale ma diretto. Niente buzzword. Dimostra comprensione del problema,
-non solo lista dei deliverable.
+[stage] You are a senior Accenture consultant responding to an RFP to modernize an inventory dashboard.
+[task] Write the executive summary for proposal/executive-summary.md.
+[rules] Max 1 page. Professional but direct tone. No buzzwords. Demonstrate understanding of the problem,
+not just a list of deliverables.
 ```
 
 ### 4b. Technical Approach
 **File:** `proposal/technical-approach.md`
 
-**Contenuto:**
-- Per ciascuno di R1–R4 (e opzionalmente D1–D3): come lo affronteresti, con quali assunzioni
-- R1 Reports: audit + remediation plan (menziona che hai già visto il codice)
-- R2 Restocking: architettura della nuova vista (input: stock + demand + budget → output: PO raccomandati)
-- R3 Testing: framework scelto (Playwright), coverage plan, criteri di done
-- R4 Architecture: formato HTML interattivo, consegnato con l'engagement
-- Includi le assunzioni derivate dalle clarifying questions
+**Content:**
+- For each of R1–R4 (and optionally D1–D3): how you would address it, with what assumptions
+- R1 Reports: audit + remediation plan (mention that you have already seen the code)
+- R2 Restocking: architecture of the new view (input: stock + demand + budget → output: recommended POs)
+- R3 Testing: chosen framework (Playwright), coverage plan, definition of done
+- R4 Architecture: interactive HTML format, delivered with the engagement
+- Include the assumptions derived from the clarifying questions
 
-> Usa **Plan Mode** (`Shift+Tab`) prima di scrivere questa sezione — è il momento giusto per allinearsi sull'outline prima di produrre il testo.
+> Use **Plan Mode** (`Shift+Tab`) before writing this section — this is the right moment to align on the outline before producing the text.
 
 ### 4c. Timeline
 **File:** `proposal/timeline.md`
 
-**Contenuto:**
-- Piano a fasi (suggerito: 3 sprint da 2 settimane)
-- Fase 1: Onboarding + R4 Architecture + inizio R1 Reports
-- Fase 2: Completamento R1 + R2 Restocking
-- Fase 3: R3 Testing + R4 finale + eventuali D1–D3
-- Milestone e criteri di accettazione per ciascuna fase
-- Note sui rischi: documentazione del vendor precedente lacunosa
+**Content:**
+- Phased plan (suggested: 3 sprints of 2 weeks)
+- Phase 1: Onboarding + R4 Architecture + start of R1 Reports
+- Phase 2: Completion of R1 + R2 Restocking
+- Phase 3: R3 Testing + final R4 + optional D1–D3
+- Milestones and acceptance criteria for each phase
+- Risk notes: previous vendor documentation is sparse
 
 ### 4d. Pricing
 **File:** `proposal/pricing.md`
 
-**Contenuto:**
-- Modello: fixed-fee o T&M con not-to-exceed (come richiesto dall'RFP §4)
-- Stima per requisito: R1 (X giorni), R2 (Y giorni), R3 (Z giorni), R4 (W giorni)
-- Assunzioni su cui si basa il prezzo (es. team size, accesso al codice, nessuna migrazione DB)
-- Opzione per i desiderata D1–D3 come change request
+**Content:**
+- Model: fixed-fee or T&M with not-to-exceed (as required by RFP §4)
+- Estimate per requirement: R1 (X days), R2 (Y days), R3 (Z days), R4 (W days)
+- Assumptions on which the price is based (e.g. team size, code access, no DB migration)
+- Option for desired items D1–D3 as change requests
 
 ---
 
@@ -131,59 +131,59 @@ non solo lista dei deliverable.
 
 **File:** `proposal/capabilities-deck.html`
 
-**Obiettivo:** Presentazione visiva da 10–15 slide, autocontenuta in un singolo HTML.
+**Objective:** Visual presentation of 10–15 slides, self-contained in a single HTML file.
 
-**Struttura suggerita:**
-1. Cover — nome firma + titolo engagement
-2. Il problema di Meridian (in 3 bullet)
-3. Il nostro approccio (R1→R4 in una slide)
-4. R1 — Reports remediation: cosa faremo
-5. R2 — Restocking view: come funzionerà
+**Suggested structure:**
+1. Cover — firm name + engagement title
+2. Meridian's problem (in 3 bullets)
+3. Our approach (R1→R4 in one slide)
+4. R1 — Reports remediation: what we will do
+5. R2 — Restocking view: how it will work
 6. R3 — Testing: coverage plan
 7. R4 — Architecture docs
-8. Timeline a fasi (visual)
-9. Perché noi (relevant experience)
+8. Phased timeline (visual)
+9. Why us (relevant experience)
 10. Next steps
 
-**Note tecniche:**
-- Navigabile con frecce / anchor `#1`, `#2`… come il deck Anthropic di oggi
-- Stile: sfondo scuro o chiaro, serif grande, accent color, layout pulito
-- Apri nel browser appena generato, poi chiedi cosa cambiare e itera almeno una volta
+**Technical notes:**
+- Navigable with arrow keys / anchor `#1`, `#2`… like today's Anthropic deck
+- Style: dark or light background, large serif, accent color, clean layout
+- Open in the browser as soon as generated, then ask what to change and iterate at least once
 
-**Prompt utile:**
+**Useful prompt:**
 ```
-Genera proposal/capabilities-deck.html: un deck HTML autocontenuto da 10 slide per rispondere
-all'RFP di Meridian Components. Navigabile via frecce. Stile professionale, sfondo scuro,
-font serif, accent arancio. Contenuto basato su executive-summary.md e technical-approach.md.
+Generate proposal/capabilities-deck.html: a 10-slide self-contained HTML deck to respond
+to Meridian Components' RFP. Navigable via arrow keys. Professional style, dark background,
+serif font, orange accent. Content based on executive-summary.md and technical-approach.md.
 ```
 
-**Opzione PPTX** (se serve un file da condividere):
+**PPTX option** (if a shareable file is needed):
 ```
-Converti il deck in proposal/capabilities-deck.pptx usando python-pptx.
+Convert the deck to proposal/capabilities-deck.pptx using python-pptx.
 ```
 
 ---
 
-## Checklist di completamento Act 1
+## Act 1 completion checklist
 
-- [ ] RFP letto e requisiti separati (R vs D)
-- [ ] Ambiguità identificate
-- [ ] Background client ricercato (`meridian-background.md` + `vendor-handoff.md`)
-- [ ] Clarifying questions scritte + assunzioni definite
-- [ ] `proposal/executive-summary.md` scritto e rivisto
-- [ ] `proposal/technical-approach.md` scritto e rivisto
-- [ ] `proposal/timeline.md` scritto e rivisto
-- [ ] `proposal/pricing.md` scritto e rivisto
-- [ ] `proposal/capabilities-deck.html` generato, aperto nel browser, iterato almeno una volta
-- [ ] Transizione ad Act 2 — *"We won the bid. Now it's hands on keyboard."*
+- [ ] RFP read and requirements separated (R vs D)
+- [ ] Ambiguities identified
+- [ ] Client background researched (`meridian-background.md` + `vendor-handoff.md`)
+- [ ] Clarifying questions written + assumptions defined
+- [ ] `proposal/executive-summary.md` written and reviewed
+- [ ] `proposal/technical-approach.md` written and reviewed
+- [ ] `proposal/timeline.md` written and reviewed
+- [ ] `proposal/pricing.md` written and reviewed
+- [ ] `proposal/capabilities-deck.html` generated, opened in browser, iterated at least once
+- [ ] Transition to Act 2 — *"We won the bid. Now it's hands on keyboard."*
 
 ---
 
-## Lezione implicita di Act 1
+## Implicit lesson of Act 1
 
-Ogni step di questo atto dimostra una tecnica di collaborazione con Claude:
-- **Leggere + analizzare** → Claude come research partner
-- **Clarifying questions** → Claude che usa `AskUserQuestion` tool per simulare il cliente
-- **Scrivere sezione per sezione** → collaboration loop (Brief → Draft → Review → Refine)
-- **Plan Mode prima del Technical Approach** → allineamento prima di produrre
-- **Capabilities deck** → Claude che genera artefatti visivi e itera sul feedback
+Each step in this act demonstrates a collaboration technique with Claude:
+- **Read + analyze** → Claude as research partner
+- **Clarifying questions** → Claude using the `AskUserQuestion` tool to simulate the client
+- **Write section by section** → collaboration loop (Brief → Draft → Review → Refine)
+- **Plan Mode before the Technical Approach** → alignment before producing
+- **Capabilities deck** → Claude generating visual artifacts and iterating on feedback
