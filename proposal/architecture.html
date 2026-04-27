@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Components — Architecture Overview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f8fafc;
+    color: #0f172a;
+    padding: 40px;
+    min-height: 100vh;
+  }
+
+  .page-header {
+    max-width: 1100px;
+    margin: 0 auto 40px;
+  }
+
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .page-header p {
+    font-size: 14px;
+    color: #64748b;
+    margin-top: 6px;
+  }
+
+  .meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 16px;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  .meta span strong { color: #64748b; }
+
+  /* Layout */
+  .diagram {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .layer {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px 28px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+
+  .layer-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .layer-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  .badge-browser  { background: #dbeafe; color: #1d4ed8; }
+  .badge-frontend { background: #dcfce7; color: #15803d; }
+  .badge-backend  { background: #fef3c7; color: #92400e; }
+  .badge-data     { background: #f3e8ff; color: #7e22ce; }
+
+  .layer-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  .layer-subtitle {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-left: auto;
+  }
+
+  /* Boxes */
+  .boxes {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .box {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 18px;
+    min-width: 160px;
+    flex: 1;
+  }
+
+  .box-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .box-title .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-green  { background: #22c55e; }
+  .dot-blue   { background: #3b82f6; }
+  .dot-yellow { background: #f59e0b; }
+  .dot-purple { background: #a855f7; }
+  .dot-slate  { background: #64748b; }
+
+  .box ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .box ul li {
+    font-size: 12px;
+    color: #64748b;
+    padding-left: 12px;
+    position: relative;
+  }
+
+  .box ul li::before {
+    content: '·';
+    position: absolute;
+    left: 0;
+    color: #cbd5e1;
+  }
+
+  .box ul li code {
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 11px;
+    background: #f1f5f9;
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: #475569;
+  }
+
+  /* Arrow connector */
+  .connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: -8px 0;
+    color: #94a3b8;
+    font-size: 12px;
+  }
+
+  .connector-line {
+    flex: 1;
+    max-width: 120px;
+    height: 1px;
+    background: #e2e8f0;
+    position: relative;
+  }
+
+  .connector svg {
+    flex-shrink: 0;
+    color: #94a3b8;
+  }
+
+  /* API table */
+  .api-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 10px;
+  }
+
+  .api-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 14px;
+  }
+
+  .method {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: #dcfce7;
+    color: #15803d;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .api-path {
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 12px;
+    color: #0f172a;
+    font-weight: 500;
+  }
+
+  .api-note {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+
+  /* Data flow */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    padding: 8px 0;
+  }
+
+  .flow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 120px;
+  }
+
+  .flow-box {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #334155;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .flow-label {
+    font-size: 10px;
+    color: #94a3b8;
+    text-align: center;
+  }
+
+  .flow-arrow {
+    font-size: 16px;
+    color: #cbd5e1;
+    flex-shrink: 0;
+    padding: 0 4px;
+    margin-bottom: 16px;
+  }
+
+  /* Known issues */
+  .issues {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .issue-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+
+  .issue-row.fixed   { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .issue-row.open    { background: #fff7ed; border: 1px solid #fed7aa; }
+
+  .issue-tag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .tag-fixed { background: #dcfce7; color: #15803d; }
+  .tag-open  { background: #ffedd5; color: #c2410c; }
+
+  .issue-text { color: #374151; line-height: 1.4; }
+
+  /* Two col */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 700px) {
+    .two-col { grid-template-columns: 1fr; }
+    body { padding: 20px; }
+  }
+
+  /* Footer */
+  footer {
+    max-width: 1100px;
+    margin: 32px auto 0;
+    font-size: 12px;
+    color: #94a3b8;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 20px;
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Meridian Components — Inventory Dashboard Architecture</h1>
+  <p>Current-state architecture overview · Prepared for Meridian IT handoff</p>
+  <div class="meta">
+    <span><strong>Vendor:</strong> Accenture</span>
+    <span><strong>Date:</strong> April 27, 2026</span>
+    <span><strong>Stack:</strong> Vue 3 + FastAPI + JSON</span>
+    <span><strong>Ports:</strong> Frontend :3000 · Backend :8001</span>
+  </div>
+</div>
+
+<div class="diagram">
+
+  <!-- Browser -->
+  <div class="layer">
+    <div class="layer-header">
+      <span class="layer-badge badge-browser">Client</span>
+      <span class="layer-title">Browser</span>
+      <span class="layer-subtitle">Warehouse operator — Chrome / Safari</span>
+    </div>
+    <div class="boxes">
+      <div class="box">
+        <div class="box-title"><span class="dot dot-blue"></span>Runs at localhost:3000</div>
+        <ul>
+          <li>Single-page application (SPA)</li>
+          <li>No server-side rendering</li>
+          <li>i18n: English / Japanese (localStorage)</li>
+          <li>State persists in-memory only (page refresh resets)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow -->
+  <div class="connector">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M8 13l-3-3M8 13l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <span>HTTP (axios) · localhost:8001</span>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M8 13l-3-3M8 13l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </div>
+
+  <!-- Frontend -->
+  <div class="layer">
+    <div class="layer-header">
+      <span class="layer-badge badge-frontend">Frontend</span>
+      <span class="layer-title">Vue 3 Application</span>
+      <span class="layer-subtitle">client/ · Vite 5 · port 3000</span>
+    </div>
+    <div class="boxes">
+      <div class="box">
+        <div class="box-title"><span class="dot dot-green"></span>Views (src/views/)</div>
+        <ul>
+          <li>Dashboard.vue — KPIs, charts, shortcuts</li>
+          <li>Inventory.vue — stock table, detail modal</li>
+          <li>Orders.vue — order list, status badges</li>
+          <li>Spending.vue — finance charts</li>
+          <li>Demand.vue — forecast table</li>
+          <li>Reports.vue — quarterly + monthly</li>
+          <li>Backlog.vue — backlog items</li>
+        </ul>
+      </div>
+      <div class="box">
+        <div class="box-title"><span class="dot dot-blue"></span>Components (src/components/)</div>
+        <ul>
+          <li>FilterBar.vue — shared filter bar (sticky)</li>
+          <li>ProfileMenu.vue — user dropdown</li>
+          <li>LanguageSwitcher.vue — EN/JA toggle</li>
+          <li>InventoryDetailModal.vue</li>
+          <li>BacklogDetailModal.vue</li>
+          <li>ProductDetailModal.vue</li>
+          <li>CostDetailModal.vue</li>
+          <li>ProfileDetailsModal.vue</li>
+          <li>TasksModal.vue</li>
+        </ul>
+      </div>
+      <div class="box">
+        <div class="box-title"><span class="dot dot-yellow"></span>Composables (src/composables/)</div>
+        <ul>
+          <li><code>useFilters.js</code> — singleton filter state</li>
+          <li><code>useI18n.js</code> — translation + locale</li>
+          <li><code>useAuth.js</code> — mock user session</li>
+        </ul>
+      </div>
+      <div class="box">
+        <div class="box-title"><span class="dot dot-slate"></span>API Client (src/api.js)</div>
+        <ul>
+          <li>Centralised axios calls</li>
+          <li>Builds URLSearchParams from filter state</li>
+          <li>All views call this — no direct axios usage</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Data flow -->
+    <div style="margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
+      <div style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">Data flow (per view)</div>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-box">useFilters</div>
+          <div class="flow-label">shared singleton</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-box">View setup()</div>
+          <div class="flow-label">watch() on filter refs</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-box">api.js</div>
+          <div class="flow-label">builds query params</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-box">FastAPI</div>
+          <div class="flow-label">filters in-memory data</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-box">Pydantic response</div>
+          <div class="flow-label">typed JSON</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-box">computed props</div>
+          <div class="flow-label">derived UI state</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow -->
+  <div class="connector">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M8 13l-3-3M8 13l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <span>REST / JSON · CORS open (dev only)</span>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M8 13l-3-3M8 13l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </div>
+
+  <!-- Backend -->
+  <div class="layer">
+    <div class="layer-header">
+      <span class="layer-badge badge-backend">Backend</span>
+      <span class="layer-title">Python FastAPI</span>
+      <span class="layer-subtitle">server/ · uvicorn · port 8001 · uv runtime</span>
+    </div>
+
+    <div style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">API Endpoints</div>
+    <div class="api-grid">
+      <div class="api-row">
+        <span class="method">GET</span>
+        <div>
+          <div class="api-path">/api/inventory</div>
+          <div class="api-note">Filters: warehouse, category</div>
+        </div>
+      </div>
+      <div class="api-row">
+        <span class="method">GET</span>
+        <div>
+          <div class="api-path">/api/inventory/{id}</div>
+          <div class="api-note">Single item by ID</div>
+        </div>
+      </div>
+      <div class="api-row">
+        <span class="method">GET</span>
+        <div>
+          <div class="api-path">/api/orders</div>
+          <div class="api-note">Filters: warehouse, category, status, month</div>
+        </div>
+      </div>
+      <div class="api-row">
+        <span class="method">GET</span>
+        <div>
+          <div class="api-path">/api/orders/{id}</div>
+          <div class="api-note">Single order by ID</div>
+        </div>
+      </div>
+      <div class="api-row">
+        <span class="method">GET</span>
+        <div>
+          <div class="api-path">/api/dashboard/summary</div>
+          <div class="api-note">Filters: warehouse, category, status, month</div>
+        </div>
+      </div>
+      <div class="api-row">
+        <span class="method">GET</span>
+        <div>
+          <div class="api-path">/api/demand</div>
+          <div class="api-note">No filters — full forecast dataset</div>
+        </div>
+      </div>
+      <div class="api-row">
+        <span class="method">GET</span>
+        <div>
+          <div class="api-path">/api/backlog</div>
+          <div class="api-note">No filters — full backlog</div>
+        </div>
+      </div>
+      <div class="api-row">
+        <span class="method">GET</span>
+        <div>
+          <div class="api-path">/api/spending/summary</div>
+          <div class="api-note">Aggregated spend totals</div>
+        </div>
+      </div>
+      <div class="api-row">
+        <span class="method">GET</span>
+        <div>
+          <div class="api-path">/api/spending/monthly</div>
+          <div class="api-note">Monthly cost breakdown</div>
+        </div>
+      </div>
+      <div class="api-row">
+        <span class="method">GET</span>
+        <div>
+          <div class="api-path">/api/spending/categories</div>
+          <div class="api-note">Spend by category</div>
+        </div>
+      </div>
+      <div class="api-row">
+        <span class="method">GET</span>
+        <div>
+          <div class="api-path">/api/spending/transactions</div>
+          <div class="api-note">Recent transactions list</div>
+        </div>
+      </div>
+      <div class="api-row">
+        <span class="method">GET</span>
+        <div>
+          <div class="api-path">/api/reports/quarterly</div>
+          <div class="api-note">Filters: warehouse, category</div>
+        </div>
+      </div>
+      <div class="api-row">
+        <span class="method">GET</span>
+        <div>
+          <div class="api-path">/api/reports/monthly-trends</div>
+          <div class="api-note">Filters: warehouse, category, month</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
+      <div class="boxes">
+        <div class="box">
+          <div class="box-title"><span class="dot dot-yellow"></span>main.py</div>
+          <ul>
+            <li>All route definitions</li>
+            <li>Pydantic request/response models</li>
+            <li>In-memory data loaded at startup</li>
+            <li>Filtering logic inline per endpoint</li>
+          </ul>
+        </div>
+        <div class="box">
+          <div class="box-title"><span class="dot dot-yellow"></span>mock_data.py</div>
+          <ul>
+            <li>Loads all JSON files at import</li>
+            <li>Exports named lists (orders, inventory…)</li>
+            <li>No database — data lives in RAM</li>
+            <li>Restart reloads from disk</li>
+          </ul>
+        </div>
+        <div class="box">
+          <div class="box-title"><span class="dot dot-yellow"></span>Runtime</div>
+          <ul>
+            <li><code>uv</code> — dependency manager</li>
+            <li><code>uvicorn</code> — ASGI server</li>
+            <li>CORS: <code>allow_origins=["*"]</code> (dev only)</li>
+            <li>Docs: <code>localhost:8001/docs</code></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow -->
+  <div class="connector">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M8 13l-3-3M8 13l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <span>Python file I/O at startup</span>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M8 13l-3-3M8 13l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </div>
+
+  <!-- Data layer -->
+  <div class="layer">
+    <div class="layer-header">
+      <span class="layer-badge badge-data">Data</span>
+      <span class="layer-title">JSON File Store</span>
+      <span class="layer-subtitle">server/data/ · no database · no persistence</span>
+    </div>
+    <div class="boxes">
+      <div class="box">
+        <div class="box-title"><span class="dot dot-purple"></span>inventory.json</div>
+        <ul><li>SKU, name, category, warehouse</li><li>quantity, reorder_point, unit_cost</li></ul>
+      </div>
+      <div class="box">
+        <div class="box-title"><span class="dot dot-purple"></span>orders.json</div>
+        <ul><li>order_id, customer, warehouse, category</li><li>order_date, status, items[], total_value</li></ul>
+      </div>
+      <div class="box">
+        <div class="box-title"><span class="dot dot-purple"></span>demand_forecasts.json</div>
+        <ul><li>sku, current_demand, forecasted_demand</li><li>trend (increasing/stable/decreasing)</li></ul>
+      </div>
+      <div class="box">
+        <div class="box-title"><span class="dot dot-purple"></span>backlog_items.json</div>
+        <ul><li>Unfulfilled orders awaiting stock</li><li>priority, days_delayed</li></ul>
+      </div>
+      <div class="box">
+        <div class="box-title"><span class="dot dot-purple"></span>spending.json · transactions.json</div>
+        <ul><li>Monthly cost breakdown by type</li><li>Recent procurement transactions</li></ul>
+      </div>
+      <div class="box">
+        <div class="box-title"><span class="dot dot-purple"></span>purchase_orders.json</div>
+        <ul><li>Approved purchase orders</li><li>Linked to backlog items by ID</li></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Known issues -->
+  <div class="layer">
+    <div class="layer-header">
+      <span class="layer-badge" style="background:#f1f5f9;color:#475569;">Findings</span>
+      <span class="layer-title">Audit Findings & Status</span>
+      <span class="layer-subtitle">R1 remediation · April 2026</span>
+    </div>
+    <div class="issues">
+      <div class="issue-row fixed"><span class="issue-tag tag-fixed">FIXED</span><span class="issue-text">Reports module: network error on load — backend endpoints existed but had no filter parameters; frontend called axios directly instead of api.js</span></div>
+      <div class="issue-row fixed"><span class="issue-tag tag-fixed">FIXED</span><span class="issue-text">Reports module: all four filters rendered but none wired to API calls</span></div>
+      <div class="issue-row fixed"><span class="issue-tag tag-fixed">FIXED</span><span class="issue-text">Reports module: Options API used instead of Composition API (migration incomplete)</span></div>
+      <div class="issue-row fixed"><span class="issue-tag tag-fixed">FIXED</span><span class="issue-text">Reports module: console.log in every method including formatNumber() — fired on every render cycle</span></div>
+      <div class="issue-row fixed"><span class="issue-tag tag-fixed">FIXED</span><span class="issue-text">Reports module: manual number formatting loop instead of toLocaleString()</span></div>
+      <div class="issue-row fixed"><span class="issue-tag tag-fixed">FIXED</span><span class="issue-text">Reports module: i18n gap — all strings hardcoded in English; reports keys missing from both en.js and ja.js</span></div>
+      <div class="issue-row fixed"><span class="issue-tag tag-fixed">FIXED</span><span class="issue-text">Reports module: Order Status filter visible but semantically invalid for aggregated reports — removed via route-aware prop</span></div>
+      <div class="issue-row open"><span class="issue-tag tag-open">PENDING</span><span class="issue-text">CORS configured as allow_origins=["*"] — acceptable for development, must be restricted before any production deployment</span></div>
+      <div class="issue-row open"><span class="issue-tag tag-open">PENDING</span><span class="issue-text">No authentication or authorisation — all endpoints publicly accessible; suitable for internal LAN only</span></div>
+      <div class="issue-row open"><span class="issue-tag tag-open">PENDING</span><span class="issue-text">R2 Restocking view — not yet built (in progress)</span></div>
+      <div class="issue-row open"><span class="issue-tag tag-open">PENDING</span><span class="issue-text">R3 Automated browser tests — Playwright suite not yet written</span></div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span>Meridian Components — Inventory Dashboard · Architecture Overview v1.0</span>
+  <span>Accenture · April 27, 2026 · Confidential</span>
+</footer>
+
+</body>
+</html>
