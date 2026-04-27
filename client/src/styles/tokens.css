@@ -68,3 +68,63 @@
   --color-danger-bold: #b91c1c;
   --color-danger-text: #991b1b;
 }
+
+/* Dark theme overrides.
+ * Activated by [data-theme="dark"] on <html>. The composable in
+ * src/composables/useTheme.js manages this attribute and persists
+ * the choice to localStorage. prefers-color-scheme is the fallback
+ * when no preference has been recorded.
+ */
+:root[data-theme="dark"] {
+  /* Surfaces */
+  --color-page-bg: #0f172a;
+  --color-paper: #1e293b;
+  --color-surface-muted: #334155;
+
+  /* Ink — flipped scale, lighter text on dark surfaces */
+  --color-ink-faint: #64748b;
+  --color-ink-muted: #94a3b8;
+  --color-ink-soft: #cbd5e1;
+  --color-ink-strong: #e2e8f0;
+  --color-ink-bold: #f1f5f9;
+  --color-ink: #f8fafc;
+
+  /* Rules — softer borders against dark backgrounds */
+  --color-rule: #334155;
+  --color-rule-strong: #475569;
+
+  /* Accent — brighter for legibility on dark */
+  --color-accent-softest: #1e3a8a;
+  --color-accent-soft: #1e40af;
+  --color-accent-light: #60a5fa;
+  --color-accent: #3b82f6;
+  --color-accent-hover: #60a5fa;
+  --color-accent-dark: #93c5fd;
+
+  /* Status: success */
+  --color-success-softest: #064e3b;
+  --color-success-soft: #065f46;
+  --color-success: #10b981;
+  --color-success-strong: #34d399;
+  --color-success-bold: #6ee7b7;
+  --color-success-text: #a7f3d0;
+  --color-success-text-strong: #d1fae5;
+  --color-success-deep: #34d399;
+
+  /* Status: warning */
+  --color-warning-softest: #451a03;
+  --color-warning-soft: #78350f;
+  --color-warning-light: #b45309;
+  --color-warning: #f59e0b;
+  --color-warning-bold: #fbbf24;
+  --color-warning-text: #fcd34d;
+
+  /* Status: danger */
+  --color-danger-softest: #450a0a;
+  --color-danger-soft: #7f1d1d;
+  --color-danger-light: #b91c1c;
+  --color-danger: #ef4444;
+  --color-danger-strong: #f87171;
+  --color-danger-bold: #fca5a5;
+  --color-danger-text: #fecaca;
+}

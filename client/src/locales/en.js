@@ -313,6 +313,12 @@ export default {
     selectLanguage: 'Select Language'
   },
 
+  // Theme
+  theme: {
+    switchToLight: 'Switch to light theme',
+    switchToDark: 'Switch to dark theme'
+  },
+
   // Common
   common: {
     loading: 'Loading...',
