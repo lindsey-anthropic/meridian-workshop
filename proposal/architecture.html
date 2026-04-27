@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Components — Architecture Overview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f9fa; color: #1a1a2e; padding: 40px; }
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  .subtitle { color: #666; font-size: 14px; margin-bottom: 40px; }
+  h2 { font-size: 17px; font-weight: 700; margin-bottom: 16px; color: #1a1a2e; }
+  h3 { font-size: 14px; font-weight: 700; margin-bottom: 8px; color: #333; }
+
+  .section { background: white; border: 1px solid #e5e5ea; border-radius: 10px; padding: 24px; margin-bottom: 24px; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #a100ff; margin-bottom: 8px; }
+
+  /* Architecture diagram */
+  .arch-diagram { display: grid; grid-template-columns: 1fr 60px 1fr 60px 1fr; gap: 0; align-items: center; margin: 8px 0 24px; }
+  .arch-box { border-radius: 10px; padding: 16px 20px; }
+  .arch-box.frontend { background: #f0e6ff; border: 2px solid #a100ff; }
+  .arch-box.backend  { background: #e8f4e8; border: 2px solid #16a34a; }
+  .arch-box.data     { background: #fff7e6; border: 2px solid #d97706; }
+  .arch-box .layer   { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+  .arch-box.frontend .layer { color: #a100ff; }
+  .arch-box.backend  .layer { color: #16a34a; }
+  .arch-box.data     .layer { color: #d97706; }
+  .arch-box .title   { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .arch-box .stack   { font-size: 12px; color: #666; line-height: 1.6; }
+  .arch-arrow { text-align: center; font-size: 20px; color: #aaa; }
+
+  /* Endpoint table */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #f8f8fa; padding: 8px 12px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #e5e5ea; }
+  td { padding: 8px 12px; border-bottom: 1px solid #f0f0f5; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .method { background: #dbeafe; color: #1e40af; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+  .endpoint { font-family: monospace; font-size: 12px; font-weight: 600; }
+  .filter-tag { background: #f0e6ff; color: #7c3aed; font-size: 11px; padding: 1px 6px; border-radius: 4px; margin: 1px; display: inline-block; }
+
+  /* Data flow */
+  .flow { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+  .flow-step { background: #a100ff; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .flow-content strong { display: block; font-size: 13px; margin-bottom: 2px; }
+  .flow-content span { font-size: 12px; color: #666; }
+
+  /* Debt table */
+  .debt-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f0f5; }
+  .debt-item:last-child { border-bottom: none; }
+  .debt-sev { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; flex-shrink: 0; height: fit-content; }
+  .debt-sev.high   { background: #fee2e2; color: #b91c1c; }
+  .debt-sev.medium { background: #fef3c7; color: #92400e; }
+  .debt-sev.low    { background: #dbeafe; color: #1e40af; }
+  .debt-desc strong { font-size: 13px; display: block; margin-bottom: 3px; }
+  .debt-desc p { font-size: 12px; color: #666; line-height: 1.5; }
+
+  /* Files */
+  .file-tree { font-family: monospace; font-size: 13px; line-height: 2; }
+  .file-tree .dir  { color: #a100ff; font-weight: 700; }
+  .file-tree .file { color: #333; }
+  .file-tree .note { color: #999; font-size: 11px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+  .pill.green  { background: #d1fae5; color: #065f46; }
+  .pill.yellow { background: #fef3c7; color: #92400e; }
+  .pill.red    { background: #fee2e2; color: #991b1b; }
+
+  footer { font-size: 12px; color: #aaa; text-align: center; margin-top: 40px; }
+</style>
+</head>
+<body>
+
+<h1>Architecture Overview — Meridian Components Inventory Dashboard</h1>
+<div class="subtitle">Prepared by Accenture · April 2026 · Based on direct codebase audit</div>
+
+<!-- System diagram -->
+<div class="section">
+  <div class="section-label">System Overview</div>
+  <h2>Three-tier web application</h2>
+  <div class="arch-diagram">
+    <div class="arch-box frontend">
+      <div class="layer">Presentation</div>
+      <div class="title">Vue 3 Frontend</div>
+      <div class="stack">
+        Port 3000 (Vite dev)<br>
+        Composition API<br>
+        vue-router · axios<br>
+        Custom SVG charts<br>
+        i18n (EN / JA)
+      </div>
+    </div>
+    <div class="arch-arrow">⟷<br><span style="font-size:11px;color:#aaa">HTTP/REST</span></div>
+    <div class="arch-box backend">
+      <div class="layer">Application</div>
+      <div class="title">FastAPI Backend</div>
+      <div class="stack">
+        Port 8001<br>
+        Python 3.x · uvicorn<br>
+        Pydantic models<br>
+        In-memory filtering<br>
+        CORS: all origins
+      </div>
+    </div>
+    <div class="arch-arrow">⟷<br><span style="font-size:11px;color:#aaa">In-process</span></div>
+    <div class="arch-box data">
+      <div class="layer">Data</div>
+      <div class="title">JSON Flat Files</div>
+      <div class="stack">
+        server/data/<br>
+        Loaded at startup<br>
+        In-memory at runtime<br>
+        No persistence layer<br>
+        No database
+      </div>
+    </div>
+  </div>
+
+  <div class="three-col">
+    <div>
+      <h3>Warehouses</h3>
+      <p style="font-size:13px;color:#555;line-height:1.7">San Francisco (HQ)<br>London (EMEA)<br>Tokyo (APAC, opened 2023)</p>
+    </div>
+    <div>
+      <h3>Product categories</h3>
+      <p style="font-size:13px;color:#555;line-height:1.7">Circuit Boards · Sensors<br>Actuators · Controllers<br>Power Supplies</p>
+    </div>
+    <div>
+      <h3>Deployment</h3>
+      <p style="font-size:13px;color:#555;line-height:1.7">Local dev only (no CI/CD)<br>No containerisation<br>No auth layer</p>
+    </div>
+  </div>
+</div>
+
+<!-- API surface -->
+<div class="section">
+  <div class="section-label">API Surface</div>
+  <h2>REST endpoints — all read-only GET except tasks and purchase orders</h2>
+  <table>
+    <thead>
+      <tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Filters accepted</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="method">GET</span></td>
+        <td class="endpoint">/api/inventory</td>
+        <td>Stock levels, reorder points, unit costs</td>
+        <td><span class="filter-tag">warehouse</span><span class="filter-tag">category</span></td>
+      </tr>
+      <tr>
+        <td><span class="method">GET</span></td>
+        <td class="endpoint">/api/orders</td>
+        <td>All purchase orders with line items</td>
+        <td><span class="filter-tag">warehouse</span><span class="filter-tag">category</span><span class="filter-tag">status</span><span class="filter-tag">month</span></td>
+      </tr>
+      <tr>
+        <td><span class="method">GET</span></td>
+        <td class="endpoint">/api/dashboard/summary</td>
+        <td>KPI rollup for Overview page</td>
+        <td><span class="filter-tag">warehouse</span><span class="filter-tag">category</span><span class="filter-tag">status</span><span class="filter-tag">month</span></td>
+      </tr>
+      <tr>
+        <td><span class="method">GET</span></td>
+        <td class="endpoint">/api/demand</td>
+        <td>Demand forecasts per SKU</td>
+        <td>None</td>
+      </tr>
+      <tr>
+        <td><span class="method">GET</span></td>
+        <td class="endpoint">/api/backlog</td>
+        <td>Unfulfilled backlog items</td>
+        <td>None</td>
+      </tr>
+      <tr>
+        <td><span class="method">GET</span></td>
+        <td class="endpoint">/api/spending/*</td>
+        <td>Summary, monthly, categories, transactions</td>
+        <td>None</td>
+      </tr>
+      <tr>
+        <td><span class="method">GET</span></td>
+        <td class="endpoint">/api/reports/quarterly</td>
+        <td>Quarterly order and revenue stats with fulfillment rate</td>
+        <td><span class="filter-tag">warehouse</span><span class="filter-tag">category</span></td>
+      </tr>
+      <tr>
+        <td><span class="method">GET</span></td>
+        <td class="endpoint">/api/reports/monthly-trends</td>
+        <td>Month-over-month revenue and order trends</td>
+        <td><span class="filter-tag">warehouse</span><span class="filter-tag">category</span></td>
+      </tr>
+      <tr>
+        <td><span class="method">GET</span></td>
+        <td class="endpoint">/api/restocking</td>
+        <td>Ranked purchase recommendations (new — R2)</td>
+        <td><span class="filter-tag">warehouse</span><span class="filter-tag">category</span><span class="filter-tag">budget</span></td>
+      </tr>
+      <tr>
+        <td><span class="method">POST</span></td>
+        <td class="endpoint">/api/tasks</td>
+        <td>Create user task</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><span class="method">POST</span></td>
+        <td class="endpoint">/api/purchase-orders</td>
+        <td>Create purchase order from backlog item</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Data flow -->
+<div class="section">
+  <div class="section-label">Data Flow</div>
+  <h2>How a filter change reaches the screen</h2>
+  <div class="two-col">
+    <div>
+      <div class="flow">
+        <div class="flow-step">1</div>
+        <div class="flow-content">
+          <strong>User changes a filter</strong>
+          <span>FilterBar.vue updates shared ref in <code>useFilters()</code> composable (singleton — same instance across all views)</span>
+        </div>
+      </div>
+      <div class="flow">
+        <div class="flow-step">2</div>
+        <div class="flow-content">
+          <strong>View detects the change</strong>
+          <span>Each view <code>watch()</code>es <code>getCurrentFilters</code> and calls <code>loadData()</code></span>
+        </div>
+      </div>
+      <div class="flow">
+        <div class="flow-step">3</div>
+        <div class="flow-content">
+          <strong>api.js builds the request</strong>
+          <span>Filter values serialised into URL query params (<code>URLSearchParams</code>). "all" values are omitted.</span>
+        </div>
+      </div>
+      <div class="flow">
+        <div class="flow-step">4</div>
+        <div class="flow-content">
+          <strong>FastAPI filters in memory</strong>
+          <span><code>apply_filters()</code> and <code>filter_by_month()</code> helpers applied to the startup-loaded JSON data</span>
+        </div>
+      </div>
+      <div class="flow">
+        <div class="flow-step">5</div>
+        <div class="flow-content">
+          <strong>Pydantic serialises the response</strong>
+          <span>Filtered list returned as JSON; Vue reactive refs update; computed properties re-derive; template re-renders</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3 style="margin-bottom:12px">Filter parameter reference</h3>
+      <table>
+        <thead><tr><th>Param</th><th>Values</th></tr></thead>
+        <tbody>
+          <tr><td><code>warehouse</code></td><td>San Francisco · London · Tokyo</td></tr>
+          <tr><td><code>category</code></td><td>circuit boards · sensors · actuators · controllers · power supplies</td></tr>
+          <tr><td><code>status</code></td><td>Delivered · Shipped · Processing · Backordered</td></tr>
+          <tr><td><code>month</code></td><td>YYYY-MM (e.g. 2025-03) or quarter (e.g. Q1-2025)</td></tr>
+          <tr><td><code>budget</code></td><td>Numeric ceiling in USD (restocking only)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- File map -->
+<div class="section">
+  <div class="section-label">File Map</div>
+  <h2>Key files for Meridian IT</h2>
+  <div class="two-col">
+    <div>
+      <h3 style="margin-bottom:10px">Frontend — <code>client/src/</code></h3>
+      <div class="file-tree">
+        <div><span class="dir">views/</span> <span class="note">one file per page</span></div>
+        <div style="padding-left:16px"><span class="file">Dashboard.vue</span></div>
+        <div style="padding-left:16px"><span class="file">Inventory.vue</span></div>
+        <div style="padding-left:16px"><span class="file">Orders.vue</span></div>
+        <div style="padding-left:16px"><span class="file">Reports.vue</span></div>
+        <div style="padding-left:16px"><span class="file">Restocking.vue</span> <span class="note">new (R2)</span></div>
+        <div style="padding-left:16px"><span class="file">Spending.vue</span></div>
+        <div><span class="dir">composables/</span></div>
+        <div style="padding-left:16px"><span class="file">useFilters.js</span> <span class="note">global filter state</span></div>
+        <div style="padding-left:16px"><span class="file">useI18n.js</span> <span class="note">translations</span></div>
+        <div style="padding-left:16px"><span class="file">useAuth.js</span> <span class="note">mock user session</span></div>
+        <div><span class="dir">locales/</span></div>
+        <div style="padding-left:16px"><span class="file">en.js</span> · <span class="file">ja.js</span></div>
+        <div><span class="file">api.js</span> <span class="note">all HTTP calls centralised here</span></div>
+        <div><span class="file">App.vue</span> <span class="note">nav, filter bar, modals</span></div>
+        <div><span class="file">main.js</span> <span class="note">app entry, router setup</span></div>
+      </div>
+    </div>
+    <div>
+      <h3 style="margin-bottom:10px">Backend — <code>server/</code></h3>
+      <div class="file-tree">
+        <div><span class="file">main.py</span> <span class="note">all API endpoints</span></div>
+        <div><span class="file">mock_data.py</span> <span class="note">loads JSON at startup</span></div>
+        <div><span class="dir">data/</span></div>
+        <div style="padding-left:16px"><span class="file">inventory.json</span></div>
+        <div style="padding-left:16px"><span class="file">orders.json</span></div>
+        <div style="padding-left:16px"><span class="file">demand_forecasts.json</span></div>
+        <div style="padding-left:16px"><span class="file">backlog.json</span></div>
+        <div style="padding-left:16px"><span class="file">spending_*.json</span></div>
+      </div>
+      <h3 style="margin-bottom:10px;margin-top:20px">Tests — <code>tests/</code></h3>
+      <div class="file-tree">
+        <div><span class="dir">e2e/</span> <span class="note">Playwright browser tests (R3)</span></div>
+        <div style="padding-left:16px"><span class="file">reports.spec.js</span></div>
+        <div style="padding-left:16px"><span class="file">restocking.spec.js</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Technical debt -->
+<div class="section">
+  <div class="section-label">Technical Debt — inherited from previous vendor</div>
+  <h2>Known issues at handoff (status as of April 2026)</h2>
+
+  <div class="debt-item">
+    <span class="debt-sev high">RESOLVED</span>
+    <div class="debt-desc">
+      <strong>Reports module defects (8 issues)</strong>
+      <p>Filters not wired, Options API inconsistency, hardcoded strings, console noise, direct axios calls, fulfillment rate calculation error. All resolved in this engagement.</p>
+    </div>
+  </div>
+  <div class="debt-item">
+    <span class="debt-sev medium">NOTED</span>
+    <div class="debt-desc">
+      <strong>No database — flat JSON files only</strong>
+      <p>Data is loaded into memory at server startup. Changes do not persist across restarts. Suitable for current scale; will require a database migration before multi-user writes or data volume exceeds ~50K records.</p>
+    </div>
+  </div>
+  <div class="debt-item">
+    <span class="debt-sev medium">NOTED</span>
+    <div class="debt-desc">
+      <strong>No authentication or authorisation</strong>
+      <p>The application has a mock auth composable (useAuth.js) but no real session management or API protection. All endpoints are publicly accessible. Not suitable for internet-facing deployment without adding an auth layer.</p>
+    </div>
+  </div>
+  <div class="debt-item">
+    <span class="debt-sev medium">NOTED</span>
+    <div class="debt-desc">
+      <strong>CORS allows all origins</strong>
+      <p>Backend is configured with <code>allow_origins=["*"]</code>. Must be restricted to specific origins before any production deployment.</p>
+    </div>
+  </div>
+  <div class="debt-item">
+    <span class="debt-sev low">NOTED</span>
+    <div class="debt-desc">
+      <strong>No CI/CD pipeline</strong>
+      <p>No automated build, test, or deploy process exists. The Playwright test suite added in this engagement (R3) can be integrated into a CI pipeline — recommended before any future vendor onboarding.</p>
+    </div>
+  </div>
+  <div class="debt-item">
+    <span class="debt-sev low">NOTED</span>
+    <div class="debt-desc">
+      <strong>Spending endpoints have no filter support</strong>
+      <p>/api/spending/* endpoints do not accept warehouse or category filters. The Finance view shows global data only. Out of scope for this engagement but worth tracking.</p>
+    </div>
+  </div>
+</div>
+
+<footer>Meridian Components · Architecture Overview · Accenture · April 2026 · Based on direct codebase audit — not the previous vendor's handoff notes</footer>
+
+</body>
+</html>
