@@ -1,0 +1,15 @@
+{
+  "name": "meridian-e2e",
+  "private": true,
+  "version": "1.0.0",
+  "description": "End-to-end browser tests (Playwright) for the Meridian inventory dashboard (R3)",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}

@@ -6,6 +6,8 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    reports: 'Reports',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -186,6 +188,69 @@ export default {
       trend: 'Trend',
       period: 'Period'
     }
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    quarterlyTitle: 'Quarterly Performance',
+    monthlyTrendTitle: 'Monthly Revenue Trend',
+    momTitle: 'Month-over-Month Analysis',
+    quarter: 'Quarter',
+    totalOrders: 'Total Orders',
+    totalRevenue: 'Total Revenue',
+    avgOrderValue: 'Avg Order Value',
+    fulfillmentRate: 'Fulfillment Rate',
+    month: 'Month',
+    orders: 'Orders',
+    revenue: 'Revenue',
+    change: 'Change',
+    growthRate: 'Growth Rate',
+    totalRevenueYTD: 'Total Revenue (YTD)',
+    avgMonthlyRevenue: 'Avg Monthly Revenue',
+    totalOrdersYTD: 'Total Orders (YTD)',
+    bestQuarter: 'Best Performing Quarter',
+    loading: 'Loading reports...',
+    loadError: 'Failed to load reports'
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    description: 'Recommended purchase orders based on stock levels, demand forecast, and your budget ceiling',
+    budgetLabel: 'Budget Ceiling',
+    leadTimeLabel: 'Lead Time (days)',
+    calculate: 'Calculate',
+    budget: 'Budget',
+    recommendedSpend: 'Recommended Spend',
+    withinBudget: 'Within Budget',
+    deferred: 'Deferred (Over Budget)',
+    criticalItems: 'Critical Items',
+    budgetRemaining: 'Budget Remaining',
+    item: 'Item',
+    warehouse: 'Warehouse',
+    onHand: 'On Hand',
+    daysOfCover: 'Days of Cover',
+    demand30: 'Demand (30d)',
+    recommendedQty: 'Recommended Qty',
+    unitCost: 'Unit Cost',
+    lineCost: 'Line Cost',
+    urgency: 'Urgency',
+    status: 'Status',
+    urgencyCritical: 'Critical',
+    urgencyHigh: 'High',
+    urgencyMedium: 'Medium',
+    statusFunded: 'Funded',
+    statusDeferred: 'Deferred',
+    willStockOut: 'Stocks out before arrival',
+    loading: 'Calculating recommendations...',
+    loadError: 'Failed to load restocking recommendations',
+    noRecommendations: 'All stock levels are healthy — no restocking needed.',
+    budgetUtilization: '{pct}% of budget',
+    items: 'items',
+    withinBudgetShort: 'within budget',
+    invalidInputs: 'Enter a budget and lead time greater than zero.'
   },
 
   // Filters

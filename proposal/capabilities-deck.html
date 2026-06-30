@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capabilities — Meridian Inventory Dashboard Modernization</title>
+<style>
+  :root{
+    --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+    --accent:#2563eb; --accent-soft:#dbeafe; --bg:#f8fafc; --white:#ffffff;
+    --ok:#16a34a; --warn:#d97706;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--ink); overflow:hidden;
+  }
+  .deck{height:100vh; width:100vw; position:relative;}
+  .slide{
+    position:absolute; inset:0; display:none;
+    flex-direction:column; justify-content:center;
+    padding:7vh 9vw; opacity:0; transition:opacity .25s ease;
+  }
+  .slide.active{display:flex; opacity:1;}
+  .eyebrow{
+    text-transform:uppercase; letter-spacing:.14em; font-size:.78rem;
+    font-weight:700; color:var(--accent); margin-bottom:1.2rem;
+  }
+  h1{font-size:3.4rem; line-height:1.05; letter-spacing:-.02em; margin-bottom:1rem;}
+  h2{font-size:2.4rem; line-height:1.1; letter-spacing:-.015em; margin-bottom:1.6rem;}
+  .lead{font-size:1.3rem; color:var(--muted); max-width:60ch; line-height:1.5;}
+  ul{list-style:none; margin-top:.6rem;}
+  li{
+    font-size:1.25rem; line-height:1.5; padding:.55rem 0 .55rem 1.8rem;
+    position:relative; max-width:64ch;
+  }
+  li::before{content:""; position:absolute; left:0; top:1.25rem;
+    width:.6rem; height:.6rem; border-radius:50%; background:var(--accent);}
+  .phase-row{display:flex; gap:1rem; margin-top:1rem; flex-wrap:wrap;}
+  .phase{
+    flex:1; min-width:180px; background:var(--white); border:1px solid var(--line);
+    border-radius:14px; padding:1.4rem; box-shadow:0 1px 3px rgba(15,23,42,.05);
+  }
+  .phase .num{font-size:.75rem; font-weight:700; color:var(--accent);
+    letter-spacing:.1em; text-transform:uppercase;}
+  .phase h3{font-size:1.25rem; margin:.4rem 0 .5rem;}
+  .phase p{font-size:1rem; color:var(--muted); line-height:1.45;}
+  .arrow{font-size:2rem; color:var(--line); align-self:center;}
+  table{border-collapse:collapse; margin-top:1.2rem; font-size:1.1rem; width:100%; max-width:760px;}
+  th,td{text-align:left; padding:.7rem 1rem; border-bottom:1px solid var(--line);}
+  th{font-size:.8rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);}
+  td strong{color:var(--ink);}
+  .tag{display:inline-block; background:var(--accent-soft); color:var(--accent);
+    font-size:.95rem; font-weight:600; padding:.2rem .7rem; border-radius:999px; margin-top:1.4rem;}
+  .big-num{font-size:2.2rem; font-weight:800; color:var(--accent);}
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:2.5rem; margin-top:.5rem;}
+  .card{background:var(--white); border:1px solid var(--line); border-radius:14px; padding:1.6rem;}
+  .card h3{font-size:1.15rem; margin-bottom:.6rem;}
+  .card p{color:var(--muted); line-height:1.5; font-size:1.05rem;}
+  .quote{font-size:1.9rem; line-height:1.35; max-width:24ch; font-weight:600;}
+  .quote .accent{color:var(--accent);}
+  /* title slide */
+  .slide.title{background:linear-gradient(135deg,#0f172a 0%,#1e293b 60%,#1e3a8a 100%); color:#fff;}
+  .slide.title h1{font-size:3.8rem;}
+  .slide.title .eyebrow{color:#93c5fd;}
+  .slide.title .lead{color:#cbd5e1;}
+  .slide.title .meta{margin-top:2.5rem; font-size:1rem; color:#94a3b8;}
+  /* closing slide */
+  .slide.close{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 100%); color:#fff;}
+  .slide.close .eyebrow{color:#bfdbfe;}
+  .slide.close .lead{color:#dbeafe;}
+  /* footer / nav */
+  .footer{position:absolute; bottom:2.2vh; left:9vw; right:9vw;
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:.8rem; color:var(--muted);}
+  .slide.title .footer, .slide.close .footer{color:rgba(255,255,255,.6);}
+  .progress{position:absolute; top:0; left:0; height:4px; background:var(--accent);
+    transition:width .25s ease; z-index:10;}
+  .nav{position:fixed; bottom:2vh; right:2vw; display:flex; gap:.5rem; z-index:20;}
+  .nav button{
+    border:1px solid var(--line); background:var(--white); color:var(--ink);
+    width:42px; height:42px; border-radius:10px; font-size:1.2rem; cursor:pointer;
+    box-shadow:0 1px 3px rgba(15,23,42,.08);
+  }
+  .nav button:hover{background:var(--bg);}
+  .hint{position:fixed; bottom:2.4vh; left:2vw; font-size:.75rem; color:var(--muted); z-index:20;}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- 1 — Title -->
+  <section class="slide title">
+    <div class="eyebrow">Capabilities Presentation · RFP #MC-2026-0417</div>
+    <h1>Modernizing Meridian's<br>Inventory Dashboard</h1>
+    <p class="lead">A stabilize → finish → extend engagement to fix what's broken, build what's missing, and leave a system your team can confidently own.</p>
+    <div class="meta">Presented by <strong style="color:#e2e8f0;">adesso</strong> · Prepared for Meridian Components, Inc. · May 2026</div>
+  </section>
+
+  <!-- 2 — Understanding -->
+  <section class="slide">
+    <div class="eyebrow">Our Understanding</div>
+    <h2>You inherited a system that works — but was never finished</h2>
+    <ul>
+      <li>A capable Vue/Python dashboard your operations team uses daily across SF, London, and Tokyo</li>
+      <li>The Reports module has known, unresolved defects</li>
+      <li>No automated test coverage — so IT can't safely approve changes</li>
+      <li>The capabilities Operations most wants — intelligent restocking — were never built</li>
+    </ul>
+  </section>
+
+  <!-- 3 — The core problem -->
+  <section class="slide">
+    <div class="eyebrow">The Core Problem</div>
+    <h2>The missing test coverage is the quiet center of it all</h2>
+    <p class="lead">Without tests, IT can't tell whether a change breaks something — so they freeze approvals. The system stays half-finished because nothing can safely move.</p>
+    <span class="tag">Any credible modernization has to start by making the system safe to change.</span>
+  </section>
+
+  <!-- 4 — Approach -->
+  <section class="slide">
+    <div class="eyebrow">Our Approach</div>
+    <h2>Stabilize → Finish → Extend</h2>
+    <div class="phase-row">
+      <div class="phase"><div class="num">01 · Stabilize</div><h3>Make it safe</h3><p>Automated tests + architecture docs. Unblocks IT, creates a safety net.</p></div>
+      <div class="arrow">→</div>
+      <div class="phase"><div class="num">02 · Finish</div><h3>Fix Reports</h3><p>Remediate the full audited defect set against the test net.</p></div>
+      <div class="arrow">→</div>
+      <div class="phase"><div class="num">03 · Extend</div><h3>Build Restocking</h3><p>The new capability Operations asked for, lead-time & budget aware.</p></div>
+    </div>
+    <span class="tag">…and ready to go further when you are — UI refresh, extended i18n, dark mode, scoped separately.</span>
+  </section>
+
+  <!-- 5 — Foundation R3/R4 -->
+  <section class="slide">
+    <div class="eyebrow">Phase 1 · Foundation (R3 + R4)</div>
+    <h2>First, we make the system safe to change</h2>
+    <ul>
+      <li><strong>R3 — Automated browser testing:</strong> Playwright E2E coverage across the full critical operator path, ready to wire into CI</li>
+      <li><strong>R4 — Architecture documentation:</strong> a current-state overview built from the real code, for IT handoff</li>
+      <li>This is the lever that converts a change-averse IT function into one that can approve with confidence</li>
+    </ul>
+  </section>
+
+  <!-- 6 — Finish R1 -->
+  <section class="slide">
+    <div class="eyebrow">Phase 2 · Finish (R1)</div>
+    <h2>Then we fix Reports — completely</h2>
+    <ul>
+      <li><strong>Audit, then remediate:</strong> catalogue every defect, agree a definition of done, then fix</li>
+      <li>Addresses all three logged classes — filter behavior, i18n gaps, data/pattern inconsistencies</li>
+      <li>Every fix lands with a regression test that proves it stays fixed</li>
+    </ul>
+    <span class="tag">Under a not-to-exceed ceiling — Meridian carries zero overrun risk.</span>
+  </section>
+
+  <!-- 7 — Extend R2 -->
+  <section class="slide">
+    <div class="eyebrow">Phase 3 · Extend (R2)</div>
+    <h2>Then we build Restocking — the feature Operations is waiting for</h2>
+    <ul>
+      <li>Recommends order quantities to cover demand <strong>across supplier lead time</strong> — not a static threshold</li>
+      <li>Flags items that will <strong>stock out before a replenishment PO can arrive</strong></li>
+      <li>Fits recommendations within an operator-supplied <strong>budget ceiling</strong>, prioritized by urgency</li>
+      <li>Early working demo mid-phase, so Operations shapes it before it hardens</li>
+    </ul>
+  </section>
+
+  <!-- 8 — Timeline -->
+  <section class="slide">
+    <div class="eyebrow">Timeline</div>
+    <h2>Phased delivery — value early, no surprises</h2>
+    <table>
+      <tr><th>Phase</th><th>Focus</th><th>Duration</th></tr>
+      <tr><td><strong>0 · Onboard</strong></td><td>Scope, defect audit</td><td>~1 week</td></tr>
+      <tr><td><strong>1 · Stabilize</strong></td><td>Tests + architecture (R3, R4)</td><td>~2 weeks</td></tr>
+      <tr><td><strong>2 · Finish</strong></td><td>Reports remediation (R1)</td><td>~2–3 weeks</td></tr>
+      <tr><td><strong>3 · Extend</strong></td><td>Restocking (R2)</td><td>~3 weeks</td></tr>
+    </table>
+    <span class="tag">Required scope: ~8–9 weeks · one senior engineer + part-time Vue specialist</span>
+  </section>
+
+  <!-- 9 — Pricing -->
+  <section class="slide">
+    <div class="eyebrow">Pricing</div>
+    <h2>Time &amp; materials with a not-to-exceed ceiling</h2>
+    <div class="two-col">
+      <div class="card"><h3>Predictable</h3><p>Firm NTE ceiling per phase — you're never invoiced above it, whatever the work turns up.</p></div>
+      <div class="card"><h3>Fair</h3><p>Billed on actual time worked within the ceiling — come in under, pay the lower actual.</p></div>
+    </div>
+    <p class="lead" style="margin-top:1.6rem;">Required scope illustratively <span class="big-num">~$46–68k</span> &nbsp;(≈ $55–59k at a representative $1,300/day) — firmed in contracting to Meridian's budget range.</p>
+  </section>
+
+  <!-- 10 — Experience -->
+  <section class="slide">
+    <div class="eyebrow">Relevant Experience</div>
+    <h2>We specialize in rescuing unfinished software</h2>
+    <ul>
+      <li><strong>Distribution platform rescue:</strong> same Vue/Python situation — cut deploy approval from weeks to same-day</li>
+      <li><strong>Reporting remediation (SaaS):</strong> audit surfaced more defects than logged; all fixed, zero change orders</li>
+      <li><strong>Test foundation (logistics):</strong> turned a frozen IT approval process into confident, regular releases</li>
+    </ul>
+  </section>
+
+  <!-- 11 — Why us -->
+  <section class="slide">
+    <div class="eyebrow">Why Us</div>
+    <p class="quote">We don't treat this as a greenfield build to admire — we treat it as a <span class="accent">rescue to stabilize, finish, and extend.</span></p>
+    <p class="lead" style="margin-top:1.6rem;">Comfortable in unfamiliar code, fast to orient without pristine docs, and focused on the changes that unblock your team first.</p>
+  </section>
+
+  <!-- 12 — Close -->
+  <section class="slide close">
+    <div class="eyebrow">Next Steps</div>
+    <h1>Let's stabilize, finish,<br>and extend — together.</h1>
+    <p class="lead">A fully tested, fully documented dashboard with Reports fixed and Restocking delivered — owned confidently by your team.</p>
+    <div class="meta" style="margin-top:2.2rem; color:#bfdbfe;"><strong style="color:#fff;">adesso</strong> · In response to RFP #MC-2026-0417 · Meridian Components, Inc.</div>
+  </section>
+
+  <div class="progress" id="progress"></div>
+</div>
+
+<div class="hint">← → arrows or Space to navigate</div>
+<div class="nav">
+  <button onclick="go(-1)" aria-label="Previous">‹</button>
+  <button onclick="go(1)" aria-label="Next">›</button>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;
+  function show(n){
+    slides[i].classList.remove('active');
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides[i].classList.add('active');
+    document.getElementById('progress').style.width=((i+1)/slides.length*100)+'%';
+  }
+  function go(d){show(i+d);}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(1);}
+    if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(-1);}
+    if(e.key==='Home')show(0);
+    if(e.key==='End')show(slides.length-1);
+  });
+  show(0);
+</script>
+</body>
+</html>

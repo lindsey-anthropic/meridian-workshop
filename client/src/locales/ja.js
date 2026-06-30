@@ -6,6 +6,8 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    reports: 'レポート',
+    restocking: '再発注',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -186,6 +188,69 @@ export default {
       trend: 'トレンド',
       period: '期間'
     }
+  },
+
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期ごとの業績指標と月次トレンドを表示',
+    quarterlyTitle: '四半期業績',
+    monthlyTrendTitle: '月次収益トレンド',
+    momTitle: '前月比分析',
+    quarter: '四半期',
+    totalOrders: '総注文数',
+    totalRevenue: '総収益',
+    avgOrderValue: '平均注文額',
+    fulfillmentRate: '履行率',
+    month: '月',
+    orders: '注文数',
+    revenue: '収益',
+    change: '変化',
+    growthRate: '成長率',
+    totalRevenueYTD: '総収益（年初来）',
+    avgMonthlyRevenue: '平均月次収益',
+    totalOrdersYTD: '総注文数（年初来）',
+    bestQuarter: '最優秀四半期',
+    loading: 'レポートを読み込み中...',
+    loadError: 'レポートの読み込みに失敗しました'
+  },
+
+  // Restocking
+  restocking: {
+    title: '再発注の推奨',
+    description: '在庫レベル、需要予測、予算上限に基づく推奨発注',
+    budgetLabel: '予算上限',
+    leadTimeLabel: 'リードタイム（日）',
+    calculate: '計算',
+    budget: '予算',
+    recommendedSpend: '推奨支出額',
+    withinBudget: '予算内',
+    deferred: '見送り（予算超過）',
+    criticalItems: '緊急品目',
+    budgetRemaining: '残予算',
+    item: '品目',
+    warehouse: '倉庫',
+    onHand: '手持在庫',
+    daysOfCover: '在庫日数',
+    demand30: '需要（30日）',
+    recommendedQty: '推奨数量',
+    unitCost: '単価',
+    lineCost: '明細金額',
+    urgency: '緊急度',
+    status: 'ステータス',
+    urgencyCritical: '緊急',
+    urgencyHigh: '高',
+    urgencyMedium: '中',
+    statusFunded: '予算確保',
+    statusDeferred: '見送り',
+    willStockOut: '入荷前に在庫切れ',
+    loading: '推奨を計算中...',
+    loadError: '再発注の推奨の読み込みに失敗しました',
+    noRecommendations: 'すべての在庫レベルが健全です — 再発注は不要です。',
+    budgetUtilization: '予算の{pct}%',
+    items: '件',
+    withinBudgetShort: '予算内',
+    invalidInputs: '予算とリードタイムは0より大きい値を入力してください。'
   },
 
   // Filters

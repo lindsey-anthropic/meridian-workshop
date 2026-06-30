@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Components &mdash; Inventory Dashboard Architecture</title>
+<style>
+  :root{
+    --ink:#0f172a;
+    --blue:#2563eb;
+    --slate:#64748b;
+    --line:#e2e8f0;
+    --bg:#f8fafc;
+    --card:#ffffff;
+    --warn:#b45309;
+    --warn-bg:#fffbeb;
+    --warn-line:#fcd34d;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    line-height:1.6;
+  }
+  header.hero{
+    background:linear-gradient(135deg,#0f172a 0%,#1e293b 60%,#1e3a8a 100%);
+    color:#fff;
+    padding:48px 32px 40px;
+  }
+  .wrap{max-width:1080px;margin:0 auto;}
+  header.hero .wrap{max-width:1080px;}
+  .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    font-size:12px;
+    font-weight:600;
+    color:#93c5fd;
+    margin:0 0 10px;
+  }
+  header.hero h1{
+    margin:0 0 8px;
+    font-size:34px;
+    font-weight:700;
+    letter-spacing:-.01em;
+  }
+  header.hero p.sub{
+    margin:0;
+    color:#cbd5e1;
+    font-size:16px;
+    max-width:760px;
+  }
+  .meta{
+    margin-top:24px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .pill{
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.16);
+    color:#e2e8f0;
+    padding:6px 12px;
+    border-radius:999px;
+    font-size:13px;
+  }
+  main{padding:40px 32px 64px;}
+  section{margin:0 auto 52px;max-width:1080px;}
+  h2{
+    font-size:22px;
+    font-weight:700;
+    margin:0 0 6px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  h2 .tag{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.06em;
+    color:var(--blue);
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    padding:2px 8px;
+    border-radius:6px;
+  }
+  .lead{color:var(--slate);margin:0 0 22px;max-width:820px;}
+  /* Stack grid */
+  .stack-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:16px;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:18px 20px;
+    box-shadow:0 1px 2px rgba(15,23,42,.04);
+  }
+  .card h3{
+    margin:0 0 4px;
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--slate);
+    font-weight:700;
+  }
+  .card .big{font-size:17px;font-weight:700;color:var(--ink);}
+  .card .note{font-size:13px;color:var(--slate);margin-top:6px;}
+  /* Diagram */
+  .diagram{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:28px;
+  }
+  .layer{
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px 18px;
+    margin:0 auto;
+    background:#fff;
+    position:relative;
+  }
+  .layer + .arrow{}
+  .layer-label{
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--slate);
+    margin-bottom:12px;
+  }
+  .browser{background:#0f172a;color:#fff;border-color:#0f172a;}
+  .browser .layer-label{color:#93c5fd;}
+  .browser .box{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#e2e8f0;}
+  .row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .box{
+    flex:1 1 0;
+    min-width:120px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 12px;
+    background:var(--bg);
+    font-size:13px;
+    font-weight:600;
+    text-align:center;
+    color:var(--ink);
+  }
+  .box small{display:block;font-weight:400;color:var(--slate);font-size:11px;margin-top:3px;}
+  .browser .box small{color:#94a3b8;}
+  .frontend-layer{border-color:#bfdbfe;background:#f5f9ff;}
+  .frontend-layer .box{background:#fff;border-color:#dbeafe;}
+  .api-layer{border-color:#bfdbfe;}
+  .api-box{
+    background:var(--blue);
+    color:#fff;
+    border-color:var(--blue);
+    text-align:center;
+    padding:12px;
+    border-radius:8px;
+    font-weight:700;
+  }
+  .api-box small{color:#dbeafe;}
+  .backend-layer{border-color:#cbd5e1;background:#f8fafc;}
+  .backend-layer .box{background:#fff;border-color:#e2e8f0;}
+  .data-layer{border-color:#cbd5e1;background:#f1f5f9;}
+  .data-layer .box{background:#fff;border-color:#e2e8f0;}
+  .arrow{
+    text-align:center;
+    color:var(--blue);
+    font-size:13px;
+    font-weight:600;
+    margin:10px 0;
+    position:relative;
+  }
+  .arrow span{
+    background:var(--bg);
+    padding:0 10px;
+  }
+  .arrow::before{
+    content:"";
+    position:absolute;
+    left:50%;top:50%;
+    width:1px;height:100%;
+    background:linear-gradient(to bottom,#cbd5e1,#94a3b8);
+    transform:translate(-50%,-50%);
+    z-index:0;
+  }
+  .arrow span{position:relative;z-index:1;}
+  .diagram .arrow span{background:var(--card);}
+  .diagram .arrow::before{background:#cbd5e1;}
+  /* Tables */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+    font-size:14px;
+  }
+  thead th{
+    background:#0f172a;
+    color:#e2e8f0;
+    text-align:left;
+    padding:11px 14px;
+    font-weight:600;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+  }
+  tbody td{
+    padding:10px 14px;
+    border-top:1px solid var(--line);
+    vertical-align:top;
+  }
+  tbody tr:nth-child(even){background:#f8fafc;}
+  code{
+    font-family:"SF Mono",Menlo,Consolas,monospace;
+    font-size:12.5px;
+    background:#eff6ff;
+    color:#1e40af;
+    padding:1px 6px;
+    border-radius:5px;
+  }
+  .method{
+    display:inline-block;
+    font-family:"SF Mono",Menlo,Consolas,monospace;
+    font-size:11px;
+    font-weight:700;
+    color:#fff;
+    background:#16a34a;
+    padding:2px 7px;
+    border-radius:5px;
+    letter-spacing:.04em;
+  }
+  /* Data flow steps */
+  .flow{
+    counter-reset:step;
+    display:grid;
+    gap:14px;
+  }
+  .flow .step{
+    display:flex;
+    gap:16px;
+    align-items:flex-start;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 18px;
+  }
+  .flow .step::before{
+    counter-increment:step;
+    content:counter(step);
+    flex:0 0 32px;
+    height:32px;
+    background:var(--blue);
+    color:#fff;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size:14px;
+  }
+  .flow .step .txt strong{display:block;}
+  .flow .step .txt span{color:var(--slate);font-size:14px;}
+  /* Known issues */
+  .issues{display:grid;gap:14px;}
+  .issue{
+    background:var(--warn-bg);
+    border:1px solid var(--warn-line);
+    border-left:4px solid var(--warn);
+    border-radius:10px;
+    padding:14px 18px;
+  }
+  .issue h4{
+    margin:0 0 4px;
+    font-size:15px;
+    color:#92400e;
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  .issue .sev{
+    font-size:10px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    padding:2px 7px;
+    border-radius:5px;
+    color:#fff;
+  }
+  .sev.high{background:#dc2626;}
+  .sev.med{background:#d97706;}
+  .sev.low{background:#64748b;}
+  .issue p{margin:0;color:#78350f;font-size:14px;}
+  .issue p.status{margin-top:6px;font-size:13px;color:#92400e;font-style:italic;}
+  footer{
+    border-top:1px solid var(--line);
+    padding:24px 32px;
+    color:var(--slate);
+    font-size:13px;
+    text-align:center;
+  }
+  @media (max-width:640px){
+    header.hero h1{font-size:26px;}
+    .box{min-width:100%;}
+  }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Current-State Architecture &mdash; Requirement R4</p>
+    <h1>Meridian Components Inventory Dashboard</h1>
+    <p class="sub">A handoff-ready overview of the system as inherited from the previous vendor: technology stack, request flow, API surface, and the known tech debt scheduled for remediation under this engagement.</p>
+    <div class="meta">
+      <span class="pill">Vue 3 &middot; Vite</span>
+      <span class="pill">FastAPI &middot; Python</span>
+      <span class="pill">7 Views &middot; 9 Components</span>
+      <span class="pill">14 API Endpoints</span>
+      <span class="pill">JSON Data Store (no DB)</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- TECH STACK -->
+  <section>
+    <h2>Technology Stack</h2>
+    <p class="lead">A lightweight two-tier application: a single-page Vue frontend talking to a Python API over HTTP. There is no database &mdash; the backend serves data from JSON files held in memory, which keeps the system simple but limits concurrency and persistence.</p>
+    <div class="stack-grid">
+      <div class="card">
+        <h3>Frontend</h3>
+        <div class="big">Vue 3 + Vite</div>
+        <div class="note">Composition API, served on port <strong>3000</strong>. Axios for HTTP. State shared via composables.</div>
+      </div>
+      <div class="card">
+        <h3>Backend</h3>
+        <div class="big">FastAPI (Python)</div>
+        <div class="note">ASGI app in <code>server/main.py</code> on port <strong>8001</strong>. Pydantic models validate every response.</div>
+      </div>
+      <div class="card">
+        <h3>Data Layer</h3>
+        <div class="big">JSON Files</div>
+        <div class="note">Seven files in <code>server/data/</code> loaded by <code>mock_data.py</code> into memory. No database engine.</div>
+      </div>
+      <div class="card">
+        <h3>Internationalisation</h3>
+        <div class="big">en / ja</div>
+        <div class="note">Custom <code>useI18n.js</code> composable. Currency auto-switches USD &harr; JPY with locale.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIAGRAM -->
+  <section>
+    <h2>Layered Architecture</h2>
+    <p class="lead">A request originates in the browser, flows down through the Vue presentation layer and the centralised API client, crosses the network to FastAPI, and resolves against the in-memory data layer. The response travels back up the same path.</p>
+    <div class="diagram">
+
+      <!-- Browser -->
+      <div class="layer browser">
+        <div class="layer-label">Client Browser &mdash; localhost:3000</div>
+        <div class="row">
+          <div class="box">User Interaction<small>clicks, filters, language toggle</small></div>
+          <div class="box">Rendered DOM<small>reactive Vue render</small></div>
+        </div>
+      </div>
+
+      <div class="arrow"><span>&#9660;&nbsp; renders / re-renders</span></div>
+
+      <!-- Frontend -->
+      <div class="layer frontend-layer">
+        <div class="layer-label">Presentation Layer &mdash; Vue 3 (Composition API)</div>
+        <div class="row" style="margin-bottom:10px;">
+          <div class="box">Views <small>Dashboard, Inventory, Orders,<br>Demand, Spending, Reports, Backlog</small></div>
+          <div class="box">Components <small>FilterBar, detail modals,<br>profile + language switchers (9)</small></div>
+        </div>
+        <div class="row">
+          <div class="box">useFilters.js <small>singleton refs: period,<br>location, category, status</small></div>
+          <div class="box">useI18n.js <small>locale + currency,<br>persisted to localStorage</small></div>
+        </div>
+      </div>
+
+      <div class="arrow"><span>&#9660;&nbsp; getCurrentFilters() &rarr; method call</span></div>
+
+      <!-- API client -->
+      <div class="layer api-layer">
+        <div class="layer-label">API Client &mdash; client/src/api.js (axios)</div>
+        <div class="api-box">Centralised HTTP Client<small>builds query params from filter state &middot; single base URL &middot; one place for all calls</small></div>
+      </div>
+
+      <div class="arrow"><span>&#9660;&nbsp; HTTP GET (JSON over the wire)</span></div>
+
+      <!-- Backend -->
+      <div class="layer backend-layer">
+        <div class="layer-label">API Layer &mdash; FastAPI &middot; localhost:8001</div>
+        <div class="row" style="margin-bottom:10px;">
+          <div class="box">Routes <small>~14 endpoints in main.py</small></div>
+          <div class="box">Filter Functions <small>apply_filters(),<br>filter_by_month()</small></div>
+          <div class="box">Pydantic Models <small>validate &amp; serialise responses</small></div>
+        </div>
+      </div>
+
+      <div class="arrow"><span>&#9660;&nbsp; in-memory query</span></div>
+
+      <!-- Data -->
+      <div class="layer data-layer">
+        <div class="layer-label">Data Layer &mdash; mock_data.py</div>
+        <div class="row">
+          <div class="box">inventory.json</div>
+          <div class="box">orders.json</div>
+          <div class="box">demand_forecasts.json</div>
+          <div class="box">backlog_items.json</div>
+        </div>
+        <div class="row" style="margin-top:10px;">
+          <div class="box">spending.json</div>
+          <div class="box">transactions.json</div>
+          <div class="box">purchase_orders.json</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- API REFERENCE -->
+  <section>
+    <h2>API Endpoint Reference</h2>
+    <p class="lead">All endpoints are read-only <code>GET</code> requests today. Query parameters are applied server-side; the backend normalises category casing before matching (see Known Issues #3).</p>
+    <table>
+      <thead>
+        <tr><th>Method</th><th>Endpoint</th><th>Query Parameters</th><th>Purpose</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="method">GET</span></td><td><code>/api/inventory</code></td><td>warehouse, category</td><td>List inventory items</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/inventory/{id}</code></td><td>&mdash;</td><td>Single inventory item</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/orders</code></td><td>warehouse, category, status, month</td><td>List orders</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/orders/{id}</code></td><td>&mdash;</td><td>Single order</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/demand</code></td><td>&mdash;</td><td>Demand forecasts</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/backlog</code></td><td>&mdash;</td><td>Backlog items</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/dashboard/summary</code></td><td>warehouse, category, status, month</td><td>Aggregated KPI summary</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/spending/summary</code></td><td>&mdash;</td><td>Spending totals</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/spending/monthly</code></td><td>&mdash;</td><td>Spending by month</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/spending/categories</code></td><td>&mdash;</td><td>Spending by category</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/spending/transactions</code></td><td>&mdash;</td><td>Transaction detail list</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/reports/quarterly</code></td><td>&mdash;</td><td>Quarterly report data</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/api/reports/monthly-trends</code></td><td>&mdash;</td><td>Monthly trend data</td></tr>
+        <tr><td><span class="method">GET</span></td><td><code>/</code></td><td>&mdash;</td><td>Health / root</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- DATA FLOW -->
+  <section>
+    <h2>Data Flow Walkthrough</h2>
+    <p class="lead">A typical interaction &mdash; a user changing the warehouse filter on the Inventory view &mdash; traverses the stack as follows.</p>
+    <div class="flow">
+      <div class="step"><div class="txt"><strong>User changes a filter in the UI</strong><span>The FilterBar updates a shared ref (e.g. <code>selectedLocation</code>) inside the <code>useFilters</code> composable. Because the refs are module-level singletons, every view sees the change.</span></div></div>
+      <div class="step"><div class="txt"><strong>View reads current filter state</strong><span>The view calls <code>getCurrentFilters()</code> to collect period, warehouse, category and status into a plain object.</span></div></div>
+      <div class="step"><div class="txt"><strong>api.js builds the request</strong><span>The centralised client maps the filter object to query parameters and issues an axios <code>GET</code> against the FastAPI base URL.</span></div></div>
+      <div class="step"><div class="txt"><strong>FastAPI route handles the request</strong><span>The matching route receives the query params and delegates to shared helpers such as <code>apply_filters()</code> and <code>filter_by_month()</code>.</span></div></div>
+      <div class="step"><div class="txt"><strong>In-memory filtering &amp; validation</strong><span>Helpers filter the data loaded by <code>mock_data.py</code>; results are validated and serialised through Pydantic models before leaving the server.</span></div></div>
+      <div class="step"><div class="txt"><strong>Vue renders the response</strong><span>The JSON resolves into reactive refs; computed properties derive display values and the DOM re-renders automatically.</span></div></div>
+    </div>
+  </section>
+
+  <!-- KNOWN ISSUES -->
+  <section>
+    <h2>Known Issues &amp; Tech Debt <span class="tag">Inherited</span></h2>
+    <p class="lead">Findings from reviewing what the previous vendor left. These are the basis for the remediation work in this engagement (notably requirement R1, Reports remediation).</p>
+    <div class="issues">
+
+      <div class="issue">
+        <h4><span class="sev high">High</span> Reports view diverges from the rest of the app</h4>
+        <p><code>Reports.vue</code> is the only view still written with the legacy <strong>Options API</strong>. It calls <code>axios</code> directly against a hardcoded URL instead of routing through <code>api.js</code>, carries leftover <code>console.log</code> statements, and has <strong>no i18n coverage</strong> (hardcoded English strings).</p>
+        <p class="status">Status: currently being remediated under R1.</p>
+      </div>
+
+      <div class="issue">
+        <h4><span class="sev high">High</span> Write endpoints declared but not implemented</h4>
+        <p><code>api.js</code> declares <code>POST</code>, <code>PATCH</code> and <code>DELETE</code> methods for <strong>tasks</strong> and <strong>purchase-orders</strong>, but <code>main.py</code> implements no such routes. Any call to them returns <strong>404</strong>. Either the client surface or the server needs to catch up.</p>
+        <p class="status">Status: relevant to the new restocking feature (R2), which needs real purchase-order creation.</p>
+      </div>
+
+      <div class="issue">
+        <h4><span class="sev med">Medium</span> Category casing mismatch (latent coupling)</h4>
+        <p>FilterBar emits category values in <strong>lowercase</strong>, while the underlying data is <strong>Title Case</strong>. It works only because the backend silently lowercases before matching &mdash; a fragile, undocumented contract that will break the moment either side changes.</p>
+      </div>
+
+      <div class="issue">
+        <h4><span class="sev low">Low</span> Hardcoded Dashboard KPIs</h4>
+        <p>Some KPI values on the Dashboard are <strong>hardcoded</strong> rather than computed from live data, so they will not respond to filters or reflect real figures.</p>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Meridian Components &mdash; Inventory Dashboard Modernisation Engagement &middot; Current-State Architecture (R4) &middot; Prepared from review of the inherited codebase.
+</footer>
+
+</body>
+</html>

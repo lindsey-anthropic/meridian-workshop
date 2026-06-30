@@ -304,12 +304,14 @@ import { useI18n } from '../composables/useI18n'
 import { formatCurrency } from '../utils/currency'
 import ProductDetailModal from '../components/ProductDetailModal.vue'
 import BacklogDetailModal from '../components/BacklogDetailModal.vue'
+import PurchaseOrderModal from '../components/PurchaseOrderModal.vue'
 
 export default {
   name: 'Dashboard',
   components: {
     ProductDetailModal,
     BacklogDetailModal,
+    PurchaseOrderModal,
   },
   setup() {
     const { t, currentCurrency, translateProductName, translateWarehouse } = useI18n()
@@ -592,7 +594,9 @@ export default {
     })
 
     const getCircleSegment = (value) => {
-      return totalOrders.value > 0 ? (value / totalOrders.value) * 440 : 0
+      // Scale by the ring circumference (2π·r, r=65 ≈ 408) so segments fill the
+      // donut exactly instead of overshooting and overlapping.
+      return totalOrders.value > 0 ? (value / totalOrders.value) * 408 : 0
     }
 
     const getStockBadge = (level) => {
