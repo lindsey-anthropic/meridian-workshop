@@ -6,6 +6,8 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    reports: 'Reports',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -185,6 +187,66 @@ export default {
       change: 'Change',
       trend: 'Trend',
       period: 'Period'
+    }
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    quarterlyPerformance: 'Quarterly Performance',
+    monthlyRevenueTrend: 'Monthly Revenue Trend',
+    monthOverMonth: 'Month-over-Month Analysis',
+    quarter: 'Quarter',
+    month: 'Month',
+    totalOrders: 'Total Orders',
+    totalRevenue: 'Total Revenue',
+    avgOrderValue: 'Avg Order Value',
+    fulfillmentRate: 'Fulfillment Rate',
+    orders: 'Orders',
+    revenue: 'Revenue',
+    change: 'Change',
+    growthRate: 'Growth Rate',
+    totalRevenueYTD: 'Total Revenue (YTD)',
+    avgMonthlyRevenue: 'Avg Monthly Revenue',
+    totalOrdersYTD: 'Total Orders (YTD)',
+    bestQuarter: 'Best Performing Quarter',
+    noData: 'No data available for the selected filters'
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    description: 'Recommended purchase orders based on stock levels, demand forecast, and your budget',
+    budgetLabel: 'Budget Ceiling',
+    recommendationsTitle: 'Recommended Purchase Orders',
+    createOrders: 'Create Purchase Orders',
+    creating: 'Creating...',
+    created: 'Purchase orders created successfully',
+    noRecommendations: 'No restocking needed for the selected filters',
+    summary: {
+      recommended: 'Recommended',
+      deferred: 'Deferred (over budget)',
+      totalCost: 'Total Cost',
+      budgetRemaining: 'Budget Remaining'
+    },
+    table: {
+      sku: 'SKU',
+      item: 'Item',
+      warehouse: 'Warehouse',
+      onHand: 'On Hand',
+      reorderPoint: 'Reorder Point',
+      forecast: 'Forecast',
+      trend: 'Trend',
+      recommendedQty: 'Recommended Qty',
+      unitCost: 'Unit Cost',
+      estCost: 'Est. Cost',
+      urgency: 'Urgency',
+      status: 'Status'
+    },
+    status: {
+      within: 'Within budget',
+      deferred: 'Deferred'
     }
   },
 

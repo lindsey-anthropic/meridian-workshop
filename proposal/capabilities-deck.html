@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capabilities Presentation — Meridian Components · Northbeam</title>
+<style>
+  :root {
+    /* Northbeam design-system tokens — dark boardroom theme */
+    --bg:         #0a0f1e;   /* dark navy */
+    --bg-2:       #0e1730;   /* panel navy */
+    --ink:        #e8eefc;   /* primary text on dark */
+    --ink-soft:   #b8c4de;   /* secondary text */
+    --muted:      #7e8cab;   /* tertiary text */
+    --line:       #1e2a47;   /* hairlines / borders */
+    --panel:      #101a33;   /* card surface */
+    --brand:      #3b82f6;   /* royal blue */
+    --brand-2:    #06b6d4;   /* cyan */
+    --brand-soft: rgba(59,130,246,.16);
+    --ok:         #34d399;
+    --warn:       #fbbf24;
+    --radius:     16px;
+    --shadow:     0 18px 50px rgba(0,0,0,.45);
+    --glow:       0 0 0 1px rgba(59,130,246,.25), 0 18px 50px rgba(6,182,212,.10);
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    font-family: var(--font);
+    color: var(--ink);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .deck { height: 100vh; width: 100vw; overflow: hidden; position: relative; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: none;
+    padding: 6vh 8vw;
+    flex-direction: column;
+    justify-content: center;
+    animation: fade .45s ease;
+    background:
+      radial-gradient(1100px 560px at 100% -10%, rgba(59,130,246,.16), transparent 60%),
+      radial-gradient(900px 520px at -8% 112%, rgba(6,182,212,.14), transparent 55%),
+      var(--bg);
+  }
+  .slide.active { display: flex; }
+
+  @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  .gradient-text {
+    background: linear-gradient(90deg, var(--brand), var(--brand-2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  .eyebrow {
+    font-size: .8rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--brand-2); margin-bottom: 1.1rem;
+  }
+  h1 { font-size: 3.5rem; line-height: 1.04; letter-spacing: -.02em; margin-bottom: 1.2rem; }
+  h2 { font-size: 2.35rem; line-height: 1.12; letter-spacing: -.015em; margin-bottom: 1.6rem; }
+  .lead { font-size: 1.28rem; color: var(--ink-soft); max-width: 60ch; line-height: 1.55; }
+  p.note { color: var(--muted); font-size: 1.05rem; max-width: 64ch; line-height: 1.6; }
+  strong { color: var(--ink); }
+  em { color: var(--ink-soft); font-style: normal; }
+
+  .grid { display: grid; gap: 1.1rem; margin-top: .6rem; }
+  .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+  .card {
+    background: linear-gradient(180deg, var(--panel), var(--bg-2));
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+  .card.glow { box-shadow: var(--glow); border-color: rgba(59,130,246,.4); }
+  .card .tag {
+    display: inline-block; font-size: .72rem; font-weight: 800; letter-spacing: .08em;
+    color: #cfe2ff; background: var(--brand-soft);
+    padding: .25rem .6rem; border-radius: 999px; margin-bottom: .8rem;
+    border: 1px solid rgba(59,130,246,.3);
+  }
+  .card h3 { font-size: 1.15rem; margin-bottom: .5rem; letter-spacing: -.01em; }
+  .card p { color: var(--muted); font-size: .98rem; line-height: 1.55; }
+
+  .flow { display: flex; align-items: stretch; gap: .6rem; margin-top: 1rem; flex-wrap: wrap; }
+  .flow .step {
+    flex: 1; min-width: 130px; text-align: center;
+    background: linear-gradient(180deg, var(--panel), var(--bg-2));
+    border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.1rem .8rem; box-shadow: var(--shadow);
+  }
+  .flow .step .n { font-size: .75rem; font-weight: 800; color: var(--brand-2); letter-spacing: .1em; }
+  .flow .step .t { font-size: 1.05rem; font-weight: 700; margin-top: .35rem; }
+  .flow .step .d { font-size: .82rem; color: var(--muted); margin-top: .35rem; line-height: 1.45; }
+  .flow .arrow { display: flex; align-items: center; color: var(--brand); font-size: 1.4rem; opacity: .6; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: .4rem; font-size: 1.04rem; }
+  th, td { text-align: left; padding: .85rem 1rem; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
+  tr:last-child td { border-bottom: none; }
+  tr.total td { font-weight: 800; border-top: 2px solid var(--brand); color: var(--ink); }
+  tr.hi td { background: var(--brand-soft); }
+
+  ul.checks { list-style: none; margin-top: .6rem; }
+  ul.checks li { padding: .55rem 0 .55rem 2rem; position: relative; font-size: 1.12rem; color: var(--ink-soft); }
+  ul.checks li::before { content: "✓"; position: absolute; left: 0; top: .5rem; color: var(--brand-2); font-weight: 800; }
+
+  .big-stat { display: flex; gap: 3.2rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  .big-stat .s .v { font-size: 3.2rem; font-weight: 800; letter-spacing: -.02em; }
+  .big-stat .s .l { color: var(--muted); font-size: 1rem; margin-top: .2rem; max-width: 26ch; }
+
+  .price-hero { display: flex; gap: 1.2rem; flex-wrap: wrap; margin-top: .4rem; }
+  .price-hero .pc { flex: 1; min-width: 230px; border-radius: var(--radius); padding: 1.7rem; border: 1px solid var(--line);
+    background: linear-gradient(180deg, var(--panel), var(--bg-2)); box-shadow: var(--shadow); }
+  .price-hero .pc.feature { border-color: rgba(59,130,246,.5); box-shadow: var(--glow); }
+  .price-hero .pc .k { font-size: .8rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+  .price-hero .pc .v { font-size: 2.6rem; font-weight: 800; margin: .35rem 0; letter-spacing: -.02em; }
+  .price-hero .pc .sub { color: var(--ink-soft); font-size: .98rem; line-height: 1.5; }
+
+  .title-mark { display:flex; align-items:center; gap:.7rem; margin-bottom: 2.2rem; }
+  .title-mark .dot { width: 16px; height: 16px; border-radius: 5px; background: linear-gradient(135deg, var(--brand), var(--brand-2)); transform: rotate(45deg); box-shadow: 0 0 18px rgba(59,130,246,.6); }
+  .title-mark .name { font-weight: 800; letter-spacing: .04em; }
+  .title-mark .sep { color: var(--muted); }
+  .title-foot { margin-top: 2.4rem; color: var(--muted); font-size: 1rem; }
+
+  .progress { position: fixed; top: 0; left: 0; height: 4px; background: linear-gradient(90deg, var(--brand), var(--brand-2)); width: 0; transition: width .35s ease; z-index: 10; box-shadow: 0 0 12px rgba(6,182,212,.7); }
+  .controls { position: fixed; bottom: 22px; right: 28px; display: flex; gap: .6rem; z-index: 10; }
+  .controls button {
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+    width: 40px; height: 40px; border-radius: 10px; font-size: 1.1rem; cursor: pointer;
+    box-shadow: var(--shadow); transition: transform .1s ease, border-color .1s ease;
+  }
+  .controls button:hover { transform: translateY(-1px); border-color: var(--brand); }
+  .counter { position: fixed; bottom: 30px; left: 28px; color: var(--muted); font-size: .9rem; z-index: 10; font-variant-numeric: tabular-nums; }
+  .hint { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); color: var(--muted); font-size: .82rem; z-index: 10; }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+
+  <!-- 1 — Title -->
+  <section class="slide active">
+    <div class="title-mark"><span class="dot"></span><span class="name">NORTHBEAM</span><span class="sep">·</span><span style="color:var(--muted)">Capabilities Presentation</span></div>
+    <div class="eyebrow">RFP MC-2026-0417</div>
+    <h1>Modernizing Meridian's<br><span class="gradient-text">Inventory Dashboard</span></h1>
+    <p class="lead">A plan to restore trust in the system your operations team uses every day — and to extend it with the capability they've been waiting for.</p>
+    <div class="title-foot">Prepared for Meridian Components, Inc. · Director of Procurement, J. Okafor</div>
+  </section>
+
+  <!-- 2 — Understanding -->
+  <section class="slide">
+    <div class="eyebrow">Our understanding</div>
+    <h2>The real problem isn't one bug —<br>it's <span class="gradient-text">consistency and safe change</span></h2>
+    <div class="grid cols-3">
+      <div class="card"><div class="tag">SYMPTOM</div><h3>Reports can't be trusted</h3><p>Built to a different standard than the rest of the dashboard: no filters, bypasses the shared data layer, leaks diagnostics, non-localized formatting.</p></div>
+      <div class="card"><div class="tag">CONSTRAINT</div><h3>Change is frozen</h3><p>With no automated tests, IT won't approve releases — which blocks every other improvement the team needs.</p></div>
+      <div class="card"><div class="tag">GAP</div><h3>Restocking doesn't exist</h3><p>The capability operations leadership most wants — budget-aware reorder guidance — was never started.</p></div>
+    </div>
+    <p class="note" style="margin-top:1.4rem">Fix the shape, not just the symptoms: <strong>restore consistency, make change safe, then extend.</strong></p>
+  </section>
+
+  <!-- 3 — Why us (moved early) -->
+  <section class="slide">
+    <div class="eyebrow">Why Northbeam</div>
+    <h2>We've done all three —<br>together, in the right order</h2>
+    <div class="grid cols-3">
+      <div class="card"><div class="tag">REMEDIATION</div><h3>Inherited systems</h3><p>We raise the weakest module to the standard of the best — without rewriting what already works.</p></div>
+      <div class="card"><div class="tag">UNBLOCKING</div><h3>Test-driven confidence</h3><p>We've turned "can't safely change it" into "change with confidence" for frozen, business-critical systems.</p></div>
+      <div class="card"><div class="tag">DELIVERY</div><h3>Budget-aware features</h3><p>We've shipped exactly this kind of demand-driven, budget-bounded recommendation tool.</p></div>
+    </div>
+    <p class="note" style="margin-top:1.4rem">Meridian needs all three at once, on one inherited codebase, without destabilizing it. <strong>That's our core competency.</strong></p>
+  </section>
+
+  <!-- 4 — The ask -->
+  <section class="slide">
+    <div class="eyebrow">Scope of work · Meridian's priority order</div>
+    <h2>Four required outcomes</h2>
+    <div class="grid cols-2">
+      <div class="card"><div class="tag">R1</div><h3>Reports remediation</h3><p>Audit and resolve all defects — and bring Reports to full parity with the rest of the dashboard.</p></div>
+      <div class="card"><div class="tag">R2</div><h3>Restocking recommendations</h3><p>A new view that turns stock, demand, and a budget ceiling into actionable purchase orders.</p></div>
+      <div class="card"><div class="tag">R3</div><h3>Automated browser testing</h3><p>End-to-end coverage of critical flows so IT can safely approve future change.</p></div>
+      <div class="card"><div class="tag">R4</div><h3>Architecture documentation</h3><p>A current-state overview suitable for handoff to Meridian IT.</p></div>
+    </div>
+    <p class="note" style="margin-top:1.2rem">Plus desired items — UI modernization, internationalization, dark mode — scoped as opt-in enhancements.</p>
+  </section>
+
+  <!-- 5 — Approach / sequencing -->
+  <section class="slide">
+    <div class="eyebrow">Our approach</div>
+    <h2>We sequence the work to <span class="gradient-text">de-risk it</span></h2>
+    <div class="flow">
+      <div class="step"><div class="n">01</div><div class="t">Document</div><div class="d">Architecture review (R4) — establish the baseline</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="n">02</div><div class="t">Test</div><div class="d">Coverage (R3) — make change safe</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="n">03</div><div class="t">Remediate</div><div class="d">Reports (R1) — restore trust</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="n">04</div><div class="t">Build</div><div class="d">Restocking (R2) — on a solid base</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="n">05</div><div class="t">Enhance</div><div class="d">D1–D3 — opt-in</div></div>
+    </div>
+    <p class="note" style="margin-top:1.6rem">Documentation and tests come <strong>first</strong> — unknowns surfaced and a safety net in place before we change a line of production behavior.</p>
+  </section>
+
+  <!-- 6 — R1 -->
+  <section class="slide">
+    <div class="eyebrow">R1 · Reports remediation</div>
+    <h2>Raise the weakest module to the standard of the best</h2>
+    <p class="note">We reviewed the code: the backend reporting endpoints are sound, so the defects are concentrated in the frontend. We will —</p>
+    <ul class="checks">
+      <li>Restore filter parity with the rest of the dashboard</li>
+      <li>Route through the shared data layer instead of hard-coded calls</li>
+      <li>Remove diagnostic logging that reaches production</li>
+      <li>Replace hand-rolled formatting with locale-aware output</li>
+      <li>Align the module to the project's framework standard</li>
+    </ul>
+  </section>
+
+  <!-- 7 — R2 -->
+  <section class="slide">
+    <div class="eyebrow">R2 · Restocking recommendations</div>
+    <h2>From stock + demand + budget → <span class="gradient-text">ranked purchase orders</span></h2>
+    <div class="flow">
+      <div class="step"><div class="n">INPUT</div><div class="t">Budget ceiling</div><div class="d">Operator sets the spend limit</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="n">COMPUTE</div><div class="t">Reorder need</div><div class="d">Demand & reorder point vs. on-hand, by SKU</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="n">RANK</div><div class="t">By urgency</div><div class="d">Costed using unit cost & trend</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="n">OUTPUT</div><div class="t">Actionable POs</div><div class="d">Max coverage within budget</div></div>
+    </div>
+    <p class="note" style="margin-top:1.5rem">The data ingredients already exist in the system. We confirm the prioritization with operations early — recommendations match how the team actually thinks — and cover it with tests from day one.</p>
+  </section>
+
+  <!-- 8 — R3 -->
+  <section class="slide">
+    <div class="eyebrow">R3 · Automated testing</div>
+    <h2>The requirement that <span class="gradient-text">unblocks all the others</span></h2>
+    <div class="grid cols-2">
+      <div class="card"><div class="tag">COVERAGE</div><h3>Comprehensive, by design</h3><p>Core navigation, filtering, the remediated Reports page, the new Restocking flow, plus Spending & Orders — including error and empty states.</p></div>
+      <div class="card"><div class="tag">OWNERSHIP</div><h3>Runnable by IT</h3><p>Delivered as a Playwright suite with clear run instructions, ready for CI — so IT can adopt it as the gate for every future release.</p></div>
+    </div>
+    <p class="note" style="margin-top:1.3rem">Today, "no tests" is why the system is frozen. We turn that into <strong>change with confidence.</strong></p>
+  </section>
+
+  <!-- 9 — R4 -->
+  <section class="slide">
+    <div class="eyebrow">R4 · Architecture documentation</div>
+    <h2>Our first deliverable — and our own first step</h2>
+    <div class="grid cols-2">
+      <div class="card"><div class="tag">WHAT</div><h3>Current-state overview</h3><p>Frontend, backend, data layer, request/response flow, the API surface, and where the codebase deviates from its own patterns.</p></div>
+      <div class="card"><div class="tag">WHY FIRST</div><h3>De-risk everything after it</h3><p>Surfaces unknowns before they affect estimates, and becomes the reference the tests and remediation are written against. Durable handoff for IT.</p></div>
+    </div>
+  </section>
+
+  <!-- 10 — Timeline -->
+  <section class="slide">
+    <div class="eyebrow">Timeline · 8 weeks, required scope</div>
+    <h2>Acceptance-gated phases</h2>
+    <table>
+      <thead><tr><th>Phase</th><th>Weeks</th><th>Item</th><th>Exit deliverable</th></tr></thead>
+      <tbody>
+        <tr><td>Onboarding & Architecture</td><td>1–2</td><td>R4</td><td>Architecture overview accepted by IT</td></tr>
+        <tr><td>Test Foundation</td><td>2–4</td><td>R3</td><td>Passing suite accepted by IT</td></tr>
+        <tr><td>Reports Remediation</td><td>4–6</td><td>R1</td><td>Remediated Reports, regression-tested</td></tr>
+        <tr><td>Restocking Build</td><td>6–8</td><td>R2</td><td>Restocking view in operators' hands</td></tr>
+      </tbody>
+    </table>
+    <p class="note" style="margin-top:1.2rem">Front-loaded de-risking; every phase ends in a defined, accepted deliverable tied to a payment milestone.</p>
+  </section>
+
+  <!-- 11 — Pricing (emphasized) -->
+  <section class="slide">
+    <div class="eyebrow">Pricing · predictable where it matters</div>
+    <h2>Fixed on the required. <span class="gradient-text">Capped</span> on the optional.</h2>
+    <div class="price-hero">
+      <div class="pc feature">
+        <div class="k">Required scope · R1–R4</div>
+        <div class="v gradient-text">$96,000</div>
+        <div class="sub"><strong>Fixed fee</strong>, invoiced on acceptance milestones. The risks we identified are ours to manage within it — not change orders waiting to happen.</div>
+      </div>
+      <div class="pc">
+        <div class="k">Desired scope · D1–D3</div>
+        <div class="v">≤ $30,500</div>
+        <div class="sub">T&amp;M with a <strong>hard not-to-exceed ceiling</strong>. Commission any, all, or none — without touching the required fee or schedule.</div>
+      </div>
+      <div class="pc">
+        <div class="k">Design system &amp; tooling</div>
+        <div class="v" style="color:var(--ok)">$0</div>
+        <div class="sub"><strong>Included.</strong> Reusable components that make the whole engagement faster — and cheaper.</div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:1.3rem">A known number for what Meridian needs; a hard ceiling on what's optional. <em>Figures firm for required scope, confirmed after the architecture review.</em></p>
+  </section>
+
+  <!-- 12 — Design system advantage (emphasized, dedicated) -->
+  <section class="slide">
+    <div class="eyebrow">The Northbeam advantage</div>
+    <h2>Our design system makes us <span class="gradient-text">faster, cheaper, and safer</span></h2>
+    <div class="grid cols-3">
+      <div class="card glow"><div class="tag">LOWER COST</div><h3>Savings passed through</h3><p>We assemble UI from proven, production-ready components instead of building each from scratch. The desired-scope price reflects that — the saving is yours, not ours.</p></div>
+      <div class="card glow"><div class="tag">DE-RISKED</div><h3>"Current standards," solved</h3><p>The system already meets a modern accessibility and consistency baseline — so the UI refresh (D1) starts from a mature foundation, not an undefined target.</p></div>
+      <div class="card glow"><div class="tag">BETTER REQUIRED WORK</div><h3>Quality, at no extra cost</h3><p>The same tooling keeps the codebase consistent during R1 remediation and underpins the R3 test suite.</p></div>
+    </div>
+    <div class="big-stat">
+      <div class="s"><div class="v gradient-text">$0</div><div class="l">Added cost — it's folded into the prices, working in Meridian's favor</div></div>
+      <div class="s"><div class="v" style="color:var(--ok)">8 wks</div><div class="l">To deliver the full required scope</div></div>
+    </div>
+  </section>
+
+  <!-- 13 — Close -->
+  <section class="slide">
+    <div class="title-mark"><span class="dot"></span><span class="name">NORTHBEAM</span></div>
+    <div class="eyebrow">Next step</div>
+    <h1>Let's make the dashboard<br>something the team <span class="gradient-text">reaches for.</span></h1>
+    <p class="lead">We've scoped this from Meridian's actual codebase, not a template. We're confident in the plan, the timeline, and the result.</p>
+    <div class="title-foot">Thank you · Questions welcome — procurement@meridiancomponents.example</div>
+  </section>
+
+</div>
+
+<div class="counter"><span id="cur">1</span> / <span id="total">13</span></div>
+<div class="hint">← → or Space to navigate</div>
+<div class="controls">
+  <button id="prev" aria-label="Previous">‹</button>
+  <button id="next" aria-label="Next">›</button>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  let i = 0;
+  const total = slides.length;
+  document.getElementById('total').textContent = total;
+  const progress = document.getElementById('progress');
+  const cur = document.getElementById('cur');
+
+  function show(n) {
+    i = Math.max(0, Math.min(total - 1, n));
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === i));
+    progress.style.width = ((i + 1) / total * 100) + '%';
+    cur.textContent = i + 1;
+  }
+  function next() { show(i + 1); }
+  function prev() { show(i - 1); }
+
+  document.getElementById('next').onclick = next;
+  document.getElementById('prev').onclick = prev;
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(total - 1);
+  });
+  show(0);
+</script>
+</body>
+</html>

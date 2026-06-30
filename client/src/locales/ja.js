@@ -6,6 +6,8 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    reports: 'レポート',
+    restocking: '補充',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -185,6 +187,66 @@ export default {
       change: '変化',
       trend: 'トレンド',
       period: '期間'
+    }
+  },
+
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期のパフォーマンス指標と月次トレンドを表示',
+    quarterlyPerformance: '四半期パフォーマンス',
+    monthlyRevenueTrend: '月次収益トレンド',
+    monthOverMonth: '前月比分析',
+    quarter: '四半期',
+    month: '月',
+    totalOrders: '総注文数',
+    totalRevenue: '総収益',
+    avgOrderValue: '平均注文額',
+    fulfillmentRate: '達成率',
+    orders: '注文',
+    revenue: '収益',
+    change: '変化',
+    growthRate: '成長率',
+    totalRevenueYTD: '総収益（年初来）',
+    avgMonthlyRevenue: '平均月次収益',
+    totalOrdersYTD: '総注文数（年初来）',
+    bestQuarter: '最高業績四半期',
+    noData: '選択したフィルターに該当するデータがありません'
+  },
+
+  // Restocking
+  restocking: {
+    title: '補充の推奨',
+    description: '在庫レベル、需要予測、予算に基づく推奨発注',
+    budgetLabel: '予算上限',
+    recommendationsTitle: '推奨発注',
+    createOrders: '発注を作成',
+    creating: '作成中...',
+    created: '発注が正常に作成されました',
+    noRecommendations: '選択したフィルターでは補充は不要です',
+    summary: {
+      recommended: '推奨',
+      deferred: '繰延（予算超過）',
+      totalCost: '合計コスト',
+      budgetRemaining: '残予算'
+    },
+    table: {
+      sku: 'SKU',
+      item: '品目',
+      warehouse: '倉庫',
+      onHand: '在庫数',
+      reorderPoint: '発注点',
+      forecast: '予測',
+      trend: '傾向',
+      recommendedQty: '推奨数量',
+      unitCost: '単価',
+      estCost: '推定コスト',
+      urgency: '緊急度',
+      status: 'ステータス'
+    },
+    status: {
+      within: '予算内',
+      deferred: '繰延'
     }
   },
 
