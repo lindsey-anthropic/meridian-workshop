@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>adesso SE — Capabilities Presentation | Meridian Components RFP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  /* === adesso Corporate Design palette ===
+     adesso-Blau   #006EC7   (Primärfarbe)
+     Blau #2       #005C9E
+     Blau #3       #003D69
+     Blau #4       #062D47   (dunkelster Ton, Basis-Hintergrund)
+     adesso-Grün   #C8B600   (Akzent, 10%-Regel)
+     adesso-Grau   #F3F2F1 / #ACA49E / #887D75
+     Hausschrift Präsentation: Open Sans
+  */
+  :root {
+    --bg:        #062D47;   /* Blau #4 */
+    --bg-accent: #003D69;   /* Blau #3 */
+    --panel:     #0a3a5c;
+    --panel-2:   #04243a;
+    --border:    #11507c;
+    --border-soft:#0c3f60;
+    --primary:   #006EC7;   /* adesso-Blau */
+    --primary-2: #005C9E;   /* Blau #2 */
+    --primary-light: #4ca3e0;
+    --green:     #C8B600;   /* adesso-Grün (Akzent) */
+    --text:      #F3F2F1;   /* adesso-Grau hell */
+    --text-body: #cfe0ee;
+    --text-muted:#8aabc4;
+    --text-dim:  #5e809a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Open Sans', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Slide container */
+  .deck { flex: 1; position: relative; overflow: hidden; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 80px;
+    animation: fadeIn 0.3s ease;
+  }
+  .slide.active { display: flex; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Layout helpers */
+  .slide-inner { width: 100%; max-width: 960px; }
+  .slide-inner.wide { max-width: 1100px; }
+
+  /* Typography */
+  .eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--primary-light); margin-bottom: 16px;
+  }
+  h1 { font-size: 52px; font-weight: 700; line-height: 1.1; color: var(--text); }
+  h2 { font-size: 36px; font-weight: 700; line-height: 1.15; color: var(--text); margin-bottom: 8px; }
+  h3 { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .subtitle { font-size: 20px; color: var(--text-muted); margin-top: 16px; line-height: 1.5; }
+  p { font-size: 16px; color: var(--text-body); line-height: 1.65; }
+  .small { font-size: 13px; color: var(--text-dim); margin-top: 32px; }
+
+  /* Divider */
+  .rule { width: 48px; height: 3px; background: var(--primary); border-radius: 2px; margin-bottom: 28px; }
+
+  /* Cards */
+  .cards { display: grid; gap: 16px; margin-top: 32px; }
+  .cards-2 { grid-template-columns: 1fr 1fr; }
+  .cards-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cards-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    padding: 22px 24px;
+  }
+  .card.accent { border-color: var(--primary); background: var(--bg-accent); }
+  .card-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--primary-light); margin-bottom: 8px; }
+  .card h3 { font-size: 17px; margin-bottom: 6px; }
+  .card p { font-size: 14px; color: var(--text-muted); line-height: 1.55; }
+  code { color: var(--primary-light); }
+
+  /* Phase sequence */
+  .phases { display: flex; align-items: flex-start; gap: 0; margin-top: 36px; }
+  .phase {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+  }
+  .phase + .phase { margin-left: 8px; }
+  .phase-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--primary); color: #fff;
+    font-size: 13px; font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .phase h3 { font-size: 15px; margin-bottom: 4px; }
+  .phase p { font-size: 13px; color: var(--text-muted); }
+  .phase .weeks { font-size: 11px; color: var(--primary-light); font-weight: 600; margin-top: 8px; }
+  .phase.accent { border-color: var(--green); }
+  .phase.accent .phase-num { background: var(--green); color: #062D47; }
+  .phase.accent .weeks { color: var(--green); }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; margin-top: 28px; font-size: 15px; }
+  th { text-align: left; padding: 10px 14px; background: var(--panel); color: var(--text-muted); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
+  td { padding: 12px 14px; border-top: 1px solid var(--border-soft); color: var(--text-body); }
+  tr:nth-child(even) td { background: var(--panel-2); }
+  .price { color: var(--text); font-weight: 600; }
+  .total-row td { border-top: 2px solid var(--primary); color: var(--text); font-weight: 700; }
+
+  /* Tag */
+  .tag {
+    display: inline-block; padding: 3px 10px;
+    background: var(--bg-accent); border: 1px solid var(--primary);
+    border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--primary-light);
+    margin-right: 6px; margin-bottom: 6px;
+  }
+  .tag.green { background: #3a3500; border-color: var(--green); color: var(--green); }
+  .tag.slate { background: var(--panel); border-color: var(--border); color: var(--text-muted); }
+
+  /* Quote */
+  .quote {
+    background: var(--panel); border-left: 4px solid var(--green);
+    border-radius: 0 8px 8px 0;
+    padding: 20px 24px; margin-top: 28px;
+  }
+  .quote p { font-size: 17px; color: var(--text); font-style: italic; line-height: 1.6; }
+  .quote .attr { font-size: 13px; color: var(--text-dim); margin-top: 10px; font-style: normal; }
+
+  /* Two-col */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 32px; align-items: start; }
+
+  /* Big stat */
+  .stat-row { display: flex; gap: 40px; margin-top: 32px; }
+  .stat { text-align: center; }
+  .stat .value { font-size: 42px; font-weight: 700; color: var(--primary); }
+  .stat .label { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+
+  /* === adesso color stripe (Farbstreifen) === */
+  .stripe { display: flex; width: 100%; height: 6px; flex-shrink: 0; }
+  .stripe span { display: block; height: 100%; }
+
+  /* Nav bar */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 32px;
+    background: var(--panel-2);
+    border-top: 1px solid var(--border-soft);
+  }
+  .nav-slides { font-size: 13px; color: var(--text-dim); }
+  .nav-btns { display: flex; gap: 8px; }
+  button {
+    background: var(--panel); border: 1px solid var(--border-soft); color: var(--text-muted);
+    padding: 7px 18px; border-radius: 6px; cursor: pointer; font-size: 13px;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s;
+  }
+  button:hover { background: var(--border-soft); color: var(--text); }
+  button:disabled { opacity: 0.3; cursor: default; }
+
+  /* === adesso Wort-Bild-Marke (Logo + Vertikale) ===
+     Auf dunklem/blauem Hintergrund ist gemäß CD-Manual (S.20) ausschließlich
+     die weiße Logo-Version zulässig (Wortmarke + Vertikale in Weiß). */
+  .adesso-logo {
+    display: inline-flex; align-items: flex-start; gap: 0.1em;
+    font-weight: 700; letter-spacing: -0.02em; line-height: 1;
+    color: #fff;
+  }
+  .adesso-logo .word { color: inherit; }
+  .adesso-logo .vert { display: block; height: 1.42em; width: auto; flex-shrink: 0; }
+  .adesso-logo.lg { font-size: 44px; }
+  .adesso-logo.sm { font-size: 15px; }
+
+  /* Title slide specifics */
+  .slide-title { background: radial-gradient(ellipse at 30% 50%, var(--bg-accent) 0%, var(--bg) 62%); }
+  .slide-title h1 { font-size: 56px; }
+  .slide-title .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bg-accent); border: 1px solid var(--primary);
+    border-radius: 24px; padding: 6px 16px;
+    font-size: 13px; color: var(--primary-light); margin-bottom: 24px;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+
+  /* Closing slide */
+  .slide-close { background: radial-gradient(ellipse at 70% 50%, var(--bg-accent) 0%, var(--bg) 62%); }
+
+  /* List */
+  ul.styled { list-style: none; margin-top: 20px; }
+  ul.styled li {
+    padding: 10px 0; border-bottom: 1px solid var(--border-soft);
+    font-size: 15px; color: var(--text-body);
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  ul.styled li::before { content: "→"; color: var(--primary); font-weight: 700; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- 1: Title -->
+  <div class="slide slide-title active">
+    <div class="slide-inner">
+      <div class="badge"><span class="dot"></span> RFP #MC-2026-0417</div>
+      <h1>Modernizing Meridian's<br>Inventory Dashboard</h1>
+      <p class="subtitle">Capabilities Presentation — adesso SE<br>April 2026</p>
+      <div style="margin-top:40px;">
+        <span class="adesso-logo lg"><span class="word">adesso</span><svg class="vert" viewBox="0 0 36 100" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><path d="M30 1 L30 71 L4 99" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="miter"/></svg></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2: Agenda -->
+  <div class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Today's Agenda</div>
+      <div class="rule"></div>
+      <h2>What We'll Cover</h2>
+      <ul class="styled">
+        <li>The challenge Meridian asked us to solve</li>
+        <li>Our proposed approach — and why the sequence matters</li>
+        <li>How we'll deliver each requirement (R1–R4)</li>
+        <li>Timeline and milestone gates</li>
+        <li>Pricing and optional extensions</li>
+        <li>Why adesso SE</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 3: The situation -->
+  <div class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">The Situation</div>
+      <div class="rule"></div>
+      <h2>A Working Foundation — With Gaps</h2>
+      <div class="cards cards-3" style="margin-top:28px;">
+        <div class="card">
+          <div class="card-label">Defects</div>
+          <h3>Reports Module</h3>
+          <p>At least 8 known issues left unresolved at previous vendor's contract end. Filter behavior, i18n gaps, data inconsistencies.</p>
+        </div>
+        <div class="card">
+          <div class="card-label">Risk</div>
+          <h3>No Test Coverage</h3>
+          <p>Zero automated tests delivered. Meridian IT has blocked changes as a result — no safe way to approve releases.</p>
+        </div>
+        <div class="card">
+          <div class="card-label">Missing</div>
+          <h3>Restocking View</h3>
+          <p>VP Operations' primary request: purchase order recommendations based on stock, demand forecast, and a budget ceiling.</p>
+        </div>
+      </div>
+      <div class="quote">
+        <p>"The previous vendor left the Reports module incomplete and delivered no automated tests."</p>
+        <div class="attr">— RFP §2, Meridian Components</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4: Our Approach -->
+  <div class="slide">
+    <div class="slide-inner wide">
+      <div class="eyebrow">Our Approach</div>
+      <div class="rule"></div>
+      <h2>Stabilize → Document → Build → Test</h2>
+      <p style="margin-top:8px;">The sequence is intentional. Each phase depends on the one before it.</p>
+      <div class="phases">
+        <div class="phase">
+          <div class="phase-num">1</div>
+          <h3>Stabilize</h3>
+          <p>Audit and fix all Reports defects before anything new is built.</p>
+          <div class="weeks">Weeks 1–2 · R1</div>
+        </div>
+        <div class="phase">
+          <div class="phase-num">2</div>
+          <h3>Document</h3>
+          <p>Architecture overview for Meridian IT — while the code is freshest.</p>
+          <div class="weeks">Week 3 · R4</div>
+        </div>
+        <div class="phase">
+          <div class="phase-num">3</div>
+          <h3>Build</h3>
+          <p>Restocking view on a stable, documented foundation.</p>
+          <div class="weeks">Weeks 4–6 · R2</div>
+        </div>
+        <div class="phase accent">
+          <div class="phase-num">4</div>
+          <h3>Test</h3>
+          <p>Full E2E coverage of legacy flows <em>and</em> the new feature.</p>
+          <div class="weeks">Weeks 7–8 · R3</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5: R1 Reports -->
+  <div class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Requirement R1</div>
+      <div class="rule"></div>
+      <h2>Reports Module Remediation</h2>
+      <div class="two-col">
+        <div>
+          <p>We conduct a structured audit across four defect areas before writing a single line of fix code:</p>
+          <ul class="styled">
+            <li>Filter wiring — query param flow end-to-end</li>
+            <li>i18n gaps — untranslated strings in templates</li>
+            <li>API pattern inconsistencies — Options vs. Composition API</li>
+            <li>Console noise — unhandled errors and warnings</li>
+          </ul>
+        </div>
+        <div>
+          <div class="card" style="margin-top:0;">
+            <div class="card-label">Our Commitment</div>
+            <p>"At least eight issues" is a floor, not a ceiling. We document every finding before touching code. Each fix is committed separately so Meridian IT can trace every change.</p>
+          </div>
+          <div class="card" style="margin-top:12px;">
+            <div class="card-label">Gate</div>
+            <p>Operations team confirms Reports behaves correctly across all filter combinations.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6: R4 Architecture -->
+  <div class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Requirement R4</div>
+      <div class="rule"></div>
+      <h2>Architecture Documentation</h2>
+      <p>Produced immediately after R1 — while the codebase is freshest in our heads.</p>
+      <div class="cards cards-2" style="margin-top:28px;">
+        <div class="card">
+          <div class="card-label">Deliverable 1</div>
+          <h3>Interactive HTML Diagram</h3>
+          <p>Visual map of Vue views, API client layer, FastAPI routes, data layer, and filter/reactivity patterns. Self-contained file — no tooling required to open.</p>
+        </div>
+        <div class="card">
+          <div class="card-label">Deliverable 2</div>
+          <h3>Written Narrative</h3>
+          <p>Layer-by-layer description of responsibilities, data flow, and inherited design decisions. Written for Meridian IT — assumes web familiarity, not codebase knowledge.</p>
+        </div>
+      </div>
+      <p style="margin-top:24px; font-size:14px; color:var(--text-dim);">This document also serves as our own onboarding artifact for Phase 3 — reducing R2 design risk.</p>
+    </div>
+  </div>
+
+  <!-- 7: R2 Restocking -->
+  <div class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Requirement R2</div>
+      <div class="rule"></div>
+      <h2>Restocking Recommendations</h2>
+      <div class="two-col">
+        <div>
+          <div class="card-label" style="margin-bottom:12px;">How It Works</div>
+          <ul class="styled">
+            <li>Operations staff enters a budget ceiling</li>
+            <li>System combines current stock levels with demand forecast</li>
+            <li>Ranked purchase order recommendations returned</li>
+            <li>Filter by warehouse or product category</li>
+          </ul>
+        </div>
+        <div>
+          <div class="card" style="margin-top:0;">
+            <div class="card-label">Frontend</div>
+            <p>New <code>RestockingView.vue</code> — budget input, recommendations table. Composition API, consistent with remediated codebase.</p>
+          </div>
+          <div class="card" style="margin-top:12px;">
+            <div class="card-label">Backend</div>
+            <p>New <code>/api/restocking</code> endpoint — combines <code>/api/inventory</code> + <code>/api/demand</code>, applies budget constraint, returns ranked results.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8: R3 Testing -->
+  <div class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Requirement R3</div>
+      <div class="rule"></div>
+      <h2>Automated Browser Testing</h2>
+      <p>Written last — so the test suite covers the complete, final application: legacy flows <em>and</em> the new Restocking feature.</p>
+      <div class="cards cards-3" style="margin-top:28px;">
+        <div class="card">
+          <div class="card-label">Tool</div>
+          <h3>Playwright</h3>
+          <p>End-to-end browser tests. Already configured in Meridian's repo.</p>
+        </div>
+        <div class="card">
+          <div class="card-label">Coverage</div>
+          <h3>All Critical Flows</h3>
+          <p>Inventory, Orders, Spending, Reports (including R1 filter interactions), Restocking.</p>
+        </div>
+        <div class="card accent">
+          <div class="card-label">Outcome</div>
+          <h3>IT Green-Gate</h3>
+          <p>A single passing test suite that IT can run on any proposed change before approving it.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9: Optional Extensions -->
+  <div class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Optional Extensions</div>
+      <div class="rule"></div>
+      <h2>D1–D3: When You're Ready</h2>
+      <div class="cards cards-3" style="margin-top:28px;">
+        <div class="card">
+          <div class="card-label">D1 · +2 weeks</div>
+          <h3>UI Modernization</h3>
+          <p>Component-level refresh aligned to a modern dashboard reference (clean card layout, KPI tiles, blue/slate palette). Mockup for approval before any implementation.</p>
+        </div>
+        <div class="card">
+          <div class="card-label">D2 · +1 week</div>
+          <h3>Internationalization</h3>
+          <p>Full i18n coverage for remaining modules. Japanese (ja) locale for the Tokyo warehouse team. Scope confirmed during R1 audit.</p>
+        </div>
+        <div class="card">
+          <div class="card-label">D3 · +1 week</div>
+          <h3>Dark Mode</h3>
+          <p>Operator-selectable theme via CSS custom properties. Designed for low-light warehouse floor stations. Persistent across sessions.</p>
+        </div>
+      </div>
+      <p style="margin-top:20px; font-size:14px; color:var(--text-dim);">Extensions can be activated at any milestone gate and run in parallel with Phase 4 testing to avoid sequential delay.</p>
+    </div>
+  </div>
+
+  <!-- 10: Timeline -->
+  <div class="slide">
+    <div class="slide-inner wide">
+      <div class="eyebrow">Delivery Timeline</div>
+      <div class="rule"></div>
+      <h2>8 Weeks to Full Delivery</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Weeks</th>
+            <th>Phase</th>
+            <th>Deliverable</th>
+            <th>Gate</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1–2</td><td>Stabilize</td><td>Remediated Reports module</td><td>Operations team sign-off</td></tr>
+          <tr><td>3</td><td>Document</td><td>Architecture overview for IT</td><td>IT acceptance</td></tr>
+          <tr><td>4–6</td><td>Build</td><td>Restocking recommendations view</td><td>VP Operations sign-off</td></tr>
+          <tr><td>7–8</td><td>Test</td><td>Full Playwright test suite</td><td>IT green-gate confirmed</td></tr>
+          <tr><td>+1–2</td><td>Optional</td><td>D1 / D2 / D3 (if activated)</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:16px; font-size:13px; color:var(--text-dim);">Each gate includes a two-day feedback window. Contract start assumed within two weeks of award.</p>
+    </div>
+  </div>
+
+  <!-- 11: Pricing -->
+  <div class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Pricing</div>
+      <div class="rule"></div>
+      <h2>Fixed Fee — No Surprises</h2>
+      <table>
+        <thead>
+          <tr><th>Phase</th><th>Scope</th><th style="text-align:right;">Fee</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Phase 1</td><td>Reports remediation (R1)</td><td class="price" style="text-align:right;">$18,000</td></tr>
+          <tr><td>Phase 2</td><td>Architecture documentation (R4)</td><td class="price" style="text-align:right;">$9,000</td></tr>
+          <tr><td>Phase 3</td><td>Restocking view (R2)</td><td class="price" style="text-align:right;">$42,000</td></tr>
+          <tr><td>Phase 4</td><td>Browser test suite (R3)</td><td class="price" style="text-align:right;">$18,000</td></tr>
+          <tr class="total-row"><td colspan="2">Core Engagement Total</td><td style="text-align:right;">$87,000</td></tr>
+        </tbody>
+      </table>
+      <div class="cards cards-3" style="margin-top:20px;">
+        <div class="card" style="padding:14px 18px;">
+          <div class="card-label">D1 UI Refresh</div>
+          <p style="font-size:14px;">$22,000</p>
+        </div>
+        <div class="card" style="padding:14px 18px;">
+          <div class="card-label">D2 i18n</div>
+          <p style="font-size:14px;">$9,000</p>
+        </div>
+        <div class="card" style="padding:14px 18px;">
+          <div class="card-label">D3 Dark Mode</div>
+          <p style="font-size:14px;">$9,000</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12: Why adesso -->
+  <div class="slide">
+    <div class="slide-inner">
+      <div class="eyebrow">Why adesso SE</div>
+      <div class="rule"></div>
+      <h2>We've Done This Before</h2>
+      <div class="cards cards-2" style="margin-top:28px;">
+        <div class="card">
+          <div class="card-label">Vendor Handover Experience</div>
+          <h3>We stabilize what others leave behind</h3>
+          <p>Our 2024 engagement with a European industrial distributor — same stack, same situation — ended with the client approving their first release in over a year within 30 days of handoff.</p>
+        </div>
+        <div class="card">
+          <div class="card-label">Restocking & i18n Track Record</div>
+          <h3>R2 and D2 are not new territory</h3>
+          <p>Our 2023 APAC logistics engagement delivered a near-identical budget-ceiling restocking feature with Japanese and Simplified Chinese locale support.</p>
+        </div>
+        <div class="card">
+          <div class="card-label">IT Handoff Specialists</div>
+          <h3>We know how to hand off to internal teams</h3>
+          <p>Our architecture documentation practice is built around enabling IT teams — not just describing systems, but ensuring the knowledge transfer actually sticks.</p>
+        </div>
+        <div class="card accent">
+          <div class="card-label">Fixed Fee Confidence</div>
+          <h3>We price what we know we can deliver</h3>
+          <p>Our fixed-fee offer isn't optimism — it's the result of having reviewed the codebase and the handoff notes before submitting this proposal.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 13: Next Steps -->
+  <div class="slide slide-close">
+    <div class="slide-inner">
+      <div class="eyebrow">Next Steps</div>
+      <div class="rule"></div>
+      <h2>Ready to Start in Two Weeks</h2>
+      <ul class="styled" style="margin-top:28px;">
+        <li>Submit clarifying questions to procurement by April 28</li>
+        <li>Await shortlist notification from J. Okafor</li>
+        <li>Confirm <code>/api/demand</code> data granularity with VP Operations Tanaka</li>
+        <li>Contract execution → engagement kick-off within 10 business days</li>
+      </ul>
+      <div style="margin-top:48px; padding-top:32px; border-top:1px solid var(--border-soft);">
+        <span class="adesso-logo lg" style="font-size:30px;"><span class="word">adesso</span><svg class="vert" viewBox="0 0 36 100" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><path d="M30 1 L30 71 L4 99" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="miter"/></svg></span>
+        <p style="margin-top:8px;">RFP Response · MC-2026-0417 · April 2026</p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<!-- adesso Farbstreifen -->
+<div class="stripe" id="stripe"></div>
+
+<nav>
+  <span class="adesso-logo sm"><span class="word">adesso</span><svg class="vert" viewBox="0 0 36 100" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><path d="M30 1 L30 71 L4 99" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="miter"/></svg><span style="color:var(--text-dim); font-weight:400; margin-left:8px;">SE · MC-2026-0417</span></span>
+  <span class="nav-slides" id="counter">1 / 13</span>
+  <div class="nav-btns">
+    <button id="prev" disabled>← Prev</button>
+    <button id="next">Next →</button>
+  </div>
+</nav>
+
+<script>
+  // Build the adesso color stripe (Farbstreifen) — blue spectrum, proportions per CD manual
+  (function () {
+    const blau   = '#006EC7';
+    const blau2  = '#005C9E';
+    const blau3  = '#003D69';
+    const segs = [
+      [7, blau3], [2, blau2], [4, blau], [2, blau3], [2, blau2],
+      [4, blau], [3, blau2], [7, blau3], [3, blau], [12, blau2], [4, blau3]
+    ];
+    const total = segs.reduce((s, x) => s + x[0], 0);
+    const stripe = document.getElementById('stripe');
+    segs.forEach(([w, c]) => {
+      const s = document.createElement('span');
+      s.style.width = (w / total * 100) + '%';
+      s.style.background = c;
+      stripe.appendChild(s);
+    });
+  })();
+
+  const slides = document.querySelectorAll('.slide');
+  let cur = 0;
+
+  function go(n) {
+    slides[cur].classList.remove('active');
+    cur = n;
+    slides[cur].classList.add('active');
+    document.getElementById('counter').textContent = (cur + 1) + ' / ' + slides.length;
+    document.getElementById('prev').disabled = cur === 0;
+    document.getElementById('next').disabled = cur === slides.length - 1;
+  }
+
+  document.getElementById('prev').addEventListener('click', () => cur > 0 && go(cur - 1));
+  document.getElementById('next').addEventListener('click', () => cur < slides.length - 1 && go(cur + 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { if (cur < slides.length - 1) go(cur + 1); }
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { if (cur > 0) go(cur - 1); }
+  });
+</script>
+</body>
+</html>
