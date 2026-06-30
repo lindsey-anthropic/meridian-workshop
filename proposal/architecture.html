@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Current-State Architecture Overview — Meridian Inventory Dashboard</title>
+<style>
+  :root{
+    --ink:#0f172a; --soft:#334155; --muted:#64748b; --line:#e2e8f0;
+    --bg:#f8fafc; --paper:#fff; --brand:#2563eb; --brand2:#06b6d4;
+    --soft-blue:#eff6ff; --soft-cyan:#ecfeff;
+    --ok:#16a34a; --okbg:#dcfce7; --warn:#d97706; --warnbg:#fef3c7;
+    --danger:#dc2626; --dangerbg:#fee2e2;
+    --radius:14px; --shadow:0 1px 3px rgba(15,23,42,.08), 0 8px 24px rgba(15,23,42,.05);
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:"SF Mono",ui-monospace,"Cascadia Code",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1.55;padding:3rem 1.5rem 5rem}
+  .wrap{max-width:1080px;margin:0 auto}
+
+  header.doc{border-bottom:3px solid var(--brand);padding-bottom:1.4rem;margin-bottom:2.2rem}
+  .brandline{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem}
+  .brandline .dot{width:14px;height:14px;border-radius:4px;background:linear-gradient(135deg,var(--brand),var(--brand2));transform:rotate(45deg)}
+  .brandline .nm{font-weight:800;letter-spacing:.04em}
+  .brandline .sep{color:var(--muted)}
+  h1{font-size:2rem;letter-spacing:-.02em;margin-bottom:.5rem}
+  .sub{color:var(--muted);font-size:1.02rem}
+  .meta{display:flex;gap:2rem;flex-wrap:wrap;margin-top:1rem;font-size:.85rem;color:var(--muted)}
+  .meta b{color:var(--soft);font-weight:600}
+
+  h2{font-size:1.35rem;letter-spacing:-.01em;margin:2.6rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:.6rem}
+  h2 .ix{font-size:.8rem;font-weight:800;color:#fff;background:var(--brand);width:1.6rem;height:1.6rem;display:inline-flex;align-items:center;justify-content:center;border-radius:7px}
+  h3{font-size:1.02rem;margin:1.4rem 0 .5rem}
+  p{color:var(--soft);margin-bottom:.7rem}
+  p.note{color:var(--muted);font-size:.95rem}
+
+  .stack-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:.5rem}
+  .stat{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:1.1rem 1.2rem;box-shadow:var(--shadow)}
+  .stat .k{font-size:.75rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+  .stat .v{font-size:1.25rem;font-weight:700;margin-top:.25rem}
+  .stat .d{font-size:.82rem;color:var(--muted);margin-top:.15rem}
+
+  /* diagram */
+  .diagram{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:1.8rem;margin-top:.6rem}
+  .layer{border:1.5px dashed var(--line);border-radius:12px;padding:1.1rem 1.1rem .8rem;margin-bottom:.4rem;position:relative}
+  .layer .lname{position:absolute;top:-.7rem;left:1rem;background:var(--paper);padding:0 .5rem;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--brand)}
+  .row{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:.3rem}
+  .node{flex:1;min-width:120px;background:var(--soft-blue);border:1px solid #bfdbfe;border-radius:10px;padding:.7rem .8rem;text-align:center}
+  .node.api{background:var(--soft-cyan);border-color:#a5f3fc}
+  .node.data{background:#f1f5f9;border-color:#cbd5e1}
+  .node .t{font-weight:700;font-size:.92rem}
+  .node .s{font-size:.76rem;color:var(--muted);margin-top:.2rem}
+  .conn{text-align:center;color:var(--brand);font-size:1.3rem;line-height:1;margin:.15rem 0;opacity:.55}
+
+  table{width:100%;border-collapse:collapse;margin-top:.6rem;font-size:.92rem;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+  th,td{text-align:left;padding:.7rem .9rem;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#f1f5f9;color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em}
+  tr:last-child td{border-bottom:none}
+  code{font-family:var(--mono);font-size:.85em;background:#f1f5f9;padding:.1rem .4rem;border-radius:5px;color:#0b3a6f}
+  .num{text-align:right;font-variant-numeric:tabular-nums}
+
+  .pill{display:inline-block;padding:.12rem .5rem;border-radius:999px;font-size:.72rem;font-weight:700;white-space:nowrap}
+  .pill.ok{background:var(--okbg);color:#166534}
+  .pill.warn{background:var(--warnbg);color:#92400e}
+  .pill.bad{background:var(--dangerbg);color:#991b1b}
+  .pill.get{background:#e0e7ff;color:#3730a3}
+
+  .flow-list{counter-reset:step;list-style:none;margin-top:.6rem}
+  .flow-list li{position:relative;padding:.5rem 0 .5rem 2.5rem;color:var(--soft)}
+  .flow-list li::before{counter-increment:step;content:counter(step);position:absolute;left:0;top:.45rem;width:1.7rem;height:1.7rem;background:var(--brand);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700}
+
+  .finding{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:10px;padding:1rem 1.2rem;margin-bottom:.8rem;box-shadow:var(--shadow)}
+  .finding.r1{border-left-color:var(--danger)}
+  .finding.gap{border-left-color:var(--brand)}
+  .finding .fh{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+  .finding .ft{font-weight:700}
+  .finding .fb{color:var(--muted);font-size:.92rem;margin-top:.35rem}
+  .finding .ref{font-size:.72rem;font-weight:800;letter-spacing:.05em;color:var(--brand);background:var(--soft-blue);padding:.15rem .5rem;border-radius:6px;white-space:nowrap}
+
+  footer{margin-top:3rem;padding-top:1.2rem;border-top:1px solid var(--line);color:var(--muted);font-size:.82rem}
+  @media print{body{background:#fff;padding:0}.diagram,.stat,table,.finding{box-shadow:none}}
+  @media(max-width:780px){.stack-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="doc">
+    <div class="brandline"><span class="dot"></span><span class="nm">NORTHBEAM</span><span class="sep">·</span><span style="color:var(--muted)">Engagement Deliverable R4</span></div>
+    <h1>Current-State Architecture Overview</h1>
+    <div class="sub">Meridian Components — Inventory Management Dashboard</div>
+    <div class="meta">
+      <span><b>Prepared for:</b> Meridian IT</span>
+      <span><b>RFP:</b> MC-2026-0417</span>
+      <span><b>Basis:</b> Direct review of the running system &amp; source</span>
+      <span><b>Status:</b> Current state, as inherited</span>
+    </div>
+  </header>
+
+  <p>This document describes the inventory dashboard <strong>as it exists today</strong>, based on a direct review of the source code and the running application — not on the previous vendor's handoff notes, which we found to be incomplete. It is intended as a durable reference for Meridian IT and as the baseline our remediation (R1), testing (R3), and new feature work (R2) are written against.</p>
+
+  <!-- 1. At a glance -->
+  <h2><span class="ix">1</span> System at a glance</h2>
+  <div class="stack-grid">
+    <div class="stat"><div class="k">Frontend</div><div class="v">Vue 3 + Vite</div><div class="d">SPA, port 3000</div></div>
+    <div class="stat"><div class="k">Backend</div><div class="v">FastAPI</div><div class="d">Python, port 8001</div></div>
+    <div class="stat"><div class="k">Data store</div><div class="v">JSON files</div><div class="d">In-memory, no database</div></div>
+    <div class="stat"><div class="k">Auth</div><div class="v">None</div><div class="d">Open CORS (<code>*</code>)</div></div>
+  </div>
+  <p class="note" style="margin-top:1rem">A two-tier single-page application with a read-mostly REST API over flat-file data loaded into memory at startup. Lightweight and low-risk to change — provided changes are verifiable, which today they are not (see §6).</p>
+
+  <!-- 2. Architecture diagram -->
+  <h2><span class="ix">2</span> Architecture diagram</h2>
+  <div class="diagram">
+    <div class="layer">
+      <span class="lname">Browser · Vue 3 SPA (:3000)</span>
+      <div class="row">
+        <div class="node"><div class="t">Views (7)</div><div class="s">Dashboard, Inventory, Orders,<br>Spending, Demand, Reports, Backlog*</div></div>
+        <div class="node"><div class="t">Components</div><div class="s">FilterBar, modals,<br>LanguageSwitcher, ProfileMenu</div></div>
+        <div class="node"><div class="t">Composables</div><div class="s">useFilters, useAuth, useI18n</div></div>
+        <div class="node"><div class="t">api.js</div><div class="s">central axios client</div></div>
+      </div>
+    </div>
+    <div class="conn">▼ &nbsp; HTTP / JSON (axios) &nbsp; ▼</div>
+    <div class="layer">
+      <span class="lname">Server · FastAPI (:8001)</span>
+      <div class="row">
+        <div class="node api"><div class="t">REST endpoints</div><div class="s">14 routes, all <code>GET</code></div></div>
+        <div class="node api"><div class="t">Filtering</div><div class="s">apply_filters() · filter_by_month()<br>in-memory, per request</div></div>
+        <div class="node api"><div class="t">Pydantic models</div><div class="s">typed request/response</div></div>
+        <div class="node api"><div class="t">mock_data.py</div><div class="s">loads JSON at startup</div></div>
+      </div>
+    </div>
+    <div class="conn">▼ &nbsp; read at startup (in-memory) &nbsp; ▼</div>
+    <div class="layer">
+      <span class="lname">Data · server/data/*.json</span>
+      <div class="row">
+        <div class="node data"><div class="t">inventory</div><div class="s">32 records</div></div>
+        <div class="node data"><div class="t">orders</div><div class="s">250 records</div></div>
+        <div class="node data"><div class="t">demand / backlog</div><div class="s">9 / 4 records</div></div>
+        <div class="node data"><div class="t">spending / transactions</div><div class="s">aggregate / 56</div></div>
+        <div class="node data"><div class="t">purchase_orders</div><div class="s">empty (R2 target)</div></div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:1rem;margin-bottom:0">* <strong>Backlog.vue</strong> exists but is <strong>not registered in the router and not in the navigation</strong> — it is surfaced only via a detail modal. See §6.</p>
+  </div>
+
+  <!-- 3. Request flow -->
+  <h2><span class="ix">3</span> Request / response flow</h2>
+  <p>The intended data path is uniform across the application — except where the Reports module diverges from it (§6):</p>
+  <ol class="flow-list">
+    <li>A view loads and reads the active filters from the <code>useFilters</code> composable (Time Period, Warehouse, Category, Order Status).</li>
+    <li>It calls a method on the central <code>api.js</code> client, which serializes filters into query parameters.</li>
+    <li><code>axios</code> issues an HTTP <code>GET</code> to the FastAPI backend on port 8001.</li>
+    <li>FastAPI applies <code>apply_filters()</code> / <code>filter_by_month()</code> against the in-memory data and validates the result through Pydantic models.</li>
+    <li>JSON returns to the view, where <strong>raw data is held in refs and derived values in computed properties</strong> for rendering.</li>
+  </ol>
+
+  <!-- 4. API surface -->
+  <h2><span class="ix">4</span> API surface</h2>
+  <p>All 14 implemented endpoints are read-only (<code>GET</code>). Notably, the frontend <code>api.js</code> client also references <strong>write endpoints that the backend does not implement</strong> — see §6.</p>
+  <table>
+    <thead><tr><th>Endpoint</th><th>Method</th><th>Filters</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>/api/inventory</code></td><td><span class="pill get">GET</span></td><td>warehouse, category</td><td>Inventory items</td></tr>
+      <tr><td><code>/api/inventory/{id}</code></td><td><span class="pill get">GET</span></td><td>—</td><td>Single item</td></tr>
+      <tr><td><code>/api/orders</code></td><td><span class="pill get">GET</span></td><td>warehouse, category, status, month</td><td>Orders</td></tr>
+      <tr><td><code>/api/orders/{id}</code></td><td><span class="pill get">GET</span></td><td>—</td><td>Single order</td></tr>
+      <tr><td><code>/api/demand</code></td><td><span class="pill get">GET</span></td><td>—</td><td>Demand forecasts</td></tr>
+      <tr><td><code>/api/backlog</code></td><td><span class="pill get">GET</span></td><td>—</td><td>Backlog + PO status flag</td></tr>
+      <tr><td><code>/api/dashboard/summary</code></td><td><span class="pill get">GET</span></td><td>all</td><td>Aggregate KPIs</td></tr>
+      <tr><td><code>/api/spending/summary|monthly|categories|transactions</code></td><td><span class="pill get">GET</span></td><td>—</td><td>Spending views</td></tr>
+      <tr><td><code>/api/reports/quarterly</code></td><td><span class="pill get">GET</span></td><td>—</td><td>Quarterly performance</td></tr>
+      <tr><td><code>/api/reports/monthly-trends</code></td><td><span class="pill get">GET</span></td><td>—</td><td>Monthly trend</td></tr>
+    </tbody>
+  </table>
+
+  <!-- 5. Data layer -->
+  <h2><span class="ix">5</span> Data layer</h2>
+  <p>Data lives as JSON in <code>server/data/</code>, loaded into memory at startup by <code>mock_data.py</code>. Writes do not persist — restarting the server reloads from file. Suitable for the current scale (&lt;10K items) but with no concurrency, indexing, or durability guarantees.</p>
+  <table>
+    <thead><tr><th>File</th><th class="num">Records</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><code>orders.json</code></td><td class="num">250</td><td>Largest dataset; drives reports &amp; spending</td></tr>
+      <tr><td><code>inventory.json</code></td><td class="num">32</td><td>SKUs with <code>quantity_on_hand</code>, <code>reorder_point</code>, <code>unit_cost</code></td></tr>
+      <tr><td><code>demand_forecasts.json</code></td><td class="num">9</td><td>Per-SKU current vs. forecasted demand + trend</td></tr>
+      <tr><td><code>transactions.json</code></td><td class="num">56</td><td>Recent spending transactions</td></tr>
+      <tr><td><code>backlog_items.json</code></td><td class="num">4</td><td>Unfulfilled-demand items</td></tr>
+      <tr><td><code>spending.json</code></td><td class="num">agg.</td><td>Pre-aggregated summary / monthly / category objects</td></tr>
+      <tr><td><code>purchase_orders.json</code></td><td class="num">0</td><td><span class="pill warn">empty</span> Target store for R2 restocking output</td></tr>
+    </tbody>
+  </table>
+
+  <!-- 6. Findings -->
+  <h2><span class="ix">6</span> Current-state findings &amp; deviations</h2>
+  <p>The review surfaced the following. Each is mapped to the relevant scope item. Together they confirm the core theme: <strong>the system is sound in shape but inconsistent in execution, and unverifiable.</strong></p>
+
+  <div class="finding r1">
+    <div class="fh"><span class="ft">Reports module is built to a different standard</span><span class="ref">R1</span></div>
+    <div class="fb">Reports uses the legacy Options API, calls the backend directly with a hard-coded URL (bypassing <code>api.js</code>), emits <code>console.log</code> on mount and on every render, has no filter bar, and uses hand-rolled (non-localized) number/currency formatting. Every other view follows the shared pattern.</div>
+  </div>
+
+  <div class="finding gap">
+    <div class="fh"><span class="ft">i18n scaffolding exists but is not applied everywhere</span><span class="ref">R1 · D2</span></div>
+    <div class="fb">A <code>useI18n</code> composable, <code>en</code>/<code>ja</code> locale files, and a <code>LanguageSwitcher</code> are present — but modules such as Reports do not use them. The foundation for the Tokyo team's i18n need (D2) is already in place; it simply was not extended.</div>
+  </div>
+
+  <div class="finding">
+    <div class="fh"><span class="ft">Frontend calls write endpoints the backend does not implement</span><span class="ref">R2</span></div>
+    <div class="fb"><code>api.js</code> defines <code>createPurchaseOrder</code>, <code>getPurchaseOrderByBacklogItem</code>, and task CRUD methods (<code>getTasks</code>/<code>createTask</code>/<code>deleteTask</code>/<code>toggleTask</code>), but the backend exposes no <code>/api/purchase-orders</code> or <code>/api/tasks</code> routes. These are client stubs ahead of unbuilt server work — directly relevant to building R2's purchase-order flow.</div>
+  </div>
+
+  <div class="finding">
+    <div class="fh"><span class="ft">Orphaned view: Backlog</span><span class="ref">R1</span></div>
+    <div class="fb"><code>Backlog.vue</code> exists as a full page but is not registered in the router (<code>main.js</code>) and not linked in the navigation. It is reachable only indirectly via a detail modal. Either an incomplete feature or dead code — to be confirmed with Meridian.</div>
+  </div>
+
+  <div class="finding">
+    <div class="fh"><span class="ft">No automated test coverage</span><span class="ref">R3</span></div>
+    <div class="fb">There are no end-to-end or unit tests in the project. This is the root cause of the change freeze: no change can be verified before release. Addressed first in our plan so subsequent work lands safely.</div>
+  </div>
+
+  <div class="finding">
+    <div class="fh"><span class="ft">Incomplete Options API → Composition API migration</span><span class="ref">R1</span></div>
+    <div class="fb">The project standard (per the codebase's own guidance) is the Composition API, but Reports — and potentially other areas — remain on the Options API. Inconsistent patterns raise the cost of maintenance and of the remediation itself.</div>
+  </div>
+
+  <div class="finding gap">
+    <div class="fh"><span class="ft">Production hardening deferred (expected for current stage)</span><span class="ref">future</span></div>
+    <div class="fb">No authentication, CORS open to all origins, no rate limiting, no input validation beyond type checks, and a non-durable data layer. Acceptable for an internal tool at this stage; flagged here so Meridian IT can plan for it. A database migration is a reasonable future recommendation but is out of current required scope.</div>
+  </div>
+
+  <footer>
+    Prepared by Northbeam for Meridian Components, Inc. · Deliverable R4 (Architecture documentation), RFP MC-2026-0417.<br>
+    Reflects the system as inherited at engagement kickoff. This is a living document and will be updated as remediation proceeds.
+  </footer>
+
+</div>
+</body>
+</html>
