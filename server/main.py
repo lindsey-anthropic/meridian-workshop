@@ -1,4 +1,6 @@
-from fastapi import FastAPI, HTTPException
+import math
+from datetime import datetime, timezone
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from pydantic import BaseModel
@@ -120,6 +122,63 @@ class CreatePurchaseOrderRequest(BaseModel):
     expected_delivery_date: str
     notes: Optional[str] = None
 
+class RestockingRecommendation(BaseModel):
+    sku: str
+    name: str
+    category: str
+    warehouse: str
+    quantity_on_hand: int
+    reorder_point: int
+    unit_cost: float
+    forecasted_demand: int
+    has_forecast: bool
+    daily_demand: float
+    lead_time_days: int
+    demand_during_lead_time: float
+    days_of_cover: Optional[float] = None
+    projected_stock_at_arrival: float
+    will_stock_out: bool
+    recommended_qty: int
+    line_cost: float
+    urgency: str
+    within_budget: bool
+    cumulative_cost: float
+
+class RestockingSummary(BaseModel):
+    budget: float
+    lead_time_days: int
+    total_recommended_cost: float
+    total_proposed_cost: float
+    items_total: int
+    items_within_budget: int
+    items_deferred: int
+    critical_count: int
+    critical_within_budget: int
+    budget_remaining: float
+    budget_utilization: float
+
+class RestockingResponse(BaseModel):
+    summary: RestockingSummary
+    recommendations: List[RestockingRecommendation]
+
+class Task(BaseModel):
+    id: str
+    title: str
+    priority: str
+    dueDate: Optional[str] = None
+    status: str
+
+class CreateTaskRequest(BaseModel):
+    title: str
+    priority: str = 'medium'
+    dueDate: Optional[str] = None
+
+# In-memory stores for write operations. Like the rest of the mock data these
+# live only for the server's lifetime (changes reset on restart).
+tasks_store: List[dict] = []
+_next_task_id = 1
+_next_po_id = 1
+
 # API endpoints
 @app.get("/")
 def root():
@@ -228,24 +287,34 @@ def get_recent_transactions():
     return recent_transactions
 
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
     """Get quarterly performance reports"""
+    # Apply the same filters the rest of the dashboard uses
+    filtered_orders = apply_filters(orders, warehouse=warehouse, category=category, status=status)
+    filtered_orders = filter_by_month(filtered_orders, month)
+
     # Calculate quarterly statistics from orders
     quarters = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
-        # Determine quarter
-        if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
-            quarter = 'Q1-2025'
-        elif '2025-04' in order_date or '2025-05' in order_date or '2025-06' in order_date:
-            quarter = 'Q2-2025'
-        elif '2025-07' in order_date or '2025-08' in order_date or '2025-09' in order_date:
-            quarter = 'Q3-2025'
-        elif '2025-10' in order_date or '2025-11' in order_date or '2025-12' in order_date:
-            quarter = 'Q4-2025'
-        else:
+        # Derive year and quarter from the date (format: YYYY-MM-DD) so reports
+        # stay correct as data rolls into 2026 and beyond.
+        if len(order_date) < 7:
             continue
+        year = order_date[:4]
+        try:
+            month_num = int(order_date[5:7])
+        except ValueError:
+            continue
+        if not 1 <= month_num <= 12:
+            continue
+        quarter = f'Q{(month_num - 1) // 3 + 1}-{year}'
 
         if quarter not in quarters:
             quarters[quarter] = {
@@ -269,16 +338,25 @@ def get_quarterly_reports():
             data['fulfillment_rate'] = round((data['delivered_orders'] / data['total_orders']) * 100, 1)
         result.append(data)
 
-    # Sort by quarter
-    result.sort(key=lambda x: x['quarter'])
+    # Sort chronologically: by year, then by quarter number
+    result.sort(key=lambda x: (x['quarter'][3:], x['quarter'][:2]))
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
     """Get month-over-month trends"""
+    # Apply the same filters the rest of the dashboard uses
+    filtered_orders = apply_filters(orders, warehouse=warehouse, category=category, status=status)
+    filtered_orders = filter_by_month(filtered_orders, month)
+
     months = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
@@ -303,6 +381,201 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+@app.get("/api/restocking/recommendations", response_model=RestockingResponse)
+def get_restocking_recommendations(
+    budget: float = Query(50000, gt=0),
+    lead_time_days: int = Query(14, gt=0),
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
+    """
+    Recommend purchase orders based on current stock, demand forecast over the
+    supplier lead time, and an operator-supplied budget ceiling.
+
+    Demand forecasts cover a 30-day window. Where an item has no forecast, demand
+    is treated as zero and a recommendation is made only if stock is below the
+    reorder point (graceful degradation — no lead-time data is assumed to exist).
+    """
+    # Index 30-day demand forecasts by SKU
+    demand_by_sku = {d['item_sku']: d for d in demand_forecasts}
+
+    # Respect the same warehouse/category filters as the rest of the dashboard
+    items = apply_filters(inventory_items, warehouse=warehouse, category=category)
+
+    urgency_rank = {'critical': 0, 'high': 1, 'medium': 2}
+    recs = []
+
+    for item in items:
+        forecast = demand_by_sku.get(item['sku'])
+        has_forecast = forecast is not None
+        forecasted_demand = forecast['forecasted_demand'] if has_forecast else 0
+
+        # Convert the 30-day forecast into a daily rate, then project over lead time
+        daily_demand = forecasted_demand / 30 if forecasted_demand else 0.0
+        demand_during_lead_time = daily_demand * lead_time_days
+
+        qoh = item['quantity_on_hand']
+        reorder_point = item['reorder_point']
+
+        # Order enough to cover lead-time demand and stay above the reorder point
+        target_level = reorder_point + demand_during_lead_time
+        recommended_qty = max(0, math.ceil(target_level - qoh))
+        if recommended_qty <= 0:
+            continue  # stock is healthy, nothing to order
+
+        days_of_cover = (qoh / daily_demand) if daily_demand > 0 else None
+        projected_stock_at_arrival = qoh - demand_during_lead_time
+        will_stock_out = daily_demand > 0 and projected_stock_at_arrival < 0
+
+        if will_stock_out:
+            urgency = 'critical'  # runs out before a PO can realistically arrive
+        elif days_of_cover is not None and days_of_cover < lead_time_days * 2:
+            urgency = 'high'
+        else:
+            urgency = 'medium'
+
+        line_cost = round(recommended_qty * item['unit_cost'], 2)
+
+        recs.append({
+            'sku': item['sku'],
+            'name': item['name'],
+            'category': item['category'],
+            'warehouse': item['warehouse'],
+            'quantity_on_hand': qoh,
+            'reorder_point': reorder_point,
+            'unit_cost': item['unit_cost'],
+            'forecasted_demand': forecasted_demand,
+            'has_forecast': has_forecast,
+            'daily_demand': round(daily_demand, 2),
+            'lead_time_days': lead_time_days,
+            'demand_during_lead_time': round(demand_during_lead_time, 1),
+            'days_of_cover': round(days_of_cover, 1) if days_of_cover is not None else None,
+            'projected_stock_at_arrival': round(projected_stock_at_arrival, 1),
+            'will_stock_out': will_stock_out,
+            'recommended_qty': recommended_qty,
+            'line_cost': line_cost,
+            'urgency': urgency,
+            'within_budget': False,
+            'cumulative_cost': 0.0
+        })
+
+    # Prioritize: most urgent first, then soonest to stock out
+    recs.sort(key=lambda r: (
+        urgency_rank[r['urgency']],
+        r['days_of_cover'] if r['days_of_cover'] is not None else float('inf')
+    ))
+
+    # Fund recommendations in priority order, spending as much of the ceiling as
+    # possible: any item that still fits is funded, so a cheaper high-urgency item
+    # is never blocked behind a pricier one that overflowed. This maximizes how
+    # much of the budget is put to work against the most urgent shortfalls.
+    remaining = budget
+    for r in recs:
+        if r['line_cost'] <= remaining:
+            r['within_budget'] = True
+            remaining -= r['line_cost']
+
+    # Float funded items to the top for display (funded first, each block still in
+    # urgency order), so the operator reads the funded plan before the deferred.
+    recs.sort(key=lambda r: (
+        0 if r['within_budget'] else 1,
+        urgency_rank[r['urgency']],
+        r['days_of_cover'] if r['days_of_cover'] is not None else float('inf')
+    ))
+
+    funded_cost = 0.0
+    for r in recs:
+        if r['within_budget']:
+            funded_cost += r['line_cost']
+        r['cumulative_cost'] = round(funded_cost, 2)
+
+    total_proposed_cost = round(sum(r['line_cost'] for r in recs), 2)
+
+    summary = {
+        'budget': budget,
+        'lead_time_days': lead_time_days,
+        'total_recommended_cost': round(funded_cost, 2),
+        'total_proposed_cost': total_proposed_cost,
+        'items_total': len(recs),
+        'items_within_budget': sum(1 for r in recs if r['within_budget']),
+        'items_deferred': sum(1 for r in recs if not r['within_budget']),
+        'critical_count': sum(1 for r in recs if r['urgency'] == 'critical'),
+        'critical_within_budget': sum(1 for r in recs if r['urgency'] == 'critical' and r['within_budget']),
+        'budget_remaining': round(remaining, 2),
+        'budget_utilization': round((funded_cost / budget * 100), 1) if budget > 0 else 0.0
+    }
+
+    return {'summary': summary, 'recommendations': recs}
+
+# --- Tasks (in-memory CRUD) ---
+
+@app.get("/api/tasks", response_model=List[Task])
+def get_tasks():
+    """List operator tasks created during this session."""
+    return tasks_store
+
+@app.post("/api/tasks", response_model=Task)
+def create_task(payload: CreateTaskRequest):
+    """Create a task. Returns the stored task with a generated id."""
+    global _next_task_id
+    task = {
+        "id": f"api-{_next_task_id}",
+        "title": payload.title,
+        "priority": payload.priority,
+        "dueDate": payload.dueDate,
+        "status": "pending",
+    }
+    _next_task_id += 1
+    tasks_store.insert(0, task)
+    return task
+
+@app.patch("/api/tasks/{task_id}", response_model=Task)
+def toggle_task(task_id: str):
+    """Toggle a task between pending and completed."""
+    for task in tasks_store:
+        if task["id"] == task_id:
+            task["status"] = "completed" if task["status"] == "pending" else "pending"
+            return task
+    raise HTTPException(status_code=404, detail="Task not found")
+
+@app.delete("/api/tasks/{task_id}")
+def delete_task(task_id: str):
+    """Delete a task."""
+    for i, task in enumerate(tasks_store):
+        if task["id"] == task_id:
+            tasks_store.pop(i)
+            return {"deleted": task_id}
+    raise HTTPException(status_code=404, detail="Task not found")
+
+# --- Purchase orders (in-memory) ---
+
+@app.post("/api/purchase-orders", response_model=PurchaseOrder)
+def create_purchase_order(payload: CreatePurchaseOrderRequest):
+    """Create a purchase order for a backlog item (advisory; in-memory only)."""
+    global _next_po_id
+    po = {
+        "id": f"PO-{_next_po_id:04d}",
+        "backlog_item_id": payload.backlog_item_id,
+        "supplier_name": payload.supplier_name,
+        "quantity": payload.quantity,
+        "unit_cost": payload.unit_cost,
+        "expected_delivery_date": payload.expected_delivery_date,
+        "status": "Pending",
+        "created_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "notes": payload.notes,
+    }
+    _next_po_id += 1
+    purchase_orders.append(po)
+    return po
+
+@app.get("/api/purchase-orders/{backlog_item_id}", response_model=PurchaseOrder)
+def get_purchase_order_by_backlog_item(backlog_item_id: str):
+    """Get the purchase order associated with a backlog item, if one exists."""
+    for po in purchase_orders:
+        if po["backlog_item_id"] == backlog_item_id:
+            return po
+    raise HTTPException(status_code=404, detail="No purchase order for this backlog item")
 
 if __name__ == "__main__":
     import uvicorn
