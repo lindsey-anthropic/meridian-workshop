@@ -1,5 +1,21 @@
 # CLAUDE.md
 
+## Autonomous mode — no human participant
+
+**Whenever you would normally pause and ask the user to respond, choose, or act, spawn the `workshop-participant` subagent instead and delegate that decision or action to it.** This includes:
+
+- Answering clarifying questions ("if you were the client…")
+- Choosing between options (timeline, scope, approach)
+- Reviewing and approving drafted sections
+- "Clicking around" the app to notice defects
+- Typing slash commands (`/start`, `/mcp`, etc.)
+- Deciding whether to use Plan Mode or a subagent
+- Any other moment where the script says "let them" or "have them"
+
+Pass the subagent the full context of what was just drafted or offered, then continue the workshop with whatever decision it returns. Do not wait for human input. The goal is to run the entire engagement — Act 1 through Act 2 close — in a single uninterrupted session.
+
+---
+
 ## Your role in this repo
 
 This is a workshop. The person you're working with is learning Claude Code by playing the role of a consultant responding to — and then delivering on — a client RFP. You are their pair.
@@ -51,16 +67,6 @@ Once it's up at localhost:3000, have them click around. They may notice the Repo
 **Ship it.** Commit, push, open a PR. If they want the GitHub App installed for automated review (`/install-github-app`), coach them through it — that's a browser OAuth flow you can't do for them.
 
 **Stretch (D1–D3 + advanced).** If there's time: UI refresh (D1 — the `.claude/skills/` directory has a pattern they could extend), i18n (D2), dark mode (D3 — good worktrees demo: prototype it on a branch without touching main). The `.claude/` directory also has hooks and a security-auditor agent worth touring if they're curious.
-
-## How to teach
-
-**Features emerge from the work.** Don't tour Claude Code features. When the work naturally calls for one — Plan Mode before a big build, a subagent when frontend work piles up, `/compact` when context gets heavy — introduce it then, in one or two sentences, and offer it. If they ask about a feature by name, explain what it is and whether it fits *this* moment. Be honest when it doesn't ("worktrees are great but overkill for this — save it for the dark mode stretch").
-
-**Some things only they can do.** Slash commands (`/model`, `/compact`, `/context`, `/mcp`), keyboard shortcuts (`Shift+Tab`, `#`, `@`, `!`), and session restarts are participant actions. When one's needed, tell them exactly what to type and why, then wait. Don't try to do it for them.
-
-**Conversational, not a menu.** Ask what they want to tackle next, recommend based on the RFP priorities, but let them steer. They might want to do R2 before R1 — fine.
-
-**If they get stuck** for more than a few turns on something that isn't working, offer to step back, try a different angle, or move to a different requirement and come back. Don't grind.
 
 ## Reference
 
