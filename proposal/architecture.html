@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture Overview — Meridian Components Inventory Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  /* === adesso Corporate Design ===
+     adesso-Blau #006EC7 · Blau #2 #005C9E · Blau #3 #003D69 · Blau #4 #062D47
+     adesso-Grün (Akzent) #C8B600 · adesso-Grau 70% #887D75 · Hausschrift: Open Sans */
+  :root {
+    --blau:   #006EC7;
+    --blau2:  #005C9E;
+    --blau3:  #003D69;
+    --blau4:  #062D47;
+    --gruen:  #C8B600;
+    --grau70: #887D75;
+    --ink:    #062D47;
+    --body:   #3b4b58;
+    --muted:  #6c7d8a;
+    --line:   #e2e8ee;
+    --line-soft: #eef2f6;
+    --surface: #ffffff;
+    --bg:     #f4f7fa;
+    --blau-tint: #d9e9f7;
+    --grau-tint: #efedea;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Open Sans', Arial, sans-serif; background: var(--bg); color: var(--ink); }
+
+  header {
+    background: var(--blau4); color: #fff; padding: 24px 40px;
+    display: flex; justify-content: space-between; align-items: center; gap: 24px;
+  }
+  .header-left { display: flex; align-items: center; gap: 22px; }
+  header h1 { font-size: 20px; font-weight: 700; }
+  header p { font-size: 13px; color: #9fbdd4; margin-top: 4px; }
+  .header-divider { width: 1px; align-self: stretch; background: rgba(255,255,255,0.18); }
+  .badge { background: rgba(255,255,255,0.06); border: 1px solid var(--blau); border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #6fb4e6; white-space: nowrap; }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 40px; }
+
+  section { margin-bottom: 48px; }
+  h2 { font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+  .section-desc { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+
+  /* Stack diagram */
+  .stack { display: grid; grid-template-columns: 1fr 80px 1fr; gap: 0; align-items: start; }
+  .layer { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+  .layer-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px; }
+  .layer-title.blue  { color: var(--blau); }
+  .layer-title.green { color: var(--blau2); }
+  .layer-title.grey  { color: var(--grau70); }
+
+  .item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-radius: 8px; margin-bottom: 6px; }
+  .item:hover { background: var(--bg); }
+  .item-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+  .icon-vue  { background: var(--blau-tint); }
+  .icon-py   { background: #e3eef8; }
+  .icon-json { background: var(--grau-tint); }
+  .icon-comp { background: #eaf2fb; }
+  .item-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .item-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .arrow-col { display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 60px; gap: 8px; color: var(--muted); font-size: 11px; text-align: center; }
+  .arrow { font-size: 24px; color: var(--blau); }
+
+  /* Data flow */
+  .flow { display: flex; align-items: center; gap: 0; overflow-x: auto; padding: 20px 0; }
+  .flow-step {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 16px; min-width: 150px; text-align: center; flex-shrink: 0;
+  }
+  .flow-step.highlight { border-color: var(--blau); background: #eaf3fb; }
+  .flow-step-icon { font-size: 20px; margin-bottom: 6px; }
+  .flow-step-name { font-size: 12px; font-weight: 700; color: var(--ink); }
+  .flow-step-detail { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .flow-arrow { color: var(--blau); font-size: 20px; padding: 0 8px; flex-shrink: 0; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--surface); border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+  th { background: var(--bg); padding: 10px 14px; text-align: left; font-weight: 700; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--line); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--line-soft); color: var(--body); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  code { background: var(--bg); padding: 2px 6px; border-radius: 4px; font-size: 12px; color: var(--blau3); font-family: 'SF Mono', 'Consolas', monospace; }
+
+  /* Known issues */
+  .issues { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .issue { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .issue-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .dot-fixed { width: 8px; height: 8px; border-radius: 50%; background: var(--blau); flex-shrink: 0; }
+  .dot-known { width: 8px; height: 8px; border-radius: 50%; background: var(--gruen); flex-shrink: 0; }
+  .issue-title { font-size: 13px; font-weight: 600; }
+  .issue-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .legend { display: flex; gap: 20px; margin-bottom: 18px; font-size: 12px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+
+  footer { display: flex; align-items: center; justify-content: center; gap: 14px; text-align: center; padding: 32px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--line); margin-top: 40px; }
+
+  /* === adesso Wort-Bild-Marke ===
+     Header (dunkel): weiße Version. Footer (weiß): blaue Wortmarke + graue Vertikale (CD-Manual S.20). */
+  .adesso-logo {
+    display: inline-flex; align-items: flex-start; gap: 0.1em;
+    font-weight: 700; letter-spacing: -0.02em; line-height: 1;
+    color: #fff;
+  }
+  .adesso-logo .vert { display: block; height: 1.42em; width: auto; flex-shrink: 0; }
+  .adesso-logo .vert path { stroke: currentColor; }
+  .adesso-logo.lg { font-size: 30px; }
+  .adesso-logo.sm { font-size: 16px; }
+  .adesso-logo.brand { color: var(--blau); }
+  .adesso-logo.brand .vert path { stroke: var(--grau70); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span class="adesso-logo lg"><span class="word">adesso</span><svg class="vert" viewBox="0 0 36 100" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><path d="M30 1 L30 71 L4 99" fill="none" stroke-width="6" stroke-linejoin="miter"/></svg></span>
+    <div class="header-divider"></div>
+    <div>
+      <h1>Inventory Dashboard — Architecture Overview</h1>
+      <p>Current-state documentation · adesso SE engagement · June 2026</p>
+    </div>
+  </div>
+  <span class="badge">For Meridian IT Handoff</span>
+</header>
+
+<main>
+
+  <!-- 1. Stack Overview -->
+  <section>
+    <h2>System Layers</h2>
+    <p class="section-desc">The application is a two-tier web app: a Vue 3 single-page application served by Vite (port 3000) communicating with a Python FastAPI backend (port 8001) over HTTP. There is no database — all data lives in JSON files loaded into memory at startup.</p>
+
+    <div class="stack">
+      <!-- Frontend -->
+      <div class="layer">
+        <div class="layer-title blue">Frontend · Vue 3 + Vite · :3000</div>
+
+        <div class="item"><div class="item-icon icon-vue">🧭</div><div><div class="item-name">Router (main.js)</div><div class="item-desc">Hash-based routing, one route per view</div></div></div>
+        <div class="item"><div class="item-icon icon-vue">📊</div><div><div class="item-name">Dashboard.vue</div><div class="item-desc">KPIs, order health, inventory shortages</div></div></div>
+        <div class="item"><div class="item-icon icon-vue">📦</div><div><div class="item-name">Inventory.vue</div><div class="item-desc">Stock levels, search, reorder status</div></div></div>
+        <div class="item"><div class="item-icon icon-vue">🛒</div><div><div class="item-name">Orders.vue</div><div class="item-desc">Order list with all filters active</div></div></div>
+        <div class="item"><div class="item-icon icon-vue">💰</div><div><div class="item-name">Spending.vue</div><div class="item-desc">Revenue vs costs, transactions</div></div></div>
+        <div class="item"><div class="item-icon icon-vue">📈</div><div><div class="item-name">Demand.vue</div><div class="item-desc">Forecast trends (no filters)</div></div></div>
+        <div class="item"><div class="item-icon icon-vue">📋</div><div><div class="item-name">Reports.vue</div><div class="item-desc">Quarterly & monthly analytics · <strong>remediated R1</strong></div></div></div>
+
+        <div style="margin-top:14px; border-top:1px solid var(--line-soft); padding-top:14px;">
+          <div class="layer-title blue">Composables</div>
+          <div class="item"><div class="item-icon icon-comp">🔧</div><div><div class="item-name">useFilters.js</div><div class="item-desc">Singleton filter state — 4 reactive refs shared across all views</div></div></div>
+          <div class="item"><div class="item-icon icon-comp">🌐</div><div><div class="item-name">useI18n.js</div><div class="item-desc">EN/JA translations, locale persistence, currency switching</div></div></div>
+          <div class="item"><div class="item-icon icon-comp">👤</div><div><div class="item-name">useAuth.js</div><div class="item-desc">Mock user / session state</div></div></div>
+        </div>
+
+        <div style="margin-top:14px; border-top:1px solid var(--line-soft); padding-top:14px;">
+          <div class="layer-title blue">API Client</div>
+          <div class="item"><div class="item-icon icon-comp">🔌</div><div><div class="item-name">api.js</div><div class="item-desc">Axios wrapper — all HTTP calls go through here. Builds URLSearchParams from filter objects.</div></div></div>
+        </div>
+      </div>
+
+      <!-- Arrow -->
+      <div class="arrow-col">
+        <span class="arrow">⇄</span>
+        <span>HTTP JSON<br>CORS open</span>
+      </div>
+
+      <!-- Backend -->
+      <div class="layer">
+        <div class="layer-title green">Backend · FastAPI · :8001</div>
+
+        <div class="item"><div class="item-icon icon-py">🐍</div><div><div class="item-name">main.py</div><div class="item-desc">All routes, models, filter logic in one file</div></div></div>
+
+        <div style="margin-top:10px; margin-bottom:6px; font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em;">Endpoints</div>
+        <div class="item"><div class="item-icon icon-py">📦</div><div><div class="item-name">GET /api/inventory</div><div class="item-desc">warehouse, category filters</div></div></div>
+        <div class="item"><div class="item-icon icon-py">🛒</div><div><div class="item-name">GET /api/orders</div><div class="item-desc">warehouse, category, status, month</div></div></div>
+        <div class="item"><div class="item-icon icon-py">📊</div><div><div class="item-name">GET /api/dashboard/summary</div><div class="item-desc">All 4 filters, aggregated metrics</div></div></div>
+        <div class="item"><div class="item-icon icon-py">📈</div><div><div class="item-name">GET /api/demand</div><div class="item-desc">No filters (static forecasts)</div></div></div>
+        <div class="item"><div class="item-icon icon-py">📋</div><div><div class="item-name">GET /api/reports/quarterly</div><div class="item-desc">All 4 filters · <strong>added R1</strong></div></div></div>
+        <div class="item"><div class="item-icon icon-py">📋</div><div><div class="item-name">GET /api/reports/monthly-trends</div><div class="item-desc">All 4 filters · <strong>added R1</strong></div></div></div>
+        <div class="item"><div class="item-icon icon-py">💰</div><div><div class="item-name">GET /api/spending/*</div><div class="item-desc">4 sub-endpoints, static aggregates</div></div></div>
+
+        <div style="margin-top:14px; border-top:1px solid var(--line-soft); padding-top:14px;">
+          <div class="layer-title grey">Data Layer</div>
+          <div class="item"><div class="item-icon icon-json">📄</div><div><div class="item-name">mock_data.py</div><div class="item-desc">Loads all JSON files at startup into module-level lists</div></div></div>
+          <div class="item"><div class="item-icon icon-json">📄</div><div><div class="item-name">data/inventory.json</div><div class="item-desc">32 SKUs across SF, London, Tokyo warehouses</div></div></div>
+          <div class="item"><div class="item-icon icon-json">📄</div><div><div class="item-name">data/orders.json</div><div class="item-desc">~250 orders, full year 2025, 4 statuses</div></div></div>
+          <div class="item"><div class="item-icon icon-json">📄</div><div><div class="item-name">data/demand_forecasts.json</div><div class="item-desc">Per-SKU trend (increasing / stable / decreasing)</div></div></div>
+          <div class="item"><div class="item-icon icon-json">📄</div><div><div class="item-name">data/spending.json + transactions.json</div><div class="item-desc">Pre-aggregated spend data + raw transactions</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Filter Data Flow -->
+  <section>
+    <h2>Filter Data Flow</h2>
+    <p class="section-desc">The four global filters (Time Period, Warehouse, Category, Order Status) propagate from the UI through to the backend via a shared composable and URL query parameters.</p>
+
+    <div class="flow">
+      <div class="flow-step highlight">
+        <div class="flow-step-icon">🎛️</div>
+        <div class="flow-step-name">FilterBar.vue</div>
+        <div class="flow-step-detail">User selects warehouse, period, category, status</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-icon">🔧</div>
+        <div class="flow-step-name">useFilters()</div>
+        <div class="flow-step-detail">Singleton reactive refs — all views share the same state</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-icon">👁️</div>
+        <div class="flow-step-name">watch() in View</div>
+        <div class="flow-step-detail">Each view watches the 4 filter refs, calls loadData() on change</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step highlight">
+        <div class="flow-step-icon">🔌</div>
+        <div class="flow-step-name">api.js</div>
+        <div class="flow-step-detail">getCurrentFilters() → URLSearchParams → axios.get(url?params)</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-icon">🐍</div>
+        <div class="flow-step-name">FastAPI route</div>
+        <div class="flow-step-detail">Optional query params: warehouse, category, status, month</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step highlight">
+        <div class="flow-step-icon">🔍</div>
+        <div class="flow-step-name">apply_filters()</div>
+        <div class="flow-step-detail">In-memory list comprehension on loaded JSON data</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-step-icon">📦</div>
+        <div class="flow-step-name">JSON response</div>
+        <div class="flow-step-detail">Pydantic-validated, returned to Vue view</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. API Reference -->
+  <section>
+    <h2>API Endpoint Reference</h2>
+    <p class="section-desc">All endpoints are GET-only. No authentication. CORS is open for all origins (development configuration).</p>
+    <table>
+      <thead>
+        <tr><th>Endpoint</th><th>Filters Supported</th><th>Data Source</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>GET /api/inventory</code></td><td>warehouse, category</td><td>inventory.json</td><td>—</td></tr>
+        <tr><td><code>GET /api/inventory/{id}</code></td><td>—</td><td>inventory.json</td><td>404 if not found</td></tr>
+        <tr><td><code>GET /api/orders</code></td><td>warehouse, category, status, month</td><td>orders.json</td><td>month accepts YYYY-MM or Q#-YYYY</td></tr>
+        <tr><td><code>GET /api/dashboard/summary</code></td><td>warehouse, category, status, month</td><td>Computed from all files</td><td>backlog count is not filter-aware</td></tr>
+        <tr><td><code>GET /api/demand</code></td><td>none</td><td>demand_forecasts.json</td><td>Static, no filter support</td></tr>
+        <tr><td><code>GET /api/backlog</code></td><td>none</td><td>backlog_items.json</td><td>Adds computed has_purchase_order flag</td></tr>
+        <tr><td><code>GET /api/reports/quarterly</code></td><td>warehouse, category, status, month</td><td>Computed from orders.json</td><td>Filter support added in R1 engagement</td></tr>
+        <tr><td><code>GET /api/reports/monthly-trends</code></td><td>warehouse, category, status, month</td><td>Computed from orders.json</td><td>Filter support added in R1 engagement</td></tr>
+        <tr><td><code>GET /api/spending/summary</code></td><td>none</td><td>spending.json</td><td>Pre-aggregated, not derived from orders</td></tr>
+        <tr><td><code>GET /api/spending/monthly</code></td><td>none</td><td>spending.json</td><td>12-month fixed breakdown</td></tr>
+        <tr><td><code>GET /api/spending/categories</code></td><td>none</td><td>spending.json</td><td>4 categories with % of total</td></tr>
+        <tr><td><code>GET /api/spending/transactions</code></td><td>none</td><td>transactions.json</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 4. Known Constraints -->
+  <section>
+    <h2>Known Constraints &amp; Limitations</h2>
+    <p class="section-desc">Inherited from the previous vendor or identified during the R1 audit. Fixed items are resolved as part of this engagement.</p>
+    <div class="legend">
+      <span><span class="dot-fixed"></span> Fixed in this engagement</span>
+      <span><span class="dot-known"></span> Known limitation</span>
+    </div>
+    <div class="issues">
+      <div class="issue">
+        <div class="issue-header"><span class="dot-fixed"></span><div class="issue-title">Reports filters not wired up</div></div>
+        <div class="issue-desc">Reports page ignored all global filters — data never reloaded on filter change. Both frontend (no watch) and backend (no query params) were incomplete. <strong>Fixed in R1.</strong></div>
+      </div>
+      <div class="issue">
+        <div class="issue-header"><span class="dot-fixed"></span><div class="issue-title">Reports: Options API + direct axios</div></div>
+        <div class="issue-desc">Reports.vue was the only view using Options API and calling axios directly instead of api.js, diverging from the established patterns in all other views. <strong>Migrated to Composition API in R1.</strong></div>
+      </div>
+      <div class="issue">
+        <div class="issue-header"><span class="dot-known"></span><div class="issue-title">No database — JSON only</div></div>
+        <div class="issue-desc">All data is loaded from flat JSON files at server startup. Changes do not persist across restarts. No CRUD endpoints exist despite Pydantic models being defined for them.</div>
+      </div>
+      <div class="issue">
+        <div class="issue-header"><span class="dot-known"></span><div class="issue-title">Spending data is static</div></div>
+        <div class="issue-desc">The /api/spending/* endpoints return pre-aggregated JSON, not values computed from orders or transactions. Spending figures do not respond to warehouse/category filters.</div>
+      </div>
+      <div class="issue">
+        <div class="issue-header"><span class="dot-known"></span><div class="issue-title">Dashboard KPIs partially hardcoded</div></div>
+        <div class="issue-desc">Inventory Turnover Rate (4.2) and Avg Processing Time (2.8) are static values in Dashboard.vue. The backend does not provide these metrics — they require COGS data and delivery-date calculations not available in the current data model.</div>
+      </div>
+      <div class="issue">
+        <div class="issue-header"><span class="dot-known"></span><div class="issue-title">No authentication</div></div>
+        <div class="issue-desc">CORS is fully open and there is no API authentication. This is acceptable for an internal, locally-hosted deployment but must be addressed before any external exposure.</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span class="adesso-logo brand sm"><span class="word">adesso</span><svg class="vert" viewBox="0 0 36 100" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><path d="M30 1 L30 71 L4 99" fill="none" stroke-width="6" stroke-linejoin="miter"/></svg></span>
+  <span>SE · Architecture Documentation · Meridian Components Engagement · June 2026 · For Meridian IT Handoff</span>
+</footer>
+
+</body>
+</html>

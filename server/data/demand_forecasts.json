@@ -76,7 +76,7 @@
     "item_sku": "STP-303",
     "item_name": "Stepper Motor NEMA 17",
     "current_demand": 48,
-    "forecasted_demand": 46,
+    "forecasted_demand": 48,
     "trend": "stable",
     "period": "Next 30 days"
   }
