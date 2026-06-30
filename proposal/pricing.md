@@ -10,6 +10,10 @@ We price by phase with a fixed fee and a hard not-to-exceed (NTE) ceiling. You k
 
 We do not offer the lowest bid in this market. We offer predictable delivery. The previous vendor's unfinished work cost Meridian more than a completed engagement would have. Our pricing reflects the cost of doing it right, not the cost of starting it.
 
+### Change Orders
+
+Any work outside the agreed deliverables for Phases 1–3 is handled via a written change order, signed by both parties before work begins. Change orders include a fixed fee and schedule impact statement. We do not begin out-of-scope work on good faith — this protects Meridian as much as it protects us.
+
 ---
 
 ## Phase Pricing
@@ -83,7 +87,9 @@ This covers full delivery of all four required items (R1–R4) with complete aut
 | D1 — UI modernization (full design system refresh) | $12,000 | 1 week |
 | D2 — Full i18n + Japanese locale | $9,500 | 1 week |
 | D3 — Dark mode | $7,000 | 1 week |
-| **D1 + D2 + D3 package** | **$24,000** | 2 weeks (integration) |
+| **D1 + D2 + D3 package** | **$24,000** | 4 weeks (Weeks 9–12) |
+
+D1 + D2 + D3 package: 4 weeks total (Weeks 9–12), including 1 week integration and regression. Individual items may be sequenced within Phase 4 at Meridian's election.
 
 Phase 4 items may be contracted at the close of Phase 3 or deferred. They do not affect Phase 1–3 delivery.
 
@@ -93,13 +99,15 @@ Phase 4 items may be contracted at the close of Phase 3 or deferred. They do not
 
 | Milestone | Amount Due |
 |---|---|
-| Contract signing | 25% of Phase 1–3 total ($17,750) |
-| Phase 1 delivery and sign-off | Remaining Phase 1 balance ($750) |
-| Phase 2 delivery and sign-off | Phase 2 full ($14,000) |
-| Phase 3 delivery and sign-off | Phase 3 full ($38,500) |
-| Phase 4 (if elected) | 50% at contract, 50% at delivery |
+| Contract signing | $9,250 (50% of Phase 1 fee) |
+| Phase 1 delivery and sign-off | $9,250 (remaining Phase 1 balance) |
+| Phase 2 delivery and sign-off | $14,000 (Phase 2 full) |
+| Phase 3 delivery and sign-off | $38,500 (Phase 3 full) |
+| Phase 4 (if elected) | 50% at Phase 4 contract, 50% at delivery |
 
 **Net-30 payment terms on all invoices.**
+
+Meridian's maximum exposure at any point is one phase fee. No payment for a subsequent phase is due until the prior phase has been signed off. If Meridian elects not to continue after Phase 1 or Phase 2, no further fees are owed beyond the completed phase.
 
 ---
 
@@ -117,9 +125,13 @@ If any of these are needed, we will scope and price them as a separate statement
 
 ## Assumptions
 
-1. Meridian provides codebase access (git repository + localhost access) within 2 business days of contract signing.
+1. Meridian provides codebase access (git repository + localhost access) within 2 business days of contract signing. Delays beyond 2 business days will extend the Phase 1 start date on a 1:1 basis and may compress subsequent phase timelines. The fixed fee is not affected by access delays of up to 5 business days; delays beyond 5 business days will be addressed via written mutual agreement.
 2. Tanaka and one IT representative are available for a 1-hour kickoff call in Week 1.
 3. Tanaka is available for 30-minute demos in Weeks 4, 6, and 8.
 4. Okafor or delegate provides written approval for phase sign-off within 3 business days of demo.
 5. No third-party API integrations are required for the Restocking feature.
-6. Tokyo team (for D2 validation) is reachable by email or video call within 5 business days.
+6. The existing backend endpoints `/api/inventory`, `/api/demand`, and `/api/purchase-orders` are present and return data consistent with the structure documented in the previous vendor's handoff notes. If any of these endpoints are absent or require material rework, we will scope and price the additional backend work as a change order before proceeding.
+
+### Additional assumptions if Phase 4 is elected
+
+7. Tokyo team (for D2 validation) is reachable by email or video call within 5 business days.

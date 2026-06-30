@@ -11,12 +11,12 @@
 
 Meridian is not a single buyer — it is a coalition of three distinct power centres with partially overlapping and partially conflicting interests:
 
-| Stakeholder | Role | What They Fear | What They Want |
-|---|---|---|---|
-| **J. Okafor** (Procurement) | Formal buyer, owns vendor selection | Picking the wrong vendor again; being blamed | Predictable price, defensible decision, clean handoff |
-| **R. Tanaka** (VP Operations) | Champion, real user | Another half-delivered engagement; her team's frustration | Features that work; being heard; not managing workarounds |
-| **IT (unnamed)** | Gatekeeper | Something breaking in production; being overruled | Control, safety net, documented changes |
-| **Tokyo warehouse team** | End users (silent stakeholders) | System that doesn't fit their workflow or language | Precision, trust, usability in native language |
+| Stakeholder | Role | What They Fear | What They Want | How They Signal Approval | How to Reach Them |
+|---|---|---|---|---|---|
+| **J. Okafor** (Procurement) | Formal buyer, owns vendor selection | Picking the wrong vendor again; being blamed | Predictable price, defensible decision, clean handoff | Asks for references; requests a formal contract draft | Direct; responds to formal written communication |
+| **R. Tanaka** (VP Operations) | Champion, real user | Another half-delivered engagement; her team's frustration | Features that work; being heard; not managing workarounds | Asks specific operational questions; engages on the Restocking algorithm | Direct and blunt; rewards candor over polish |
+| **IT (unnamed)** | Gatekeeper | Something breaking in production; being overruled | Control, safety net, documented changes | Asks technical process questions (CI, access, test commands) | Indirect; likely communicates through Okafor — ask Okafor for a direct IT contact in the pre-contract kickoff call |
+| **Tokyo warehouse team** | End users (silent stakeholders) | System that doesn't fit their workflow or language | Precision, trust, usability in native language | Will not signal discomfort directly; watch for Tanaka surfacing Tokyo concerns | Through Tanaka; direct email to Tokyo warehouse manager is the one exception — use Japanese, teineigo register |
 
 **The coalition dynamic:** IT is blocking everything. Tanaka has the political will to push things through, but needs IT's sign-off. Okafor needs both of them aligned before he can award a contract. The vendor who makes IT comfortable *first* wins the political battle, which is why Phase 1 (tests + architecture) is the strategic opening move — not a warmup.
 
@@ -106,6 +106,10 @@ She respects directness and competence. She has heard too many vendor pitches th
 - Are you going to disappear after sign-off like the last vendor did?
 
 ### Anticipated Questions from Tanaka
+
+**Q: "Okay, tell me specifically: what's wrong with the Reports module?"**
+
+> *"From our codebase review, we found at least four categories of defects. First: filter state is not connected to API calls — when a user selects a warehouse or time period, the query isn't being passed correctly, so the results don't change. Second: the i18n composable (the translation layer) is wired up in some views and hardcoded to English strings in others — the Reports view is one of the hardcoded ones. Third: the API patterns are inconsistent — some endpoints accept filter parameters, others don't, and the frontend code doesn't always handle that correctly. Fourth: the Options API / Composition API split means the Reports view behaves differently from other views in ways that are hard to predict. The vendor handoff doc mentions 'eight issues' — we expect the audit to confirm most of those and possibly surface more."*
 
 **Q: "The previous vendor said all the same things. What makes you different?"**
 
@@ -211,6 +215,10 @@ The key insight: **IT doesn't need to love the feature — they need to feel saf
 
 > *"We need read access to the codebase (git) and localhost access for testing. We don't need and won't request direct production server access. All changes go through your review process before deployment. We can define this formally in the contract if that's helpful."*
 
+**Q: "How do you handle deployment to production? Do you have a CI/CD pipeline or do you deploy manually?"**
+
+> *"We deploy through your existing process — we don't introduce a new deployment mechanism without your agreement. Our deliverables are merged PRs in your git repository. Whether those go to production via a manual step, a script, or a CI pipeline is your call and your IT team's responsibility. We'll document the deployment procedure in the architecture doc. If you don't currently have a formal deployment process, we'll note that in the architecture doc as a recommendation for future work — it's out of scope for this engagement but worth naming."*
+
 ### Objection Handling — IT
 
 | Objection | Our Response |
@@ -228,6 +236,8 @@ Send IT the architecture doc draft (or an outline of what it will contain) durin
 - The documentation is real, not vaporware
 
 A one-page draft architecture overview shared before contract signing will differentiate you more effectively than any pitch deck.
+
+Send it directly to the IT contact — not through Okafor. Mark it clearly as a draft prepared during our RFP due diligence, not a deliverable. Limit it to: (1) the tech stack overview, (2) the three known issue categories from the handoff doc, (3) the proposed Phase 1 deliverables. Do not include pricing or scope assumptions — this is a trust-building document, not a negotiating document. If Meridian shares it with other bidders, that is their right — but the content should stand on its own as evidence of competence.
 
 ---
 
@@ -317,6 +327,8 @@ This email will likely generate substantive responses that inform the D2 work. M
 
 ## Pre-Negotiation: Clarifying Questions as Anchors
 
+NOTE: Questions deadline per RFP §6 is April 28. If that date has passed, treat unanswered items as open assumptions — document them explicitly in the proposal assumptions section (§4, technical approach) and note them verbally in the pre-contract kickoff call. Do not submit questions after the deadline; answers must be shared with all bidders, which removes your competitive advantage from asking.
+
 Submit before the proposal deadline. Their answers become scope assumptions that anchor our framing.
 
 | # | Question | Strategic Purpose |
@@ -342,7 +354,7 @@ Submit before the proposal deadline. Their answers become scope assumptions that
 > *"If budget is constrained, D3 (dark mode) is the cleanest item to defer — it's a CSS-only change that won't affect any other feature. D1 and D2 have more operational impact for Tanaka's team and the Tokyo office."*
 
 **Option C — Compress with cost tradeoff:**
-> *"We can cut 1 week from Phase 3 by adding a second frontend engineer at +$6K. If timeline is the constraint, this is the lever. If total spend is the constraint, we hold the current plan."*
+> *"We can cut 1–2 weeks from Phase 3 by adding a second frontend engineer, at a cost of approximately +$3K per week saved. If timeline is the constraint, this is the lever — but the buffer weeks exist because stakeholder review cycles (IT, Tanaka) take time we can't control. Compressing engineering time doesn't compress review time."*
 
 ### If a Competitor Comes in Lower
 
@@ -374,7 +386,7 @@ If the competitor is fixed-fee at a lower number:
 
 | Item | Opening | Target | Walk-Away |
 |---|---|---|---|
-| Phase 1–3 total | $71,000 (fixed) | $71,000 | $63,000 (10% flex, absorb by reducing Phase 1 to 2 deliverables; defer defect register to Phase 2 start) |
+| Phase 1–3 total | $71,000 (fixed) | $71,000 | $63,000 (10% flex, absorb by reducing Phase 1 buffer by 2 days and deferring the 2-hour IT walkthrough session to Phase 2 kickoff rather than Phase 1 close) |
 | Phase 4 package | $24,000 | $22,000 | $19,500 (reduce D1 scope to colour tokens + typography only) |
 | Payment terms | Net-30 | Net-30 | Net-45 |
 | Start date | 2 weeks post-signing | 2 weeks | 4 weeks (flag that resource slot cannot be held beyond 3 weeks without deposit) |
@@ -402,9 +414,15 @@ This question signals that you care about the human outcome, not just the contra
 
 Send a brief, personal email in Japanese to the Tokyo warehouse manager before contract signing. Three to four sentences. Polite teineigo register. Something like:
 
-> 「株式会社メリディアン東京チームの皆様のために、より使いやすいシステムを構築することを楽しみにしております。まず皆様がどのような言葉・表現を普段お使いかをお聞きしたく、近日中にご連絡させていただければ幸いです。何卒よろしくお願い申し上げます。」
+> 「拝啓
+>
+> この度は弊社にお声がけいただき、誠にありがとうございます。
+>
+> プロジェクト開始にあたり、東京チームの皆様が日々ご使用いただく用語や表現についてお伺いできればと存じます。より使いやすいシステムを構築するため、近日中にご連絡させていただければ幸いです。
+>
+> 何卒よろしくお願い申し上げます。」
 
-*(Translation: "We look forward to building a system that is easier for the Meridian Tokyo team to use. We would like to first learn what terms and expressions your team uses day-to-day, and we hope to reach out soon. We look forward to working with you.")*
+*(Translation: "Dear [name], Thank you very much for reaching out to us. As we begin the project, we would like to learn about the terms and expressions that the Tokyo team uses in your daily work. We hope to contact you soon in order to build a system that is easier for your team to use. We look forward to working with you.")*
 
 This gesture — reaching out in Japanese, before the contract is signed — is extremely difficult for a competitor to match. It demonstrates cultural fluency, treats Tokyo as a first-class stakeholder, and builds the relationship that will make the D2 review go smoothly.
 

@@ -11,9 +11,7 @@ Our technical approach is governed by four rules derived directly from Meridian'
 1. **Test before you touch.** IT has blocked changes because there's no safety net. We establish automated coverage first — before any production code changes.
 2. **Scope from the actual codebase, not the docs.** The previous vendor's handoff documentation is thin and may be incomplete or stale. We have reviewed the actual source code and base our estimates on what is there.
 3. **Deliver incrementally.** Each phase produces working, testable, demonstrable software — not a big-bang release at the end.
-4. **Respect cultural context.** Meridian operates across three distinct work cultures — North American (SF HQ), British (London), and Japanese (Tokyo). The Tokyo warehouse team of ~12 people represents a unique operational context that goes beyond language translation. Our approach to D2 reflects this — we treat Japanese localization as a cultural adaptation, not a string replacement exercise.
-
-> **A note on the Tokyo office:** The Tokyo warehouse opened in 2023 to serve APAC OEM customers. The team works with varying English proficiency. In Japanese professional culture, using a system in one's native language is not merely a convenience — it is a matter of precision, trust, and respect. Errors or awkward phrasing in a Japanese UI are not cosmetic issues; they undermine confidence in the system itself. We approach the i18n work accordingly.
+4. **Respect cultural context.** We treat Japanese localization as a cultural adaptation, not a string-swap — details in the D2 section.
 
 ---
 
@@ -28,9 +26,13 @@ The Reports page (client/src/views/Reports.vue) was left in an incomplete state 
 - Data shape mismatches between the API response and the component's display logic
 
 ### Our Approach
-1. **Audit phase (Day 1–2):** Systematically enumerate every defect using browser DevTools + source review. Produce a defect register with severity ratings.
-2. **Fix phase (Day 3–6):** Address all defects in order of severity. Each fix is covered by a corresponding Playwright test.
-3. **Verification phase (Day 7–8):** Run full test suite, confirm no regressions in other views, deliver defect register with resolution notes.
+
+The audit and remediation are split across two phases — intentionally:
+
+- **Phase 1, Week 2 — Defect audit:** Systematically enumerate every defect using browser DevTools and source review. Produce a defect register with severity ratings. This happens before any code changes.
+- **Phase 2, Weeks 3–4 — Remediation:** Address all defects in order of severity. Each fix is covered by a corresponding Playwright test before it is merged.
+
+This sequence is intentional — we do not fix defects we cannot verify. IT has already approved the test harness by the time the first production code change is made.
 
 ### Assumptions
 - All known defects are contained within the frontend Reports view and the existing backend `/api/reports/*` endpoints. If new backend endpoints are required, we will flag this before building.
@@ -92,7 +94,7 @@ There is no test coverage of any kind in the current codebase — no unit tests,
 
 ### Our Approach
 
-**Tool:** Playwright (already configured in `.mcp.json` in this repository).
+**Tool:** Playwright.
 
 **Test scope — critical user flows:**
 
@@ -115,12 +117,11 @@ There is no test coverage of any kind in the current codebase — no unit tests,
 **CI integration:** We will provide a `package.json` test script (`npm run test:e2e`) so IT can run the full suite locally and in CI without additional tooling.
 
 ### Assumptions
-- Tests run against `localhost:3000` (dev server). If Meridian wants CI integration against a staging URL, we will configure that in a follow-up ticket.
-- IT approves the Playwright MCP server connection (already in `.mcp.json`, requires approval on first launch).
+- Tests run against the existing dev server (localhost:3000 or the equivalent staging URL). If Meridian IT requires execution against a dedicated staging environment, we will configure that as part of Phase 1 CI setup — no additional cost.
 
 ### Stakeholder Relevance
 - **IT:** This is their requirement. We deliver a `tests/` directory with a clear README, a single command to run all tests, and a green result before handoff.
-- **Okafor:** Every phase deliverable includes test results as proof of completion.
+- **Okafor:** Every phase deliverable includes test results as proof of completion. Each phase delivery package includes a test results summary (pass count, run time, zero failures) formatted for non-technical review. Phase sign-off is a written approval against a checklist we provide at kickoff. No ambiguity about what constitutes completion — the checklist is the contract.
 
 ---
 
@@ -131,7 +132,9 @@ The previous vendor's technical documentation is minimal — a single `vendor-ha
 
 ### Our Approach
 
-Deliver `proposal/architecture.html` — a self-contained HTML document with:
+Delivered as a standalone HTML file — opens in any browser with no tooling required. Path to be agreed with Meridian IT at kickoff (suggested: `docs/architecture/current-state.html` in Meridian's repository).
+
+The document includes:
 
 1. **System overview diagram** — frontend → API → data layer, with ports, protocols, and data flow
 2. **Component map** — every Vue view and component, what API endpoints it calls, what state it manages
@@ -149,9 +152,36 @@ Deliver `proposal/architecture.html` — a self-contained HTML document with:
 
 ## D1 — UI Modernization (Desired)
 
-Refresh the visual design system — typography, color palette, spacing — while preserving all existing functionality. We will align with Meridian's brand if a brand guide is provided; otherwise we will propose a modern, accessible palette for approval.
+### The Problem
+The current dashboard uses an ad-hoc visual style with inconsistent spacing, no defined typography scale, and a color system that was not designed for multi-hour warehouse floor use. No brand alignment with Meridian's corporate identity is present.
 
-**Approach:** CSS-variable based design tokens (already partially in place). A single token file update propagates to all views. Zero JavaScript changes required for a visual refresh.
+### Our Approach
+
+**Step 1 — Design token audit (Day 1–2 of D1 week)**
+The codebase already has CSS custom properties in place — we will audit what exists, identify what is missing, and produce a proposed token set: color palette, typography scale (font family, size, weight, line height), spacing scale, border radius, and shadow levels. This is the only file that changes; every component inherits from it automatically.
+
+**Step 2 — Brand alignment**
+If Meridian can provide a brand guide (logo, primary colors, typeface) by contract start, we will align the token set to it. If no brand guide is available, we will propose a modern, accessible palette for approval before implementation begins.
+
+**Step 3 — Accessibility baseline (WCAG 2.1 AA)**
+All color combinations in the new token set will be verified against WCAG 2.1 AA contrast ratios (4.5:1 for body text, 3:1 for large text). This is required for the D3 dark mode work to function correctly — the same token system supports both themes.
+
+**Step 4 — Application and regression**
+Token file applied to all views. We run the full Playwright suite after application to confirm no layout regressions. Browser tests for visual breakpoints are not included — functional test coverage is.
+
+### Deliverables
+- Updated CSS token file (single source of truth for all visual properties)
+- Before/after screenshots of each view for Meridian approval
+- WCAG contrast ratio audit results
+
+### Assumptions
+- Brand guide provided by Day 1 of D1 week, or approval of our proposed palette by end of Day 2
+- No Figma or design tool deliverable required — HTML/CSS is the final output
+
+### Stakeholder Relevance
+- **Tanaka:** Her team uses this dashboard all day. A visually consistent, comfortable UI reduces fatigue and errors.
+- **IT:** Token-based system is easier to maintain than ad-hoc CSS — future visual changes are one-file edits, not hunts through component files.
+- **Okafor:** Purely additive change — zero risk to existing functionality; Playwright suite confirms it before merge.
 
 ---
 
@@ -199,11 +229,11 @@ Translation alone is insufficient. Japanese localization requires:
 
 **Step 4 — Tokyo team validation (nemawashi / 根回し)**
 
-Before final delivery, we will share the Japanese locale file with the Tokyo team for review. This is not a formality — it is essential. In Japanese work culture, involving the team in the review process (根回し — building consensus before formal sign-off) creates ownership and dramatically reduces post-delivery correction requests.
+Before final delivery, we will share the Japanese locale file with the Tokyo team for review. This is not a formality — it is essential. In Japanese work culture, involving the team in the review process (根回し — building consensus before formal sign-off) creates ownership and dramatically reduces post-delivery correction requests. Unlike translation-only approaches, we include a Tokyo team review cycle before final merge — corrections are part of the budget, not a change order.
 
 We will:
 - Provide a Japanese-locale staging build for the Tokyo team to review
-- Allow a minimum of 5 business days for feedback (respecting the timezone difference)
+- The Tokyo review window is built into Week 10: locale file delivered to Tokyo team by Wednesday; feedback due by end of Week 11 (5 business days). Any corrections are applied during Week 12 integration. If Tokyo feedback arrives late, D2 may slip to the Week 12 integration buffer — this is the only schedule risk for Phase 4.
 - Conduct a video walkthrough if the team prefers (in Japanese if a Japanese-speaking team member can join from our side)
 - Document any corrections and apply them before final merge
 
@@ -218,13 +248,6 @@ The existing `LanguageSwitcher` component will be updated to:
 - Playwright tests for locale switching (EN ↔ JA)
 - Verify all numeric and date formats render correctly in Japanese locale
 - Verify no layout overflow in Japanese locale on all views
-
-### What Japanese Localization Is NOT
-
-We will not:
-- Use machine translation (Google Translate / DeepL output) without human review — machine-translated Japanese business copy is immediately recognizable and unprofessional
-- Use generic translations for domain-specific logistics terms
-- Treat this as a string-swap exercise with no cultural review
 
 ### Deliverable
 `client/src/locales/ja.json` — reviewed by Tokyo team, using correct keigo register, industry-standard logistics terminology, and locale-aware numeric/date formatting.

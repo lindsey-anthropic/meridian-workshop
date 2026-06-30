@@ -17,14 +17,12 @@
 
 ## Phase Overview
 
-```
-Week:   1    2    3    4    5    6    7    8    9   10   11   12
-        ████ ████ ████ ████ ████ ████ ████ ████
-Phase1: [== Foundation ==]
-Phase2:           [== Reports Remediation ==]
-Phase3:                     [======== Restocking Feature ========]
-Phase4:                                         [== Modernization (optional) ==]
-```
+| Phase | Weeks | Duration | Notes |
+|---|---|---|---|
+| Phase 1 — Foundation | 1–2 | 2 weeks | R3 skeleton, R4 architecture docs |
+| Phase 2 — Reports Remediation | 3–4 | 2 weeks | R1 |
+| Phase 3 — Restocking Feature | 5–8 | 4 weeks | R2 |
+| Phase 4 — Modernization (optional) | 9–12 | 4 weeks | D1, D2, D3 |
 
 ---
 
@@ -38,7 +36,7 @@ Phase4:                                         [== Modernization (optional) ==]
 
 | Day | Activity | Owner | Output |
 |---|---|---|---|
-| Mon | Kickoff call with Meridian (Okafor + IT rep) | Lead | Confirmed scope assumptions, approved questions list |
+| Mon | Kickoff call with Meridian (Okafor + Tanaka + IT rep) | Lead | Confirmed scope assumptions, approved questions list, Tanaka confirms Restocking algorithm priorities |
 | Mon–Tue | Full codebase audit — map every component, endpoint, data flow | Lead + Frontend | Internal architecture notes |
 | Wed | Draft architecture document (R4) — diagram, component map, API reference | Lead + Writer | `proposal/architecture.html` v0.1 |
 | Wed–Thu | Set up Playwright test environment, write first 5 smoke tests (dashboard, inventory, orders) | QA | `tests/` with passing smoke suite |
@@ -106,8 +104,8 @@ Phase4:                                         [== Modernization (optional) ==]
 | Day | Activity | Owner | Output |
 |---|---|---|---|
 | Mon | Planning session — review restocking algorithm with Tanaka to validate ranking logic | Lead | Confirmed algorithm parameters |
-| Tue | Backend: new endpoint `/api/restocking/recommendations` with ranking algorithm | Lead | API endpoint + unit tests (pytest) |
-| Wed | Backend: purchase order creation endpoint (if not already present) | Lead | Full backend API ready |
+| Tue | Backend: new endpoint `GET /api/restocking/recommendations` with ranking algorithm | Lead | API endpoint + unit tests (pytest) |
+| Wed | Backend: purchase order creation endpoint `POST /api/purchase-orders` (new endpoint — not present in current codebase per audit; API design confirmed in Phase 1 defect audit) | Lead | Full backend API ready |
 | Thu–Fri | Frontend: new route `/restocking`, basic table scaffold, API wired | Frontend | Working skeleton at localhost:3000/restocking |
 
 ### Week 6 — Core Feature
@@ -142,7 +140,7 @@ Phase4:                                         [== Modernization (optional) ==]
 **Phase 3 Success Criteria:**
 - ✅ Restocking view accessible at `/restocking`
 - ✅ Budget ceiling filters recommendations correctly
-- ✅ Recommendations ranked by urgency × demand trend
+- ✅ Recommendations ranked by composite urgency score (critical/warning/watch tier × demand trend multiplier) — scoring logic confirmed with Tanaka in Week 5 planning session
 - ✅ Purchase order creation works
 - ✅ CSV export works
 - ✅ Full Playwright coverage
@@ -154,7 +152,7 @@ Phase4:                                         [== Modernization (optional) ==]
 
 **Deliverables:** D1 (UI refresh), D2 (Full i18n / Japanese), D3 (Dark mode)
 
-This phase is **modular** — Meridian may elect any combination of D1, D2, D3. Pricing and timeline below assumes all three.
+This phase is **modular** — Meridian may elect any combination of D1, D2, D3. Individual items can be contracted separately; the package price applies when all three are included together. When contracted as a package, D1, D2, and D3 each run in a dedicated week (Weeks 9–11), with Week 12 reserved for integration and regression across all three — accounting for the full four-week duration.
 
 | Week | Focus | Deliverables |
 |---|---|---|
@@ -163,19 +161,21 @@ This phase is **modular** — Meridian may elect any combination of D1, D2, D3. 
 | 11 | D3 — Dark mode prototype on feature branch | `data-theme` toggle, CSS overrides, localStorage persistence |
 | 12 | Integration + regression | All D1–D3 merged, full test suite green, final delivery |
 
+**Phase 4 package (D1+D2+D3): 4 weeks (Weeks 9–12)**
+
 ---
 
 ## Key Milestones Summary
 
 | Milestone | Date (from contract start) | What's Delivered |
 |---|---|---|
-| Phase 1 Kickoff | Day 1 | Team onboarded, codebase access confirmed |
-| Architecture Doc v0.1 | End of Week 1 | Early IT review |
-| **Phase 1 Complete** | End of Week 2 | Tests running, architecture doc final, defect register |
-| **Phase 2 Complete** | End of Week 4 | Reports module fully remediated, all tests green |
-| Restocking Mid-Point Demo | End of Week 6 | Tanaka validates ranking logic |
-| **Phase 3 Complete** | End of Week 8 | R1–R4 all delivered, full test coverage |
-| **Phase 4 Complete** (optional) | End of Week 12 | D1–D3 delivered |
+| Phase 1 Kickoff | Day 1 (Week 1, Monday) | Team onboarded, codebase access confirmed |
+| Architecture Doc v0.1 | Day 5 (End of Week 1) | Early IT review |
+| **Phase 1 Complete** | Day 10 (End of Week 2) | Tests running, architecture doc final, defect register |
+| **Phase 2 Complete** | Day 20 (End of Week 4) | Reports module fully remediated, all tests green |
+| Restocking Mid-Point Demo | Day 30 (End of Week 6) | Tanaka validates ranking logic |
+| **Phase 3 Complete** | Day 40 (End of Week 8) | R1–R4 all delivered, full test coverage |
+| **Phase 4 Complete** (optional) | Day 60 (End of Week 12) | D1–D3 delivered |
 
 ---
 
@@ -184,7 +184,8 @@ This phase is **modular** — Meridian may elect any combination of D1, D2, D3. 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
 | Defect count in Reports exceeds 8 | Medium | Low | Fixed price covers all defects found — no change order needed |
-| Restocking algorithm doesn't match operational intuition | Medium | High | Week 6 mid-point demo with Tanaka before any polish; algorithm confirmed in Week 5 planning session |
-| IT delays access or approval | Low | High | Clarifying question sent before contract start; access confirmed in Phase 1 kickoff |
-| Tokyo team unavailable for i18n validation (D2) | Low | Medium | Provide Japanese locale file for async review; video walkthrough if sync call not possible |
-| Scope creep during Phase 3 | Medium | Medium | Any change beyond agreed Restocking spec is logged as a new ticket; no scope added without written approval |
+| Codebase complexity exceeds Phase 1 audit estimate (hidden coupling, undocumented state) | Medium | Medium | Phase 1 audit is specifically scoped to surface this before Phase 2–3 work begins. If audit reveals material scope increase, we present findings before proceeding — no surprises mid-engagement |
+| Restocking algorithm doesn't match operational intuition | Medium | High | Week 5 planning session with Tanaka validates ranking logic before any UI is built; Week 6 mid-point demo provides a second checkpoint before polish week |
+| Stakeholder unavailability delays phase sign-off (Okafor or Tanaka) | Low | Medium | Pricing assumptions (§5 of pricing doc) require written approval within 3 business days of demo; if delayed, timeline shifts by equivalent days at no additional cost — this is documented in contract terms |
+| IT delays codebase access or environment approval | Low | High | Access requirements confirmed in Phase 1 kickoff; codebase access is a contract precondition (Day 1) |
+| Tokyo team unavailable for i18n validation (D2) | Low | Medium | Japanese locale file provided for async review; 5-business-day review window; video walkthrough available if synchronous call not possible |
