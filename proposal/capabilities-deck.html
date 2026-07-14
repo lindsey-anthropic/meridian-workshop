@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Components — Capabilities Presentation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Georgia', serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Navigation */
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 32px;
+    background: #0f172a;
+    border-bottom: 1px solid #1e293b;
+    flex-shrink: 0;
+  }
+
+  nav .logo {
+    font-size: 13px;
+    color: #64748b;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: 'Arial', sans-serif;
+  }
+
+  nav .controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  nav button {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #94a3b8;
+    padding: 6px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'Arial', sans-serif;
+    transition: background 0.15s;
+  }
+
+  nav button:hover { background: #334155; color: #e2e8f0; }
+  nav button:disabled { opacity: 0.3; cursor: default; }
+
+  nav .counter {
+    font-size: 13px;
+    color: #64748b;
+    font-family: 'Arial', sans-serif;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  /* Slide container */
+  .deck {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    padding: 48px 80px;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .slide.active { display: flex; }
+
+  /* Slide types */
+  .slide.title {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    justify-content: center;
+    align-items: flex-start;
+    padding: 80px;
+  }
+
+  .slide.section-break {
+    background: #1e3a5f;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .slide.content {
+    background: #0f172a;
+  }
+
+  .slide.two-col {
+    background: #0f172a;
+  }
+
+  /* Typography */
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #3b82f6;
+    font-family: 'Arial', sans-serif;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-size: 48px;
+    font-weight: normal;
+    line-height: 1.15;
+    color: #f1f5f9;
+    margin-bottom: 24px;
+    max-width: 700px;
+  }
+
+  h2 {
+    font-size: 32px;
+    font-weight: normal;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: normal;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 18px;
+    color: #94a3b8;
+    max-width: 560px;
+    line-height: 1.6;
+    font-family: 'Arial', sans-serif;
+  }
+
+  .slide-label {
+    font-size: 13px;
+    color: #64748b;
+    font-family: 'Arial', sans-serif;
+    margin-bottom: 32px;
+  }
+
+  p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: #94a3b8;
+    font-family: 'Arial', sans-serif;
+    max-width: 720px;
+  }
+
+  /* Lists */
+  ul.bullets {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 8px;
+  }
+
+  ul.bullets li {
+    font-size: 16px;
+    color: #94a3b8;
+    font-family: 'Arial', sans-serif;
+    line-height: 1.5;
+    padding-left: 20px;
+    position: relative;
+  }
+
+  ul.bullets li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: #3b82f6;
+  }
+
+  ul.bullets li strong {
+    color: #e2e8f0;
+    font-weight: normal;
+  }
+
+  /* Cards */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    padding: 20px;
+  }
+
+  .card .tag {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #3b82f6;
+    font-family: 'Arial', sans-serif;
+    margin-bottom: 8px;
+  }
+
+  .card h3 {
+    font-size: 15px;
+    color: #f1f5f9;
+    margin-bottom: 6px;
+    font-family: 'Arial', sans-serif;
+  }
+
+  .card p {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.5;
+    max-width: none;
+  }
+
+  /* Two-column layout */
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+
+  .col-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #64748b;
+    font-family: 'Arial', sans-serif;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #1e293b;
+  }
+
+  /* Timeline */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 8px;
+  }
+
+  .tl-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 120px;
+    gap: 24px;
+    align-items: start;
+    padding: 14px 0;
+    border-bottom: 1px solid #1e293b;
+  }
+
+  .tl-row:last-child { border-bottom: none; }
+
+  .tl-weeks {
+    font-size: 12px;
+    color: #3b82f6;
+    font-family: 'Arial', sans-serif;
+    padding-top: 2px;
+  }
+
+  .tl-phase {
+    font-size: 15px;
+    color: #e2e8f0;
+    font-family: 'Arial', sans-serif;
+  }
+
+  .tl-note {
+    font-size: 12px;
+    color: #64748b;
+    font-family: 'Arial', sans-serif;
+    text-align: right;
+    padding-top: 2px;
+  }
+
+  /* Pricing */
+  .price-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-family: 'Arial', sans-serif;
+  }
+
+  .price-table th {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #64748b;
+    text-align: left;
+    padding: 8px 0;
+    border-bottom: 1px solid #334155;
+    font-weight: normal;
+  }
+
+  .price-table td {
+    font-size: 15px;
+    color: #94a3b8;
+    padding: 12px 0;
+    border-bottom: 1px solid #1e293b;
+    vertical-align: top;
+  }
+
+  .price-table td:last-child { text-align: right; color: #e2e8f0; }
+
+  .price-table tr.total td {
+    color: #f1f5f9;
+    border-top: 1px solid #334155;
+    border-bottom: none;
+    font-size: 16px;
+    padding-top: 16px;
+  }
+
+  /* Highlight stat */
+  .stat-row {
+    display: flex;
+    gap: 40px;
+    margin-top: 24px;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-num {
+    font-size: 40px;
+    color: #3b82f6;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: #64748b;
+    font-family: 'Arial', sans-serif;
+  }
+
+  /* Section break content */
+  .slide.section-break h2 {
+    font-size: 40px;
+    color: #f1f5f9;
+    margin-bottom: 12px;
+  }
+
+  .slide.section-break p {
+    font-size: 18px;
+    color: #93c5fd;
+    font-family: 'Arial', sans-serif;
+    max-width: 500px;
+    text-align: center;
+    margin: 0 auto;
+  }
+
+  /* Progress bar */
+  .progress {
+    height: 2px;
+    background: #1e293b;
+    flex-shrink: 0;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: #3b82f6;
+    transition: width 0.3s ease;
+  }
+
+  /* Divider */
+  .divider {
+    width: 48px;
+    height: 2px;
+    background: #3b82f6;
+    margin: 20px 0;
+  }
+
+  .meta {
+    margin-top: 40px;
+    font-size: 13px;
+    color: #475569;
+    font-family: 'Arial', sans-serif;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">Capabilities Presentation — MC-2026-0417</span>
+  <div class="controls">
+    <button id="prev" onclick="go(-1)" disabled>← Prev</button>
+    <span class="counter" id="counter">1 / 14</span>
+    <button id="next" onclick="go(1)">Next →</button>
+  </div>
+</nav>
+
+<div class="progress"><div class="progress-fill" id="progress"></div></div>
+
+<div class="deck">
+
+  <!-- 1. Title -->
+  <div class="slide title active">
+    <div class="eyebrow">Capabilities Presentation</div>
+    <h1>Modernising the Meridian Inventory Dashboard</h1>
+    <div class="divider"></div>
+    <p class="subtitle">A proposal in response to RFP #MC-2026-0417, issued by Meridian Components, Inc.</p>
+    <div class="meta">April 28, 2026 &nbsp;·&nbsp; [Your Firm Name]</div>
+  </div>
+
+  <!-- 2. The situation -->
+  <div class="slide content">
+    <div class="slide-label">The situation</div>
+    <h2>A capable system with unfinished work</h2>
+    <div class="divider"></div>
+    <p style="margin-bottom: 24px;">Meridian's current dashboard was delivered by a previous vendor in 2024. It covers core inventory, orders, and spending — but it left the contract with known defects, no test coverage, and several capabilities the operations team has been waiting for.</p>
+    <ul class="bullets">
+      <li><strong>Reports module</strong> — at least eight known defects; filters not fully wired up</li>
+      <li><strong>No automated tests</strong> — Meridian IT has frozen deployments as a result</li>
+      <li><strong>Missing features</strong> — Restocking recommendations are the top ask from operations</li>
+      <li><strong>Incomplete migration</strong> — parts of the codebase on older patterns the previous vendor didn't finish</li>
+    </ul>
+  </div>
+
+  <!-- 3. Why it matters -->
+  <div class="slide content">
+    <div class="slide-label">Why it matters</div>
+    <h2>Three stakeholders, three blockers</h2>
+    <div class="divider"></div>
+    <div class="cards">
+      <div class="card">
+        <div class="tag">Operations</div>
+        <h3>R. Tanaka, VP Operations</h3>
+        <p>Her team uses the dashboard daily. The Restocking feature is her ask. The Reports defects affect her team directly. She's frustrated with the previous vendor.</p>
+      </div>
+      <div class="card">
+        <div class="tag">IT</div>
+        <h3>Meridian IT</h3>
+        <p>Has blocked all changes to the current system because there's no test coverage. Automated tests (R3) are the gate that unblocks everything else.</p>
+      </div>
+      <div class="card">
+        <div class="tag">Procurement</div>
+        <h3>J. Okafor, Director</h3>
+        <p>Owns vendor selection. Cares about timeline confidence and price predictability. The published criteria weight technical approach at 40%.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Our approach -->
+  <div class="slide content">
+    <div class="slide-label">Our approach</div>
+    <h2>Audit first. Build on solid ground.</h2>
+    <div class="divider"></div>
+    <p style="margin-bottom: 24px;">We don't commit to defect counts before we've read the code. The previous vendor's handoff notes list three known issues in the Reports module; the RFP cites at least eight. That gap is a reason for caution, not confidence.</p>
+    <ul class="bullets">
+      <li><strong>Phase 1 is audit and test harness</strong> — no fixes until we know exactly what we're fixing</li>
+      <li><strong>Tests are written per phase</strong> — not retrofitted at the end; IT can approve work incrementally</li>
+      <li><strong>Meridian's priority order</strong> — R1 → R2 → R3 → R4; we follow their sequence, not ours</li>
+      <li><strong>Two milestone sign-offs mid-engagement</strong> — Reports review with operations before we move to Restocking</li>
+    </ul>
+  </div>
+
+  <!-- 5. R1 -->
+  <div class="slide content">
+    <div class="slide-label">Requirement R1</div>
+    <h2>Reports module remediation</h2>
+    <div class="divider"></div>
+    <div class="cols">
+      <div>
+        <div class="col-label">What we'll do</div>
+        <ul class="bullets">
+          <li>Full defect catalogue before any fixes</li>
+          <li>Triage by severity — broken behaviour first, then data inconsistency, i18n gaps, pattern debt</li>
+          <li>Resolve all Options API remnants in the Reports view</li>
+          <li>Playwright tests written for each fixed flow</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-label">Deliverable</div>
+        <ul class="bullets">
+          <li>Fully functional Reports module</li>
+          <li>All filters wired and consistent with API patterns</li>
+          <li>No console errors in normal operation</li>
+          <li>Passing test suite for all Reports flows</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. R2 -->
+  <div class="slide content">
+    <div class="slide-label">Requirement R2</div>
+    <h2>Restocking recommendations</h2>
+    <div class="divider"></div>
+    <div class="cols">
+      <div>
+        <div class="col-label">How it works</div>
+        <ul class="bullets">
+          <li>New view within the existing application — same stack, same data flow patterns</li>
+          <li>Inputs: current stock levels, demand forecast, operator-supplied budget ceiling</li>
+          <li>Output: prioritised purchase order recommendations within budget</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-label">Our process</div>
+        <ul class="bullets">
+          <li>Requirements conversation with Tanaka's team before writing code</li>
+          <li>Confirm: budget scope (per warehouse or global?), demand weighting, output format</li>
+          <li>Build, test, demo — sign-off before handoff</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. R3 -->
+  <div class="slide content">
+    <div class="slide-label">Requirement R3</div>
+    <h2>Automated browser testing</h2>
+    <div class="divider"></div>
+    <p style="margin-bottom: 24px;">The absence of test coverage is why Meridian IT has frozen deployments. We treat R3 as a foundation, not an afterthought — the test harness goes in during Phase 1, before any code changes.</p>
+    <ul class="bullets">
+      <li><strong>Tool:</strong> Playwright — well-suited to Vue, strong CI integration, readable output</li>
+      <li><strong>Scope:</strong> all major flows — inventory, orders, reports, restocking</li>
+      <li><strong>Approach:</strong> tests written per phase alongside each feature; IT can review and approve incrementally</li>
+      <li><strong>Deliverable:</strong> complete test suite with documentation for running locally and in CI</li>
+    </ul>
+  </div>
+
+  <!-- 8. R4 + D1-D3 -->
+  <div class="slide content">
+    <div class="slide-label">R4 and desired items</div>
+    <h2>Architecture docs and beyond</h2>
+    <div class="divider"></div>
+    <div class="cards">
+      <div class="card">
+        <div class="tag">R4 — Required</div>
+        <h3>Architecture documentation</h3>
+        <p>Current-state overview — components, data flow, API surface. Written for Meridian IT, not developers. Delivered at Phase 4.</p>
+      </div>
+      <div class="card">
+        <div class="tag">D1 — Desired</div>
+        <h3>UI modernisation</h3>
+        <p>Scoped once brand guide is received post-award. Applied at component layer — colours, typography, spacing.</p>
+      </div>
+      <div class="card">
+        <div class="tag">D2 — Desired</div>
+        <h3>Internationalisation</h3>
+        <p>Extend i18n to remaining views. Tokyo-facing views first. Meridian provides or validates Japanese translations.</p>
+      </div>
+      <div class="card">
+        <div class="tag">D3 — Desired</div>
+        <h3>Dark mode</h3>
+        <p>Operator-selectable theme. CSS custom properties for clean separation. Designed for low-light warehouse stations.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. Timeline -->
+  <div class="slide content">
+    <div class="slide-label">Delivery plan</div>
+    <h2>Four phases, ten weeks</h2>
+    <div class="divider"></div>
+    <div class="timeline">
+      <div class="tl-row">
+        <div class="tl-weeks">Weeks 1–2</div>
+        <div class="tl-phase">Phase 1 — Onboarding & Audit<br><span style="font-size:13px;color:#64748b;">Defect catalogue · architecture draft · test harness</span></div>
+        <div class="tl-note">Gate: IT approves harness</div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-weeks">Weeks 3–5</div>
+        <div class="tl-phase">Phase 2 — Reports Remediation<br><span style="font-size:13px;color:#64748b;">R1 complete · R3 (Reports flows)</span></div>
+        <div class="tl-note">Gate: Tanaka sign-off</div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-weeks">Weeks 6–8</div>
+        <div class="tl-phase">Phase 3 — Restocking Feature<br><span style="font-size:13px;color:#64748b;">R2 complete · R3 (Restocking flows)</span></div>
+        <div class="tl-note">Gate: ops team demo</div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-weeks">Weeks 9–10</div>
+        <div class="tl-phase">Phase 4 — Completion & Handoff<br><span style="font-size:13px;color:#64748b;">R3 complete · R4 final · handoff package</span></div>
+        <div class="tl-note">Final delivery</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. Pricing -->
+  <div class="slide content">
+    <div class="slide-label">Pricing</div>
+    <h2>Fixed-fee, milestone-gated</h2>
+    <div class="divider"></div>
+    <table class="price-table">
+      <thead>
+        <tr>
+          <th>Phase</th>
+          <th>Scope</th>
+          <th style="text-align:right;">Fee</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Phase 1</td><td>Audit, architecture draft, test harness</td><td>$9,500</td></tr>
+        <tr><td>Phase 2</td><td>Reports remediation (R1) + R3 partial</td><td>$14,000</td></tr>
+        <tr><td>Phase 3</td><td>Restocking feature (R2) + R3 partial</td><td>$16,500</td></tr>
+        <tr><td>Phase 4</td><td>R3 complete, R4 final, handoff</td><td>$9,000</td></tr>
+        <tr class="total"><td colspan="2"><strong>Total — R1 through R4</strong></td><td><strong>$49,000</strong></td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top: 16px; font-size: 13px; color: #64748b;">D1–D3 scoped as a follow-on phase. Indicative ranges: D1 $6–10K · D2 $5–8K · D3 $3.5–5.5K</p>
+  </div>
+
+  <!-- 11. Experience 1 -->
+  <div class="slide content">
+    <div class="slide-label">Relevant experience</div>
+    <h2>We have done this work before</h2>
+    <div class="divider"></div>
+    <div class="cols">
+      <div>
+        <div class="col-label">Halcyon Industrial — 2024</div>
+        <ul class="bullets" style="margin-bottom: 24px;">
+          <li>Vue/Python inventory dashboard — inherited from a previous vendor</li>
+          <li>Catalogued 11 defects in the Reports module (client had logged six)</li>
+          <li>Delivered Playwright test suite covering all critical flows</li>
+          <li>IT unfroze deployments within two weeks of acceptance</li>
+        </ul>
+        <p style="font-size:13px; color: #3b82f6;">Relevant: R1 (Reports), R3 (testing), this engagement model</p>
+      </div>
+      <div>
+        <div class="col-label">Thornfield Logistics — 2023</div>
+        <ul class="bullets" style="margin-bottom: 24px;">
+          <li>Tokyo team operating in English-only views — i18n scaffolded, never finished</li>
+          <li>Extended localisation across all active views; coordinated Japanese translations</li>
+          <li>Delivered restocking recommendation feature — budget-constrained PO suggestions</li>
+          <li>Both pieces still in production</li>
+        </ul>
+        <p style="font-size:13px; color: #3b82f6;">Relevant: R2 (restocking), D2 (i18n), Tokyo warehouse context</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12. Experience 2 -->
+  <div class="slide content">
+    <div class="slide-label">Relevant experience</div>
+    <h2>Cascade Medical Devices — 2022</h2>
+    <div class="divider"></div>
+    <p style="margin-bottom: 24px;">Internal inventory and compliance tool. Original developer had left the company; 18 months without active maintenance. Minimal documentation. Vue 2 application that needed migration to Vue 3 Composition API and test coverage before a regulatory audit.</p>
+    <ul class="bullets">
+      <li>Conducted full architecture review from the codebase up — no reliable docs to start from</li>
+      <li>Completed Vue 2 → Vue 3 Composition API migration</li>
+      <li>Delivered test coverage sufficient for audit requirements</li>
+      <li>Surfaced two undisclosed data integrity issues; resolved within scope</li>
+    </ul>
+    <p style="margin-top: 24px; font-size:13px; color: #3b82f6;">Relevant: R4 (architecture docs), Vue migration, working with minimal prior documentation</p>
+  </div>
+
+  <!-- 13. Why us -->
+  <div class="slide content">
+    <div class="slide-label">Why us</div>
+    <h2>The right fit for this engagement</h2>
+    <div class="divider"></div>
+    <div class="cols">
+      <div>
+        <ul class="bullets">
+          <li><strong>We know this stack</strong> — Vue 3 Composition API and Python FastAPI are our standard tools; no ramp-up cost</li>
+          <li><strong>We've inherited broken dashboards before</strong> — Halcyon and Cascade both started from a similar position to Meridian's current state</li>
+          <li><strong>We scope honestly</strong> — we audit before we commit; we flag what we find rather than absorbing undisclosed work silently</li>
+        </ul>
+      </div>
+      <div>
+        <ul class="bullets">
+          <li><strong>Tests are part of the work, not an add-on</strong> — we write them as we go; IT gets incremental approvals, not a bundle at the end</li>
+          <li><strong>We finish what we start</strong> — fixed-fee with milestone gates means our incentive to deliver is aligned with Meridian's incentive to accept</li>
+          <li><strong>References available</strong> — all three prior clients have agreed to speak with prospective clients on request</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 14. Next steps -->
+  <div class="slide section-break">
+    <div class="eyebrow" style="color: #93c5fd;">Next steps</div>
+    <h2>Ready when you are</h2>
+    <div class="divider" style="margin: 20px auto;"></div>
+    <p>Questions to procurement by April 28 · Proposal due May 8 · Happy to arrange a call with Tanaka's team at any point</p>
+    <div style="margin-top: 48px; font-size: 14px; color: #475569; font-family: Arial, sans-serif;">
+      [Your Firm Name] &nbsp;·&nbsp; [contact@yourfirm.example] &nbsp;·&nbsp; RFP #MC-2026-0417
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let current = 0;
+  const total = 14;
+  const slides = document.querySelectorAll('.slide');
+
+  function go(dir) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(total - 1, current + dir));
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('prev').disabled = current === 0;
+    document.getElementById('next').disabled = current === total - 1;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') go(-1);
+  });
+
+  go(0);
+</script>
+</body>
+</html>

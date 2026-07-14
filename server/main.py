@@ -120,6 +120,21 @@ class CreatePurchaseOrderRequest(BaseModel):
     expected_delivery_date: str
     notes: Optional[str] = None
 
+class RestockingRecommendation(BaseModel):
+    id: str
+    sku: str
+    name: str
+    category: str
+    warehouse: str
+    quantity_on_hand: int
+    reorder_point: int
+    recommended_qty: int
+    unit_cost: float
+    estimated_cost: float
+    demand_trend: str
+    forecasted_demand: int
+    priority: str
+
 # API endpoints
 @app.get("/")
 def root():
@@ -227,13 +242,77 @@ def get_recent_transactions():
     """Get recent transactions"""
     return recent_transactions
 
+PRIORITY_ORDER = {'high': 0, 'medium': 1, 'low': 2}
+
+@app.get("/api/restocking", response_model=List[RestockingRecommendation])
+def get_restocking_recommendations(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
+    """Get restocking recommendations based on stock levels and demand forecasts"""
+    filtered = apply_filters(inventory_items, warehouse, category)
+    demand_lookup = {d['item_sku']: d for d in demand_forecasts}
+
+    recommendations = []
+    for item in filtered:
+        qty = item['quantity_on_hand']
+        reorder = item['reorder_point']
+
+        if qty > reorder * 1.5:
+            continue
+
+        demand = demand_lookup.get(item['sku'], {})
+        trend = demand.get('trend', 'stable')
+        forecasted = demand.get('forecasted_demand', reorder * 2)
+
+        base_qty = reorder * 2 - qty
+        if trend == 'increasing' and (forecasted - qty) > base_qty:
+            recommended_qty = forecasted - qty
+        else:
+            recommended_qty = base_qty
+        recommended_qty = max(recommended_qty, 1)
+
+        estimated_cost = round(recommended_qty * item['unit_cost'], 2)
+
+        if qty <= reorder and trend == 'increasing':
+            priority = 'high'
+        elif qty <= reorder:
+            priority = 'medium'
+        else:
+            priority = 'low'
+
+        recommendations.append({
+            'id': item['id'],
+            'sku': item['sku'],
+            'name': item['name'],
+            'category': item['category'],
+            'warehouse': item['warehouse'],
+            'quantity_on_hand': qty,
+            'reorder_point': reorder,
+            'recommended_qty': recommended_qty,
+            'unit_cost': item['unit_cost'],
+            'estimated_cost': estimated_cost,
+            'demand_trend': trend,
+            'forecasted_demand': forecasted,
+            'priority': priority
+        })
+
+    recommendations.sort(key=lambda x: PRIORITY_ORDER[x['priority']])
+    return recommendations
+
+
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
     """Get quarterly performance reports"""
+    filtered_orders = apply_filters(orders, warehouse, category)
+
     # Calculate quarterly statistics from orders
     quarters = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
@@ -274,11 +353,16 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
     """Get month-over-month trends"""
+    filtered_orders = apply_filters(orders, warehouse, category)
+
     months = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
