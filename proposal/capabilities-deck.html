@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Meridian Components — Inventory Dashboard Modernization</title>
+<style>
+  :root {
+    --navy: #121A38;
+    --white: #ffffff;
+    --panel: #F3F4F7;
+    --panel-deep: #e7eaf0;
+    --gray-light: #ADB8C2;
+    --gray-mid: #738597;
+    --gray-dark: #47556B;
+    --blue: #0058AB;
+    --blue-bright: #0066B0;
+    --cyan: #1DB8F2;
+    --teal: #00D5D0;
+    --amber: #FEB100;
+    --coral: #FF816E;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
+    background: var(--panel);
+    color: var(--navy);
+  }
+  #deck {
+    position: relative;
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+  }
+  .slide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6vh 8vw;
+    background:
+      radial-gradient(circle at 88% 6%, rgba(29, 184, 242, 0.10) 0%, transparent 45%),
+      radial-gradient(circle at 8% 96%, rgba(0, 213, 208, 0.10) 0%, transparent 42%),
+      linear-gradient(155deg, #ffffff 0%, var(--panel) 55%, var(--panel-deep) 130%);
+    overflow: hidden;
+  }
+  .slide::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(18, 26, 56, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(18, 26, 56, 0.05) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: linear-gradient(to bottom, black, transparent 75%);
+    pointer-events: none;
+  }
+  .slide.active { display: flex; }
+  .slide > * { position: relative; z-index: 1; }
+  .kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.78rem;
+    color: var(--blue-bright);
+    font-weight: 700;
+    margin-bottom: 0.85rem;
+    font-family: "Consolas", "SFMono-Regular", Menlo, monospace;
+  }
+  .kicker::before { content: "// "; color: var(--teal); }
+  h1 {
+    font-size: 3rem;
+    margin: 0 0 0.6rem 0;
+    font-weight: 800;
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    background: linear-gradient(100deg, var(--navy) 25%, var(--blue-bright) 65%, var(--cyan) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  h2 {
+    font-size: 2rem;
+    margin: 0 0 1.5rem 0;
+    font-weight: 800;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+  }
+  h2::after {
+    content: "";
+    display: block;
+    width: 56px;
+    height: 4px;
+    margin-top: 0.7rem;
+    background: linear-gradient(90deg, var(--cyan), var(--teal));
+    border-radius: 3px;
+  }
+  .subtitle {
+    font-size: 1.12rem;
+    color: var(--gray-dark);
+    margin-bottom: 2rem;
+    max-width: 660px;
+    line-height: 1.55;
+  }
+  .meta {
+    margin-top: auto;
+    font-size: 0.9rem;
+    color: var(--gray-mid);
+    letter-spacing: 0.03em;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    width: 100%;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.25rem;
+    width: 100%;
+  }
+  .card {
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(18, 26, 56, 0.08);
+    border-radius: 14px;
+    padding: 1.5rem;
+    backdrop-filter: blur(6px);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(18, 26, 56, 0.06);
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--cyan), var(--teal));
+  }
+  .card h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.05rem;
+    color: var(--navy);
+    font-weight: 700;
+  }
+  .card p {
+    margin: 0;
+    font-size: 0.94rem;
+    color: var(--gray-dark);
+    line-height: 1.55;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 0.22rem 0.6rem;
+    border-radius: 6px;
+    margin-bottom: 0.65rem;
+    font-family: "Consolas", "SFMono-Regular", Menlo, monospace;
+  }
+  .tag-required { background: rgba(255, 129, 110, 0.12); color: #d45a45; border: 1px solid rgba(255, 129, 110, 0.4); }
+  .tag-desired { background: rgba(254, 177, 0, 0.14); color: #a3730a; border: 1px solid rgba(254, 177, 0, 0.4); }
+  .tag-phase { background: rgba(29, 184, 242, 0.12); color: var(--blue-bright); border: 1px solid rgba(29, 184, 242, 0.4); }
+  ul.plain { margin: 0; padding: 0; list-style: none; max-width: 760px; }
+  ul.plain li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(18, 26, 56, 0.1);
+    font-size: 1.02rem;
+    color: var(--navy);
+  }
+  ul.plain li:last-child { border-bottom: none; }
+  ul.plain li .label {
+    color: var(--blue-bright);
+    font-size: 0.78rem;
+    display: block;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+  }
+  .timeline-row {
+    display: flex;
+    align-items: stretch;
+    gap: 1rem;
+    margin-bottom: 0.9rem;
+  }
+  .timeline-bar {
+    width: 90px;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    border-radius: 10px;
+    color: var(--white);
+    font-size: 0.8rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(0, 88, 171, 0.25);
+  }
+  .timeline-content {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(18, 26, 56, 0.08);
+    border-radius: 10px;
+    padding: 0.85rem 1.2rem;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 6px 16px rgba(18, 26, 56, 0.05);
+  }
+  .timeline-content strong { display: block; font-size: 1rem; margin-bottom: 0.2rem; color: var(--navy); }
+  .timeline-content span { font-size: 0.9rem; color: var(--gray-dark); }
+  .stat-row {
+    display: flex;
+    gap: 2.5rem;
+    margin-top: 1rem;
+  }
+  .stat .num {
+    font-size: 2.6rem;
+    font-weight: 800;
+    background: linear-gradient(100deg, var(--blue-bright), var(--teal));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .stat .lbl { font-size: 0.85rem; color: var(--gray-mid); letter-spacing: 0.03em; }
+  .nav {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(29, 184, 242, 0.3);
+    padding: 8px 16px;
+    border-radius: 999px;
+    z-index: 10;
+    box-shadow: 0 8px 24px rgba(18, 26, 56, 0.12);
+  }
+  .nav button {
+    background: none;
+    border: none;
+    color: var(--navy);
+    cursor: pointer;
+    font-size: 0.88rem;
+    padding: 4px 10px;
+    letter-spacing: 0.02em;
+  }
+  .nav button:hover { color: var(--blue-bright); }
+  .nav .count {
+    color: var(--gray-mid);
+    font-size: 0.82rem;
+    min-width: 50px;
+    text-align: center;
+    font-family: "Consolas", "SFMono-Regular", Menlo, monospace;
+  }
+  .title-slide {
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .close-note {
+    justify-content: center;
+  }
+</style>
+</head>
+<body>
+
+<div id="deck">
+
+  <!-- 1: Title -->
+  <section class="slide title-slide active">
+    <div class="kicker">RFP #MC-2026-0417 · Response Presentation</div>
+    <h1>Modernizing Meridian's<br>Inventory Dashboard</h1>
+    <p class="subtitle">A focused engagement to close known gaps, add restocking intelligence, and put safe, tested change back in your team's hands.</p>
+    <div class="meta">Prepared for Meridian Components, Inc.</div>
+  </section>
+
+  <!-- 2: Where things stand -->
+  <section class="slide">
+    <div class="kicker">Current State</div>
+    <h2>A strong foundation, with real gaps</h2>
+    <div class="grid-3">
+      <div class="card">
+        <h3>Reports module</h3>
+        <p>At least eight logged defects — filter behavior, internationalization, inconsistent data patterns — left unresolved.</p>
+      </div>
+      <div class="card">
+        <h3>No test coverage</h3>
+        <p>Without automated tests, your IT team can't confidently approve changes to the system.</p>
+      </div>
+      <div class="card">
+        <h3>Missing capability</h3>
+        <p>Operations has asked for restocking recommendations. It doesn't exist yet.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3: What this means -->
+  <section class="slide">
+    <div class="kicker">Impact</div>
+    <h2>What that means day to day</h2>
+    <ul class="plain">
+      <li><span class="label">Operations</span>Manual workarounds for known Reports issues; no tool to support restocking decisions.</li>
+      <li><span class="label">IT</span>Reluctant to approve any change without a way to verify it's safe.</li>
+      <li><span class="label">Tokyo warehouse</span>Working in English-only views despite limited English proficiency on the team.</li>
+    </ul>
+  </section>
+
+  <!-- 4: Our approach overview -->
+  <section class="slide">
+    <div class="kicker">Our Approach</div>
+    <h2>Four required deliverables, one connected plan</h2>
+    <div class="grid-2">
+      <div class="card">
+        <span class="tag tag-required">R1</span>
+        <h3>Reports Remediation</h3>
+        <p>Audit and resolve all logged defects, verified against new automated tests.</p>
+      </div>
+      <div class="card">
+        <span class="tag tag-required">R2</span>
+        <h3>Restocking Recommendations</h3>
+        <p>New view recommending purchase orders from stock, demand, and budget ceiling.</p>
+      </div>
+      <div class="card">
+        <span class="tag tag-required">R3</span>
+        <h3>Automated Browser Testing</h3>
+        <p>End-to-end coverage so IT can approve future changes with confidence.</p>
+      </div>
+      <div class="card">
+        <span class="tag tag-required">R4</span>
+        <h3>Architecture Documentation</h3>
+        <p>Current-state overview delivered as part of onboarding, for IT's ongoing use.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5: R1 detail -->
+  <section class="slide">
+    <div class="kicker">R1 · Reports Remediation</div>
+    <h2>Fix root causes, not symptoms</h2>
+    <p class="subtitle">We audit the Reports page against the live codebase, group defects by root cause — filter wiring, i18n coverage, data-handling patterns — and resolve each one verified against the test suite we're building in parallel.</p>
+    <div class="stat-row">
+      <div class="stat"><div class="num">8+</div><div class="lbl">logged defects addressed</div></div>
+      <div class="stat"><div class="num">3</div><div class="lbl">root-cause categories</div></div>
+    </div>
+  </section>
+
+  <!-- 6: R2 detail -->
+  <section class="slide">
+    <div class="kicker">R2 · Restocking Recommendations</div>
+    <h2>Built with your operations team, not around them</h2>
+    <p class="subtitle">The Restocking view recommends purchase orders from three inputs: current stock, demand forecast, and an operator-supplied budget ceiling. Before we build the logic, we sit down with the people who'll use it daily to understand how restocking decisions are actually made.</p>
+  </section>
+
+  <!-- 7: R3 detail -->
+  <section class="slide">
+    <div class="kicker">R3 · Automated Browser Testing</div>
+    <h2>Coverage where it matters most</h2>
+    <p class="subtitle">Initial coverage focuses on the Reports module, the new Restocking view, and the shared filter system underneath both — giving your IT team a verifiable foundation on the areas of highest change and historical risk.</p>
+  </section>
+
+  <!-- 8: R4 detail -->
+  <section class="slide">
+    <div class="kicker">R4 · Architecture Documentation</div>
+    <h2>A clear picture for your team</h2>
+    <p class="subtitle">A full architecture review during onboarding produces a current-state overview suitable for IT's ongoing reference — useful today, and for any future vendor transition.</p>
+  </section>
+
+  <!-- 9: Desired items -->
+  <section class="slide">
+    <div class="kicker">Also Considered</div>
+    <h2>Desired items (D1–D3)</h2>
+    <div class="grid-3">
+      <div class="card">
+        <span class="tag tag-desired">D1</span>
+        <h3>UI Modernization</h3>
+        <p>Out of scope for this phase.</p>
+      </div>
+      <div class="card">
+        <span class="tag tag-desired">D2</span>
+        <h3>Internationalization</h3>
+        <p>Candidate addition once required items are complete.</p>
+      </div>
+      <div class="card">
+        <span class="tag tag-desired">D3</span>
+        <h3>Dark Mode</h3>
+        <p>Candidate addition once required items are complete.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10: Timeline overview -->
+  <section class="slide">
+    <div class="kicker">Timeline</div>
+    <h2>A phased plan, built for speed</h2>
+    <div class="timeline-row">
+      <div class="timeline-bar">Wk 1</div>
+      <div class="timeline-content"><strong>Onboarding & Discovery</strong><span>Architecture review, defect audit, operations discovery session.</span></div>
+    </div>
+    <div class="timeline-row">
+      <div class="timeline-bar">Wk 2–3</div>
+      <div class="timeline-content"><strong>Reports + Test Foundation</strong><span>Resolve defects while standing up automated coverage.</span></div>
+    </div>
+    <div class="timeline-row">
+      <div class="timeline-bar">Wk 3–5</div>
+      <div class="timeline-content"><strong>Restocking Build</strong><span>Build and test the new Restocking view.</span></div>
+    </div>
+    <div class="timeline-row">
+      <div class="timeline-bar">Wk 5–6</div>
+      <div class="timeline-content"><strong>Documentation & Handoff</strong><span>Finalize architecture docs, final regression pass, handoff.</span></div>
+    </div>
+  </section>
+
+  <!-- 11: Pricing -->
+  <section class="slide">
+    <div class="kicker">Pricing</div>
+    <h2>Time-and-materials, capped</h2>
+    <p class="subtitle">Time-and-materials with a not-to-exceed cap — budget certainty for Meridian, with the flexibility to adapt the Restocking build as requirements are refined during discovery.</p>
+    <div class="stat-row">
+      <div class="stat"><div class="num">5–6</div><div class="lbl">weeks estimated effort</div></div>
+      <div class="stat"><div class="num">4</div><div class="lbl">delivery phases</div></div>
+    </div>
+  </section>
+
+  <!-- 12: Risk approach -->
+  <section class="slide">
+    <div class="kicker">How We Work</div>
+    <h2>Verify before we build, test before we ship</h2>
+    <ul class="plain">
+      <li><span class="label">Discovery first</span>Recommendation logic for Restocking is validated with your team before we build it.</li>
+      <li><span class="label">Tests alongside fixes</span>Reports fixes ship against automated coverage, not ahead of it.</li>
+      <li><span class="label">Documentation as a byproduct</span>Architecture review happens naturally as part of onboarding, not as a separate afterthought.</li>
+    </ul>
+  </section>
+
+  <!-- 13: Why us -->
+  <section class="slide">
+    <div class="kicker">Why Us</div>
+    <h2>Relevant experience</h2>
+    <p class="subtitle">[Add 2–3 comparable engagements here — similar scale, similar stack, or similar remediation-plus-new-feature scope. This slide should reflect your firm's actual track record.]</p>
+  </section>
+
+  <!-- 14: Assumptions -->
+  <section class="slide">
+    <div class="kicker">Key Assumptions</div>
+    <h2>What this proposal is built on</h2>
+    <ul class="plain">
+      <li>Time-and-materials pricing with a not-to-exceed cap.</li>
+      <li>Test coverage scoped to Reports, Restocking, and the shared filter system.</li>
+      <li>UI modernization (D1) deferred; D2/D3 pursued only if capacity allows.</li>
+    </ul>
+  </section>
+
+  <!-- 15: Close -->
+  <section class="slide close-note">
+    <div class="kicker">Next Steps</div>
+    <h1>Let's get started</h1>
+    <p class="subtitle">We're ready to begin onboarding as soon as we're selected — starting with the architecture review and operations discovery session in Week 1.</p>
+    <div class="meta">Meridian Components, Inc. · RFP #MC-2026-0417</div>
+  </section>
+
+</div>
+
+<div class="nav">
+  <button id="prevBtn">&larr; Prev</button>
+  <span class="count" id="count">1 / 15</span>
+  <button id="nextBtn">Next &rarr;</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let idx = 0;
+  function show(i) {
+    slides[idx].classList.remove('active');
+    idx = (i + slides.length) % slides.length;
+    slides[idx].classList.add('active');
+    document.getElementById('count').textContent = (idx + 1) + ' / ' + slides.length;
+  }
+  document.getElementById('prevBtn').addEventListener('click', () => show(idx - 1));
+  document.getElementById('nextBtn').addEventListener('click', () => show(idx + 1));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') show(idx + 1);
+    if (e.key === 'ArrowLeft') show(idx - 1);
+  });
+</script>
+
+</body>
+</html>
