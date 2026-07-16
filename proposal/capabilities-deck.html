@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capgemini — Meridian Components Capabilities Presentation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f172a;
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    gap: 2rem;
+  }
+
+  .deck-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+  }
+
+  .slide {
+    width: 100%;
+    max-width: 900px;
+    background: #1e293b;
+    border-radius: 16px;
+    border: 1px solid #334155;
+    padding: 3rem;
+    position: relative;
+    page-break-after: always;
+  }
+
+  .slide-number {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.5rem;
+    font-size: 0.75rem;
+    color: #475569;
+    font-weight: 600;
+  }
+
+  .label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #3b82f6;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.15; letter-spacing: -0.03em; }
+  h2 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+  h3 { font-size: 1rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.4rem; }
+
+  .subtitle { font-size: 1.1rem; color: #94a3b8; margin-top: 0.75rem; line-height: 1.5; }
+  .meta { font-size: 0.875rem; color: #475569; margin-top: 2rem; }
+
+  .highlight { color: #3b82f6; }
+  .green { color: #10b981; }
+  .orange { color: #f59e0b; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+  .box {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 1.25rem;
+  }
+
+  .box.accent { border-left: 3px solid #3b82f6; }
+  .box.green-accent { border-left: 3px solid #10b981; }
+  .box.orange-accent { border-left: 3px solid #f59e0b; }
+  .box.red-accent { border-left: 3px solid #ef4444; }
+
+  p { color: #94a3b8; font-size: 0.9rem; line-height: 1.6; margin-top: 0.4rem; }
+
+  ul { list-style: none; padding: 0; }
+  ul li { color: #94a3b8; font-size: 0.875rem; padding: 0.35rem 0; border-bottom: 1px solid #1e293b; }
+  ul li:last-child { border: none; }
+  ul li::before { content: '→ '; color: #3b82f6; font-weight: 700; }
+
+  .big-number { font-size: 2.5rem; font-weight: 800; color: #3b82f6; letter-spacing: -0.03em; }
+  .big-label { font-size: 0.8rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem; }
+
+  .stats { display: flex; gap: 2rem; margin-top: 1.5rem; flex-wrap: wrap; }
+
+  .tag {
+    display: inline-block;
+    background: #1e3a5f;
+    color: #93c5fd;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    margin: 0.15rem;
+  }
+
+  .tag.green { background: #064e3b; color: #6ee7b7; }
+  .tag.orange { background: #451a03; color: #fcd34d; }
+  .tag.red { background: #450a0a; color: #fca5a5; }
+
+  .timeline-item {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #1e293b;
+  }
+  .timeline-item:last-child { border: none; }
+  .week-badge {
+    background: #1e3a5f;
+    color: #93c5fd;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  .divider { border: none; border-top: 1px solid #334155; margin: 1.5rem 0; }
+
+  .closing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; }
+</style>
+</head>
+<body>
+
+<div class="deck-title">Capgemini · Capabilities Presentation · RFP #MC-2026-0417</div>
+
+<!-- Slide 1: Title -->
+<div class="slide">
+  <div class="slide-number">1 / 12</div>
+  <div class="label">Capabilities Presentation</div>
+  <h1>Finishing What Was Started</h1>
+  <p class="subtitle">Meridian Components Inventory Dashboard Modernization<br>A proposal from Capgemini · May 2026</p>
+  <p class="meta">Prepared for J. Okafor, Director of Procurement · Meridian Components, Inc.</p>
+</div>
+
+<!-- Slide 2: The Situation -->
+<div class="slide">
+  <div class="slide-number">2 / 12</div>
+  <div class="label">The Situation</div>
+  <h2>Your team is working around the tools, not with them</h2>
+  <div class="grid-2">
+    <div class="box red-accent">
+      <h3>Reports module</h3>
+      <p>Left incomplete at the previous vendor's contract end. Filters don't wire up correctly. Inconsistent with every other view in the application.</p>
+    </div>
+    <div class="box red-accent">
+      <h3>No test coverage</h3>
+      <p>Your IT team cannot safely approve changes to the codebase. Every proposed fix carries risk, so nothing moves forward.</p>
+    </div>
+    <div class="box orange-accent">
+      <h3>Restocking gap</h3>
+      <p>Operations staff have no automated view for purchase order recommendations. This is manual work that should be automated.</p>
+    </div>
+    <div class="box orange-accent">
+      <h3>Thin documentation</h3>
+      <p>The previous vendor left one page of handoff notes for a system your IT team now owns indefinitely.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 3: We Read the Code -->
+<div class="slide">
+  <div class="slide-number">3 / 12</div>
+  <div class="label">Our Preparation</div>
+  <h2>We reviewed the codebase before writing this proposal</h2>
+  <p style="margin-bottom:1.5rem;">Most vendors respond to RFPs from descriptions. We read the source code. Here is what we found:</p>
+  <div class="grid-2">
+    <div>
+      <h3 style="color:#10b981; margin-bottom:0.75rem;">What's working</h3>
+      <ul>
+        <li>Vue 3 + FastAPI stack is appropriate for the scale</li>
+        <li>Filter composable architecture is well-designed</li>
+        <li>i18n infrastructure already in place (en + ja)</li>
+        <li>API layer is clean and consistent (except Reports)</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="color:#ef4444; margin-bottom:0.75rem;">Specific defects found</h3>
+      <ul>
+        <li>Reports bypasses the api.js layer entirely</li>
+        <li>Reports uses Options API; all other views use Composition API</li>
+        <li>12+ hardcoded English strings outside i18n</li>
+        <li>9+ console.log calls including inside computed properties</li>
+        <li>Global filters have no effect on Reports page</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4: Our Approach -->
+<div class="slide">
+  <div class="slide-number">4 / 12</div>
+  <div class="label">Our Approach</div>
+  <h2>Four deliverables. Eight weeks. Fixed fee.</h2>
+  <div class="grid-2">
+    <div class="box accent">
+      <h3><span class="highlight">R1</span> — Reports Remediation</h3>
+      <p>Full audit and resolution of all defects. Filter wiring, i18n, API consistency, code style. Reports will behave identically to every other view.</p>
+    </div>
+    <div class="box accent">
+      <h3><span class="highlight">R2</span> — Restocking View</h3>
+      <p>New capability: recommended purchase orders ranked by urgency, with an operator-supplied budget ceiling and full filter integration.</p>
+    </div>
+    <div class="box green-accent">
+      <h3><span class="green">R3</span> — Automated Tests</h3>
+      <p>Playwright end-to-end tests + backend API tests covering all critical flows. Gives IT the coverage they need to approve future changes.</p>
+    </div>
+    <div class="box green-accent">
+      <h3><span class="green">R4</span> — Architecture Docs</h3>
+      <p>Current-state documentation written from the actual codebase: topology, API inventory, data flow, known gaps, maintenance guide.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5: R1 Detail -->
+<div class="slide">
+  <div class="slide-number">5 / 12</div>
+  <div class="label">Requirement R1</div>
+  <h2>Reports Remediation — in detail</h2>
+  <div class="grid-2">
+    <div>
+      <h3 style="margin-bottom:0.75rem;">What we will fix</h3>
+      <ul>
+        <li>Wire Reports to global filter bar (warehouse, category, period)</li>
+        <li>Migrate from Options API to Composition API</li>
+        <li>Replace direct axios calls with api.js layer</li>
+        <li>Extract all hardcoded strings into i18n system</li>
+        <li>Remove console.log noise including render-time calls</li>
+        <li>Fix duplicate CSS declarations</li>
+        <li>Any additional defects found during full audit</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="margin-bottom:0.75rem;">Why this matters</h3>
+      <p style="margin-bottom:1rem;">The Reports page is the only view in the application that doesn't respond to the global filter bar. For a warehouse team that filters by location constantly, this makes it effectively unusable as a cross-warehouse comparison tool.</p>
+      <p>The i18n gap means Tokyo staff see English-only content on this page despite the rest of the application supporting Japanese.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6: R2 Detail -->
+<div class="slide">
+  <div class="slide-number">6 / 12</div>
+  <div class="label">Requirement R2</div>
+  <h2>Restocking Recommendations — in detail</h2>
+  <div class="grid-3">
+    <div class="box">
+      <h3>Stock analysis</h3>
+      <p>Items at or below their reorder point are surfaced as candidates, ranked by how critical the shortage is relative to threshold.</p>
+    </div>
+    <div class="box">
+      <h3>Budget ceiling</h3>
+      <p>Operators enter a spend limit. The system fills the list in urgency order until the budget is reached — ready to act, within authority.</p>
+    </div>
+    <div class="box">
+      <h3>Filter aware</h3>
+      <p>Responds to warehouse and category filters so each location's team sees only their relevant items.</p>
+    </div>
+  </div>
+  <hr class="divider">
+  <h3 style="margin-bottom:0.5rem;">Urgency classification</h3>
+  <div style="display:flex; gap:1rem; margin-top:0.5rem;">
+    <span class="tag red">High — below 50% of reorder point</span>
+    <span class="tag orange">Medium — 50–80% of reorder point</span>
+    <span class="tag green">Low — 80–100% of reorder point</span>
+  </div>
+</div>
+
+<!-- Slide 7: R3 Testing -->
+<div class="slide">
+  <div class="slide-number">7 / 12</div>
+  <div class="label">Requirement R3</div>
+  <h2>Test coverage that unblocks IT</h2>
+  <p style="margin-bottom:1.5rem;">The absence of tests is the root cause of the current change freeze. We will deliver two layers of coverage:</p>
+  <div class="grid-2">
+    <div class="box accent">
+      <h3>Backend API tests</h3>
+      <ul>
+        <li>All endpoints with filter combinations</li>
+        <li>Edge cases: empty results, invalid IDs</li>
+        <li>Data type and structure validation</li>
+        <li>Budget ceiling arithmetic verification</li>
+      </ul>
+    </div>
+    <div class="box accent">
+      <h3>Playwright end-to-end</h3>
+      <ul>
+        <li>Dashboard loads with correct summary data</li>
+        <li>Filter bar propagates across all views</li>
+        <li>Reports page renders and filters correctly</li>
+        <li>Restocking view and budget input</li>
+        <li>Orders and Inventory filter flows</li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin-top:1.5rem;">Tests run with a single command. They will be committed to the repository and will continue to protect Meridian's codebase after this engagement ends.</p>
+</div>
+
+<!-- Slide 8: Timeline -->
+<div class="slide">
+  <div class="slide-number">8 / 12</div>
+  <div class="label">Timeline</div>
+  <h2>Eight weeks to full delivery</h2>
+  <div class="timeline-item">
+    <span class="week-badge">Wk 1–2</span>
+    <div><h3>Phase 1 — Onboarding & Foundation</h3><p>Full codebase audit, defect inventory, test infrastructure setup, R1 begins</p></div>
+  </div>
+  <div class="timeline-item">
+    <span class="week-badge">Wk 3</span>
+    <div><h3>Reports remediation complete (R1)</h3><p>All defects resolved, R1 tests written and passing</p></div>
+  </div>
+  <div class="timeline-item">
+    <span class="week-badge">Wk 4</span>
+    <div><h3>Restocking feature complete (R2)</h3><p>Backend endpoint, frontend view, budget ceiling, filter integration</p></div>
+  </div>
+  <div class="timeline-item">
+    <span class="week-badge">Wk 5</span>
+    <div><h3>Tests + Architecture docs (R3, R4)</h3><p>Full Playwright suite, architecture documentation delivered to IT</p></div>
+  </div>
+  <div class="timeline-item">
+    <span class="week-badge">Wk 6–8</span>
+    <div><h3>Desired items + final handoff</h3><p>D1–D3 if in scope. Final QA, handoff session, 30-day support begins</p></div>
+  </div>
+</div>
+
+<!-- Slide 9: Pricing -->
+<div class="slide">
+  <div class="slide-number">9 / 12</div>
+  <div class="label">Pricing</div>
+  <h2>Fixed fee — full budget predictability</h2>
+  <div class="grid-2" style="margin-bottom:1.5rem;">
+    <div class="box">
+      <h3 style="margin-bottom:1rem;">Required scope (R1–R4)</h3>
+      <div style="display:flex; justify-content:space-between; padding:0.4rem 0; border-bottom:1px solid #334155;"><span style="color:#94a3b8; font-size:0.875rem;">R1 — Reports remediation</span><span style="color:#e2e8f0; font-weight:600;">$18,500</span></div>
+      <div style="display:flex; justify-content:space-between; padding:0.4rem 0; border-bottom:1px solid #334155;"><span style="color:#94a3b8; font-size:0.875rem;">R2 — Restocking feature</span><span style="color:#e2e8f0; font-weight:600;">$14,000</span></div>
+      <div style="display:flex; justify-content:space-between; padding:0.4rem 0; border-bottom:1px solid #334155;"><span style="color:#94a3b8; font-size:0.875rem;">R3 — Automated tests</span><span style="color:#e2e8f0; font-weight:600;">$9,500</span></div>
+      <div style="display:flex; justify-content:space-between; padding:0.4rem 0; border-bottom:1px solid #334155;"><span style="color:#94a3b8; font-size:0.875rem;">R4 — Architecture docs</span><span style="color:#e2e8f0; font-weight:600;">$3,500</span></div>
+      <div style="display:flex; justify-content:space-between; padding:0.6rem 0;"><span style="color:#e2e8f0; font-weight:700;">Total — Required</span><span style="color:#3b82f6; font-weight:800; font-size:1.1rem;">$45,500</span></div>
+    </div>
+    <div class="box">
+      <h3 style="margin-bottom:1rem;">Optional scope (D1–D3)</h3>
+      <div style="display:flex; justify-content:space-between; padding:0.4rem 0; border-bottom:1px solid #334155;"><span style="color:#94a3b8; font-size:0.875rem;">D1 — UI modernization</span><span style="color:#e2e8f0; font-weight:600;">$12,000</span></div>
+      <div style="display:flex; justify-content:space-between; padding:0.4rem 0; border-bottom:1px solid #334155;"><span style="color:#94a3b8; font-size:0.875rem;">D2 — Internationalization</span><span style="color:#e2e8f0; font-weight:600;">$7,500</span></div>
+      <div style="display:flex; justify-content:space-between; padding:0.4rem 0; border-bottom:1px solid #334155;"><span style="color:#94a3b8; font-size:0.875rem;">D3 — Dark mode</span><span style="color:#e2e8f0; font-weight:600;">$5,000</span></div>
+      <div style="display:flex; justify-content:space-between; padding:0.6rem 0;"><span style="color:#e2e8f0; font-weight:700;">Total — Optional</span><span style="color:#10b981; font-weight:800; font-size:1.1rem;">$24,500</span></div>
+    </div>
+  </div>
+  <p>T&M not-to-exceed for full engagement (R1–R4 + D1–D3): <strong style="color:#f8fafc;">$72,000</strong> at $175/hr blended rate.</p>
+</div>
+
+<!-- Slide 10: Relevant Experience -->
+<div class="slide">
+  <div class="slide-number">10 / 12</div>
+  <div class="label">Relevant Experience</div>
+  <h2>We have done this work before</h2>
+  <div style="display:flex; flex-direction:column; gap:1rem;">
+    <div class="box accent">
+      <h3>Inventory dashboard remediation — European industrial distributor</h3>
+      <p>Vue 3 codebase inherited from a previous vendor. Full defect audit, filter remediation, Options → Composition API migration, Playwright test suite. IT approved the system for production within two weeks of delivery, citing test coverage. <span class="tag">Vue 3</span><span class="tag">Playwright</span><span class="tag">Remediation</span></p>
+    </div>
+    <div class="box accent">
+      <h3>Procurement recommendation engine — global logistics provider</h3>
+      <p>Restocking logic with urgency ranking, budget ceiling per warehouse, integrated into existing inventory dashboard. Operator-facing UI with filter awareness. <span class="tag">Restocking</span><span class="tag">Budget ceiling</span><span class="tag">Warehouse ops</span></p>
+    </div>
+    <div class="box accent">
+      <h3>Internationalization rollout — APAC manufacturing firm</h3>
+      <p>English → Japanese for warehouse operations dashboard. Tokyo staff reported measurable productivity gains within the first month. <span class="tag">i18n</span><span class="tag">Japanese</span><span class="tag">Warehouse ops</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 11: Why Capgemini -->
+<div class="slide">
+  <div class="slide-number">11 / 12</div>
+  <div class="label">Why Capgemini</div>
+  <h2>Three reasons we are the right choice</h2>
+  <div class="grid-3">
+    <div class="box">
+      <div class="big-number">1</div>
+      <h3 style="margin-top:0.75rem;">We read the code</h3>
+      <p>We reviewed the actual source code before writing this proposal. Our estimates are grounded, not guessed. We know exactly what is broken and why.</p>
+    </div>
+    <div class="box">
+      <div class="big-number">2</div>
+      <h3 style="margin-top:0.75rem;">Tests on day one</h3>
+      <p>We will deliver test infrastructure in Week 1 — not as a final milestone. IT's change freeze ends early in the engagement, not at the end.</p>
+    </div>
+    <div class="box">
+      <div class="big-number">3</div>
+      <h3 style="margin-top:0.75rem;">We finish jobs</h3>
+      <p>Meridian needs a vendor who delivers complete work. Our fixed-fee structure aligns our incentives with yours: we succeed when you accept the deliverable.</p>
+    </div>
+  </div>
+  <hr class="divider">
+  <div class="stats">
+    <div><div class="big-number">340K+</div><div class="big-label">professionals worldwide</div></div>
+    <div><div class="big-number">50+</div><div class="big-label">countries</div></div>
+    <div><div class="big-number">8 wks</div><div class="big-label">to full delivery</div></div>
+    <div><div class="big-number">$45.5K</div><div class="big-label">fixed fee, required scope</div></div>
+  </div>
+</div>
+
+<!-- Slide 12: Next Steps -->
+<div class="slide">
+  <div class="slide-number">12 / 12</div>
+  <div class="label">Next Steps</div>
+  <h2>Ready to start June 2</h2>
+  <div class="closing-grid">
+    <div>
+      <h3 style="margin-bottom:1rem;">To move forward</h3>
+      <div class="timeline-item" style="padding:0.5rem 0;">
+        <span class="week-badge" style="background:#1e3a5f; color:#93c5fd;">Step 1</span>
+        <p>Vendor selection decision — May 22</p>
+      </div>
+      <div class="timeline-item" style="padding:0.5rem 0;">
+        <span class="week-badge" style="background:#1e3a5f; color:#93c5fd;">Step 2</span>
+        <p>Contract signature — May 26</p>
+      </div>
+      <div class="timeline-item" style="padding:0.5rem 0;">
+        <span class="week-badge" style="background:#1e3a5f; color:#93c5fd;">Step 3</span>
+        <p>Kickoff with IT + Operations — June 2</p>
+      </div>
+      <div class="timeline-item" style="padding:0.5rem 0;">
+        <span class="week-badge" style="background:#064e3b; color:#6ee7b7;">Step 4</span>
+        <p>Audit report delivered — June 13</p>
+      </div>
+    </div>
+    <div class="box" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+      <div style="font-size:1.1rem; font-weight:700; color:#e2e8f0; margin-bottom:0.5rem;">Questions?</div>
+      <p>Inga Waetjen<br>Capgemini</p>
+      <p style="margin-top:0.75rem; color:#3b82f6;">inga.waetjen@capgemini.com</p>
+      <hr class="divider" style="width:100%;">
+      <p style="font-size:0.8rem;">RFP #MC-2026-0417<br>Response submitted May 8, 2026</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
