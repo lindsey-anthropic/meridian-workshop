@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from pydantic import BaseModel
+from datetime import date
 from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders
 
 app = FastAPI(title="Factory Inventory Management System")
@@ -100,10 +101,12 @@ class BacklogItem(BaseModel):
     days_delayed: int
     priority: str
     has_purchase_order: Optional[bool] = False
+    purchase_order_id: Optional[str] = None
 
 class PurchaseOrder(BaseModel):
     id: str
-    backlog_item_id: str
+    backlog_item_id: Optional[str] = None
+    inventory_sku: Optional[str] = None
     supplier_name: str
     quantity: int
     unit_cost: float
@@ -113,12 +116,29 @@ class PurchaseOrder(BaseModel):
     notes: Optional[str] = None
 
 class CreatePurchaseOrderRequest(BaseModel):
-    backlog_item_id: str
+    backlog_item_id: Optional[str] = None
+    inventory_sku: Optional[str] = None
     supplier_name: str
     quantity: int
     unit_cost: float
     expected_delivery_date: str
     notes: Optional[str] = None
+
+class RestockRecommendation(BaseModel):
+    sku: str
+    name: str
+    category: str
+    warehouse: str
+    quantity_on_hand: int
+    reorder_point: int
+    stock_status: str
+    has_demand_data: bool
+    trend: Optional[str] = None
+    forecasted_demand: Optional[int] = None
+    recommended_quantity: int
+    unit_cost: float
+    estimated_cost: float
+    priority_score: float
 
 # API endpoints
 @app.get("/")
@@ -174,8 +194,9 @@ def get_backlog():
     for item in backlog_items:
         item_dict = dict(item)
         # Check if this backlog item has a purchase order
-        has_po = any(po["backlog_item_id"] == item["id"] for po in purchase_orders)
-        item_dict["has_purchase_order"] = has_po
+        matching_po = next((po for po in purchase_orders if po["backlog_item_id"] == item["id"]), None)
+        item_dict["has_purchase_order"] = matching_po is not None
+        item_dict["purchase_order_id"] = matching_po["id"] if matching_po else None
         result.append(item_dict)
     return result
 
@@ -227,24 +248,31 @@ def get_recent_transactions():
     """Get recent transactions"""
     return recent_transactions
 
+def month_to_quarter(month: str) -> Optional[str]:
+    """Map a YYYY-MM string to its quarter label using QUARTER_MAP"""
+    for quarter, months in QUARTER_MAP.items():
+        if month in months:
+            return quarter
+    return None
+
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
-    """Get quarterly performance reports"""
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
+    """Get quarterly performance reports with optional filtering"""
+    filtered_orders = apply_filters(orders, warehouse, category, status)
+    filtered_orders = filter_by_month(filtered_orders, month)
+
     # Calculate quarterly statistics from orders
     quarters = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
-        # Determine quarter
-        if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
-            quarter = 'Q1-2025'
-        elif '2025-04' in order_date or '2025-05' in order_date or '2025-06' in order_date:
-            quarter = 'Q2-2025'
-        elif '2025-07' in order_date or '2025-08' in order_date or '2025-09' in order_date:
-            quarter = 'Q3-2025'
-        elif '2025-10' in order_date or '2025-11' in order_date or '2025-12' in order_date:
-            quarter = 'Q4-2025'
-        else:
+        quarter = month_to_quarter(order_date[:7])
+        if not quarter:
             continue
 
         if quarter not in quarters:
@@ -274,11 +302,19 @@ def get_quarterly_reports():
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
-    """Get month-over-month trends"""
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None
+):
+    """Get month-over-month trends with optional filtering"""
+    filtered_orders = apply_filters(orders, warehouse, category, status)
+    filtered_orders = filter_by_month(filtered_orders, month)
+
     months = {}
 
-    for order in orders:
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
@@ -303,6 +339,104 @@ def get_monthly_trends():
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+@app.post("/api/purchase-orders", response_model=PurchaseOrder)
+def create_purchase_order(request: CreatePurchaseOrderRequest):
+    """Create a purchase order, either for a backlog item or an inventory restocking recommendation"""
+    if bool(request.backlog_item_id) == bool(request.inventory_sku):
+        raise HTTPException(status_code=400, detail="Exactly one of backlog_item_id or inventory_sku must be provided")
+
+    if request.backlog_item_id:
+        backlog_item = next((item for item in backlog_items if item["id"] == request.backlog_item_id), None)
+        if not backlog_item:
+            raise HTTPException(status_code=404, detail=f"Backlog item {request.backlog_item_id} not found")
+
+        if any(po["backlog_item_id"] == request.backlog_item_id for po in purchase_orders):
+            raise HTTPException(status_code=400, detail="A purchase order already exists for this backlog item")
+    else:
+        inventory_item = next((item for item in inventory_items if item["sku"] == request.inventory_sku), None)
+        if not inventory_item:
+            raise HTTPException(status_code=404, detail=f"Inventory item {request.inventory_sku} not found")
+        # No duplicate check: restocking orders recur as stock depletes over time
+
+    new_po = {
+        "id": str(len(purchase_orders) + 1),
+        "backlog_item_id": request.backlog_item_id,
+        "inventory_sku": request.inventory_sku,
+        "supplier_name": request.supplier_name,
+        "quantity": request.quantity,
+        "unit_cost": request.unit_cost,
+        "expected_delivery_date": request.expected_delivery_date,
+        "status": "Pending",
+        "created_date": date.today().isoformat(),
+        "notes": request.notes
+    }
+    purchase_orders.append(new_po)
+    return new_po
+
+@app.get("/api/restocking/recommendations", response_model=List[RestockRecommendation])
+def get_restocking_recommendations(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None
+):
+    """Recommend restocking quantities from current stock and demand forecast"""
+    filtered_inventory = apply_filters(inventory_items, warehouse, category)
+    demand_by_sku = {d["item_sku"]: d for d in demand_forecasts}
+
+    trend_multipliers = {"increasing": 1.3, "stable": 1.0, "decreasing": 0.85}
+
+    recommendations = []
+    for item in filtered_inventory:
+        demand = demand_by_sku.get(item["sku"])
+        has_demand_data = demand is not None
+
+        if item["quantity_on_hand"] <= item["reorder_point"]:
+            stock_status = "low_stock"
+        elif item["quantity_on_hand"] <= item["reorder_point"] * 1.5:
+            stock_status = "adequate"
+        else:
+            stock_status = "in_stock"
+
+        if has_demand_data:
+            target = item["reorder_point"] + demand["forecasted_demand"]
+        else:
+            target = round(item["reorder_point"] * 1.5)
+
+        recommended_quantity = max(target - item["quantity_on_hand"], 0)
+        if recommended_quantity == 0:
+            continue
+
+        trend = demand["trend"] if has_demand_data else None
+        trend_multiplier = trend_multipliers.get(trend, 1.0)
+        priority_score = (target - item["quantity_on_hand"]) / max(item["reorder_point"], 1) * trend_multiplier
+
+        recommendations.append({
+            "sku": item["sku"],
+            "name": item["name"],
+            "category": item["category"],
+            "warehouse": item["warehouse"],
+            "quantity_on_hand": item["quantity_on_hand"],
+            "reorder_point": item["reorder_point"],
+            "stock_status": stock_status,
+            "has_demand_data": has_demand_data,
+            "trend": trend,
+            "forecasted_demand": demand["forecasted_demand"] if has_demand_data else None,
+            "recommended_quantity": recommended_quantity,
+            "unit_cost": item["unit_cost"],
+            "estimated_cost": round(recommended_quantity * item["unit_cost"], 2),
+            "priority_score": round(priority_score, 4)
+        })
+
+    recommendations.sort(key=lambda r: r["priority_score"], reverse=True)
+    return recommendations
+
+@app.get("/api/purchase-orders/{backlog_item_id}", response_model=PurchaseOrder)
+def get_purchase_order_by_backlog_item(backlog_item_id: str):
+    """Get the purchase order associated with a backlog item"""
+    po = next((po for po in purchase_orders if po["backlog_item_id"] == backlog_item_id), None)
+    if not po:
+        raise HTTPException(status_code=404, detail=f"No purchase order found for backlog item {backlog_item_id}")
+    return po
 
 if __name__ == "__main__":
     import uvicorn

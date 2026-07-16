@@ -6,6 +6,7 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    restocking: '再発注',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -186,6 +187,82 @@ export default {
       trend: 'トレンド',
       period: '期間'
     }
+  },
+
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期のパフォーマンス指標と月次トレンドを表示',
+    quarterlyPerformance: {
+      title: '四半期パフォーマンス',
+      quarter: '四半期',
+      totalOrders: '総注文数',
+      totalRevenue: '総収益',
+      avgOrderValue: '平均注文額',
+      fulfillmentRate: '達成率'
+    },
+    monthlyTrend: {
+      title: '月次収益トレンド'
+    },
+    monthOverMonth: {
+      title: '月次比較分析',
+      month: '月',
+      orders: '注文数',
+      revenue: '収益',
+      change: '変化',
+      growthRate: '成長率'
+    },
+    summary: {
+      totalRevenueYTD: '総収益（年初来）',
+      avgMonthlyRevenue: '平均月間収益',
+      totalOrdersYTD: '総注文数（年初来）',
+      bestQuarter: '最高業績四半期'
+    },
+    noData: '選択したフィルターのデータがありません'
+  },
+
+  // Restocking
+  restocking: {
+    title: '再発注レコメンデーション',
+    description: '在庫レベル、需要予測、予算上限に基づく発注提案',
+    budget: {
+      label: '予算上限',
+      placeholder: '予算額を入力...',
+      totalRecommended: '推奨合計コスト',
+      totalFunded: '予算充当合計コスト',
+      remaining: '残り予算',
+      itemsFunded: '充当済みアイテム',
+      itemsUnfunded: '未充当アイテム',
+      enterPrompt: '予算上限を入力すると、充当可能な提案が表示されます'
+    },
+    table: {
+      item: 'アイテム',
+      warehouse: '倉庫',
+      category: 'カテゴリ',
+      stockStatus: '在庫ステータス',
+      quantityOnHand: '在庫数',
+      reorderPoint: '再発注点',
+      demand: '需要トレンド',
+      recommendedQty: '推奨数量',
+      unitCost: '単価',
+      estimatedCost: '見積コスト',
+      fundedStatus: 'ステータス',
+      action: 'アクション'
+    },
+    stockStatus: {
+      lowStock: '在庫不足',
+      adequate: '適正',
+      inStock: '在庫あり'
+    },
+    fundedStatus: {
+      funded: '充当済み',
+      partial: '一部充当',
+      unfunded: '未充当',
+      ordered: '発注済み'
+    },
+    noDemandData: '需要データなし',
+    createOrder: '発注する',
+    noData: '選択したフィルターに該当する再発注レコメンデーションはありません'
   },
 
   // Filters

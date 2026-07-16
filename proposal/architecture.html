@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Meridian Inventory Dashboard — Current-State Architecture</title>
+<style>
+  :root {
+    --ink: #0f172a;
+    --ink-soft: #334155;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --panel: #f8fafc;
+    --accent: #3b82f6;
+    --accent-soft: #eff6ff;
+    --good: #16a34a;
+    --good-soft: #dcfce7;
+    --warn: #d97706;
+    --warn-soft: #fef3c7;
+    --bad: #dc2626;
+    --bad-soft: #fee2e2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--panel); color: var(--ink-soft); line-height: 1.55;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+  header.doc-header {
+    background: var(--ink); color: #fff; padding: 3rem 2rem; margin-bottom: 2.5rem;
+  }
+  header.doc-header .wrap { padding: 0; }
+  .kicker { text-transform: uppercase; letter-spacing: .1em; font-size: .78rem; font-weight: 600; color: #93c5fd; margin-bottom: .6rem; }
+  h1 { font-size: 2.1rem; margin: 0 0 .5rem; color: #fff; }
+  .doc-sub { color: #cbd5e1; font-size: 1.05rem; max-width: 42em; }
+  .meta { display: flex; gap: 2rem; margin-top: 1.6rem; font-size: .85rem; color: #94a3b8; }
+  .meta strong { display: block; color: #e2e8f0; font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; margin-bottom: .15rem; }
+
+  h2 { font-size: 1.45rem; color: var(--ink); margin: 3rem 0 1rem; padding-bottom: .6rem; border-bottom: 2px solid var(--line); }
+  h2:first-of-type { margin-top: 0; }
+  h3 { font-size: 1.05rem; color: var(--ink); margin: 1.5rem 0 .6rem; }
+  p { margin: 0 0 1rem; }
+  code { background: #eef2f7; padding: .12rem .4rem; border-radius: 4px; font-size: .88em; color: #1e3a5f; }
+
+  /* Diagram */
+  .diagram {
+    display: flex; flex-direction: column; gap: 0; align-items: stretch; margin: 1.5rem 0 2rem;
+  }
+  .tier {
+    display: grid; gap: .9rem; padding: 1.1rem; border-radius: 10px; border: 1px solid var(--line); background: #fff;
+  }
+  .tier-frontend { grid-template-columns: repeat(4, 1fr); }
+  .tier-shared { grid-template-columns: repeat(3, 1fr); }
+  .tier-backend { grid-template-columns: repeat(2, 1fr); }
+  .tier-data { grid-template-columns: 1fr; }
+  .tier-label {
+    font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--muted); margin-bottom: .3rem; grid-column: 1 / -1;
+  }
+  .node {
+    background: var(--accent-soft); border: 1px solid #bfdbfe; border-radius: 8px;
+    padding: .7rem .8rem; font-size: .85rem; font-weight: 600; color: #1e3a5f; text-align: center;
+  }
+  .node.backend { background: var(--good-soft); border-color: #86efac; color: #14532d; }
+  .node.data { background: var(--warn-soft); border-color: #fcd34d; color: #78350f; font-family: ui-monospace, monospace; font-weight: 500; }
+  .arrow-row { display: flex; justify-content: center; align-items: center; padding: .5rem 0; color: var(--muted); font-size: 1.3rem; }
+  .arrow-row .label { font-size: .72rem; color: var(--muted); margin: 0 .6rem; font-weight: 600; }
+
+  /* Cards / grids */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 1.1rem 1.3rem; }
+  .card h4 { margin: 0 0 .4rem; font-size: .95rem; color: var(--ink); }
+  .card p { margin: 0; font-size: .88rem; color: var(--muted); }
+  .card ul { margin: .4rem 0 0; padding-left: 1.1rem; font-size: .85rem; color: var(--muted); }
+
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: .88rem; }
+  th { text-align: left; background: var(--panel); padding: .55rem .75rem; border-bottom: 2px solid var(--line); color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+  td { padding: .55rem .75rem; border-bottom: 1px solid var(--line); }
+  tr:last-child td { border-bottom: none; }
+
+  .badge { display: inline-block; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: .15rem .5rem; border-radius: 999px; }
+  .badge.fixed { background: var(--good-soft); color: #166534; }
+  .badge.open { background: var(--warn-soft); color: #92400e; }
+  .badge.info { background: var(--accent-soft); color: #1e40af; }
+
+  .finding { border-left: 4px solid var(--warn); padding: .6rem 0 .6rem 1.1rem; margin-bottom: 1rem; background: #fff; border-radius: 0 8px 8px 0; }
+  .finding.fixed { border-left-color: var(--good); }
+  .finding h4 { margin: 0 0 .3rem; font-size: .95rem; color: var(--ink); display: flex; align-items: center; gap: .5rem; }
+  .finding p { margin: 0; font-size: .87rem; color: var(--muted); }
+
+  footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); font-size: .8rem; color: var(--muted); }
+
+  ul.points { padding-left: 1.2rem; }
+  ul.points li { margin-bottom: .5rem; font-size: .92rem; }
+</style>
+</head>
+<body>
+
+<header class="doc-header">
+  <div class="wrap">
+    <div class="kicker">RFP MC-2026-0417 · R4 Deliverable</div>
+    <h1>Current-State Architecture Overview</h1>
+    <p class="doc-sub">Meridian Components Inventory Dashboard — produced during engagement discovery, for handoff to Meridian IT.</p>
+    <div class="meta">
+      <div><strong>System</strong>Inventory Management Dashboard</div>
+      <div><strong>Reviewed</strong>Vue 3 + FastAPI application</div>
+      <div><strong>Prepared by</strong>Capgemini</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <h2>System Overview</h2>
+  <p>The application is a two-tier system: a Vue 3 single-page frontend and a Python FastAPI backend, with no database — all data is loaded from static JSON files into memory at server startup. There is no authentication layer; the system is intended for internal, trusted-network use only.</p>
+
+  <div class="diagram">
+    <div class="tier tier-frontend">
+      <div class="tier-label">Frontend Views (Vue Router)</div>
+      <div class="node">Dashboard</div>
+      <div class="node">Inventory</div>
+      <div class="node">Orders</div>
+      <div class="node">Demand</div>
+      <div class="node">Spending</div>
+      <div class="node">Reports</div>
+    </div>
+    <div class="arrow-row">▼ <span class="label">shared state &amp; i18n</span> ▼</div>
+    <div class="tier tier-shared">
+      <div class="tier-label">Shared Composables &amp; Components</div>
+      <div class="node">useFilters (global filter state)</div>
+      <div class="node">useI18n (en / ja)</div>
+      <div class="node">useAuth (mock only)</div>
+    </div>
+    <div class="arrow-row">▼ <span class="label">client/src/api.js</span> ▼</div>
+    <div class="tier tier-backend">
+      <div class="tier-label">Backend — FastAPI (server/main.py)</div>
+      <div class="node backend">REST endpoints (/api/*)</div>
+      <div class="node backend">apply_filters() / filter_by_month()</div>
+    </div>
+    <div class="arrow-row">▼ <span class="label">load at startup, in-memory</span> ▼</div>
+    <div class="tier tier-data">
+      <div class="tier-label">Data — server/data/*.json (no database)</div>
+      <div class="node data">inventory.json · orders.json · demand_forecasts.json · backlog_items.json · spending.json · transactions.json · purchase_orders.json</div>
+    </div>
+  </div>
+
+  <h2>Tech Stack</h2>
+  <table>
+    <thead><tr><th>Layer</th><th>Technology</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Frontend</td><td>Vue 3 (Composition API) + Vite</td><td>Runs on port 3000. Routing via <code>vue-router</code>.</td></tr>
+      <tr><td>Backend</td><td>Python 3 + FastAPI + Pydantic</td><td>Runs on port 8001. Auto docs at <code>/docs</code>.</td></tr>
+      <tr><td>Data</td><td>Static JSON files</td><td>Loaded into memory via <code>mock_data.py</code>. No persistence between restarts.</td></tr>
+      <tr><td>i18n</td><td>Custom composable (<code>useI18n</code>)</td><td>English and Japanese locale files under <code>client/src/locales/</code>.</td></tr>
+      <tr><td>Auth</td><td>None (mock user)</td><td><code>useAuth</code> hardcodes a signed-in user; no session or token handling.</td></tr>
+      <tr><td>Tests</td><td>None at engagement start</td><td>Established as part of R3 (this engagement).</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Frontend Structure</h2>
+  <div class="grid-3">
+    <div class="card">
+      <h4>views/</h4>
+      <p>One component per route: Dashboard, Inventory, Orders, Demand, Spending, Reports.</p>
+      <ul><li>All migrated to Composition API as of this engagement (Reports was the last holdout)</li></ul>
+    </div>
+    <div class="card">
+      <h4>composables/</h4>
+      <p>Shared reactive state, singleton-style.</p>
+      <ul>
+        <li><code>useFilters</code> — global Time Period / Warehouse / Category / Status filter state, read by the top-level <code>FilterBar</code> and by each view</li>
+        <li><code>useI18n</code> — translation lookup + locale switching</li>
+        <li><code>useAuth</code> — mock current-user data only</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>api.js</h4>
+      <p>Centralized API client — the intended single point of contact with the backend for every view.</p>
+      <ul><li>All endpoints now routed through here, including Reports (previously bypassed it directly with <code>axios</code>)</li></ul>
+    </div>
+  </div>
+
+  <h2>Backend Structure</h2>
+  <p><code>server/main.py</code> defines all REST endpoints directly against in-memory data loaded by <code>mock_data.py</code>. Common filtering logic (<code>apply_filters</code>, <code>filter_by_month</code>) is centralized and reused by most endpoints — the Reports endpoints were the exception until this engagement.</p>
+  <table>
+    <thead><tr><th>Endpoint</th><th>Filters supported</th></tr></thead>
+    <tbody>
+      <tr><td><code>GET /api/inventory</code></td><td>warehouse, category</td></tr>
+      <tr><td><code>GET /api/orders</code></td><td>warehouse, category, status, month</td></tr>
+      <tr><td><code>GET /api/dashboard/summary</code></td><td>warehouse, category, status, month</td></tr>
+      <tr><td><code>GET /api/reports/quarterly</code>, <code>/monthly-trends</code></td><td>warehouse, category, status, month <span class="badge fixed">Fixed R1</span></td></tr>
+      <tr><td><code>GET /api/demand</code>, <code>/api/backlog</code></td><td>none</td></tr>
+      <tr><td><code>GET /api/spending/*</code></td><td>none</td></tr>
+      <tr><td><code>/api/tasks</code>, <code>/api/purchase-orders</code></td><td>CRUD, no filters (not applicable)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Findings from Discovery</h2>
+  <p>Independent verification surfaced items the previous vendor's handoff notes didn't mention. Resolved items are marked; open items are flagged for follow-up.</p>
+
+  <div class="finding fixed">
+    <h4><span class="badge fixed">Resolved</span> Reports page ignored the global filter bar</h4>
+    <p>Reports.vue never read shared filter state and the backend endpoints accepted no filter parameters at all, so changing Warehouse/Period/Category/Status had no effect on the Reports page. Fixed as part of R1: both frontend and backend now follow the same filtering pattern used everywhere else.</p>
+  </div>
+
+  <div class="finding fixed">
+    <h4><span class="badge fixed">Resolved</span> Reports page was the last Options-API holdout</h4>
+    <p>Confirmed the handoff note "migration incomplete" — Reports.vue was the only view still on the Options API, bypassing the shared API client and i18n system, with unremoved debug logging. Migrated to Composition API as part of R1.</p>
+  </div>
+
+  <div class="finding">
+    <h4><span class="badge open">Open</span> <code>views/Backlog.vue</code> is not registered as a route</h4>
+    <p>The file exists but isn't wired into <code>main.js</code>'s router — it appears to be an abandoned or in-progress feature, distinct from the <code>BacklogDetailModal</code> used on the Dashboard. Recommend confirming with Meridian whether this was intentional before removing or completing it.</p>
+  </div>
+
+  <div class="finding">
+    <h4><span class="badge open">Open</span> Dashboard references an unregistered <code>PurchaseOrderModal</code> component</h4>
+    <p><code>Dashboard.vue</code>'s template uses <code>&lt;PurchaseOrderModal&gt;</code>, but no such component is imported or registered, and no matching file exists in <code>components/</code>. The "Create PO" action likely fails silently. Flagged for remediation alongside R2 (Restocking), since purchase-order creation is directly related.</p>
+  </div>
+
+  <div class="finding">
+    <h4><span class="badge open">Open</span> No authentication or session management</h4>
+    <p><code>useAuth</code> hardcodes a single mock user; there is no login flow, token handling, or access control. Acceptable for the current internal/demo deployment, but worth flagging to Meridian IT as a gap if the system is exposed beyond a trusted network.</p>
+  </div>
+
+  <div class="finding">
+    <h4><span class="badge info">Info</span> No database — static JSON, in-memory only</h4>
+    <p>All data resets on server restart. Fine for the current scope; worth a conversation with Meridian if data volume or persistence needs grow (see open question on SKU/order scale raised in our technical approach).</p>
+  </div>
+
+  <h2>Recommendations Going Forward</h2>
+  <ul class="points">
+    <li>Continue routing all new frontend data access through <code>api.js</code> — no direct <code>axios</code> calls from views.</li>
+    <li>Extend automated test coverage (R3) to lock in the Reports fix and prevent similar regressions.</li>
+    <li>Resolve the two open findings above (orphaned route, missing modal) alongside R2, since both touch purchase-order and backlog workflows.</li>
+  </ul>
+
+  <footer>
+    Prepared by Capgemini as part of RFP MC-2026-0417 engagement discovery. Reflects the system state at time of review; intended for handoff to Meridian IT alongside the automated test suite delivered under R3.
+  </footer>
+</div>
+
+</body>
+</html>
