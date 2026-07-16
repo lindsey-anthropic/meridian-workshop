@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Meridian Components — Inventory Dashboard Modernization</title>
+<style>
+  :root {
+    --ink: #0f172a;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --accent: #2563eb;
+    --accent-soft: #eff6ff;
+    --ok: #16a34a;
+    --bg: #f8fafc;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--bg);
+    font-family: -apple-system, "Segoe UI", Inter, Roboto, sans-serif;
+    color: var(--ink);
+  }
+  .deck { position: relative; width: 100%; height: 100vh; overflow: hidden; }
+  .slide {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6vh 9vw;
+    opacity: 0;
+    transition: opacity .25s ease;
+  }
+  .slide.active { display: flex; opacity: 1; }
+  .kicker {
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  h1 { font-size: 44px; margin: 0 0 18px; line-height: 1.15; }
+  h2 { font-size: 34px; margin: 0 0 28px; }
+  p.lead { font-size: 19px; color: var(--muted); max-width: 700px; line-height: 1.5; }
+  ul.points { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 16px; }
+  ul.points li {
+    font-size: 18px; padding-left: 28px; position: relative; color: var(--ink); max-width: 780px; line-height: 1.45;
+  }
+  ul.points li::before {
+    content: "→"; position: absolute; left: 0; color: var(--accent); font-weight: 700;
+  }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 10px; }
+  .card {
+    background: white; border: 1px solid var(--line); border-radius: 12px;
+    padding: 22px 24px;
+  }
+  .card h3 { margin: 0 0 8px; font-size: 17px; }
+  .card p { margin: 0; font-size: 15px; color: var(--muted); line-height: 1.4; }
+  .badge {
+    display: inline-block; font-size: 12px; font-weight: 700;
+    padding: 3px 10px; border-radius: 999px; margin-bottom: 8px;
+  }
+  .badge.req { background: var(--accent-soft); color: var(--accent); }
+  .badge.opt { background: #f1f5f9; color: var(--muted); }
+  table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+  th, td { text-align: left; padding: 10px 14px; font-size: 15px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+  .timeline { display: flex; gap: 6px; margin-top: 24px; }
+  .phase {
+    flex: 1; background: white; border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 14px; position: relative;
+  }
+  .phase .wk { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .phase .nm { font-size: 15px; font-weight: 600; }
+  .phase.stretch { background: #fafafa; border-style: dashed; }
+  .total {
+    margin-top: 28px; font-size: 20px; font-weight: 700;
+    padding: 16px 20px; background: var(--accent-soft); border-radius: 10px; display: inline-block;
+  }
+  .center { align-items: center; text-align: center; }
+  .logo-row { display: flex; gap: 10px; align-items: center; margin-bottom: 40px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+  .footer-note { position: absolute; bottom: 28px; left: 9vw; font-size: 13px; color: var(--muted); }
+  .pageno { position: absolute; bottom: 28px; right: 9vw; font-size: 13px; color: var(--muted); }
+  .nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 10px;
+    padding: 14px; background: linear-gradient(transparent, rgba(255,255,255,.9) 40%);
+  }
+  .nav button {
+    border: 1px solid var(--line); background: white; color: var(--ink);
+    padding: 8px 16px; border-radius: 8px; font-size: 14px; cursor: pointer;
+  }
+  .nav button:hover { border-color: var(--accent); color: var(--accent); }
+  .nav button:disabled { opacity: .4; cursor: default; }
+  .nav .counter { align-self: center; font-size: 13px; color: var(--muted); margin: 0 6px; }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- 1 -->
+  <section class="slide active center">
+    <div class="logo-row" style="justify-content:center;"><span class="dot"></span><span style="font-weight:700; letter-spacing:.02em;">PROPOSAL</span></div>
+    <h1>Modernizing the Meridian Components<br>Inventory Dashboard</h1>
+    <p class="lead">A response to RFP MC-2026-0417 — remediating, extending, and hardening the operations dashboard your team relies on every day.</p>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide">
+    <div class="kicker">The Situation</div>
+    <h2>A capable system, left unfinished</h2>
+    <ul class="points">
+      <li>The 2024 vendor delivered a working Vue / FastAPI dashboard covering inventory, orders, and spend — then the contract ended with work in progress.</li>
+      <li>The Reports module has known, unresolved defects — filters, translations, inconsistent data.</li>
+      <li>There's no way today to turn stock levels and demand into a purchasing decision.</li>
+      <li>With zero automated test coverage, IT has been unwilling to approve further changes at all.</li>
+    </ul>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide">
+    <div class="kicker">What's Being Asked</div>
+    <h2>Four required outcomes, three stretch goals</h2>
+    <div class="grid2">
+      <div class="card"><span class="badge req">Required</span><h3>R1 · Reports Remediation</h3><p>Resolve the ~8 logged defects in the Reports module.</p></div>
+      <div class="card"><span class="badge req">Required</span><h3>R2 · Restocking Recommendations</h3><p>New view: purchase order suggestions from stock, demand, and budget.</p></div>
+      <div class="card"><span class="badge req">Required</span><h3>R3 · Automated Browser Testing</h3><p>E2E coverage so IT can safely approve future changes.</p></div>
+      <div class="card"><span class="badge req">Required</span><h3>R4 · Architecture Documentation</h3><p>Current-state overview for handoff to Meridian IT.</p></div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide">
+    <div class="kicker">What's Being Asked</div>
+    <h2>Desired, evaluated but not mandatory</h2>
+    <div class="grid2">
+      <div class="card"><span class="badge opt">Desired</span><h3>D1 · UI Modernization</h3><p>Refresh visual design to a modern baseline.</p></div>
+      <div class="card"><span class="badge opt">Desired</span><h3>D2 · Internationalization</h3><p>Extend i18n to remaining modules — serving the Tokyo team.</p></div>
+      <div class="card"><span class="badge opt">Desired</span><h3>D3 · Dark Mode</h3><p>Operator-selectable theme for low-light floor stations.</p></div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide">
+    <div class="kicker">Our Philosophy</div>
+    <h2>Extend what works. Fix what's broken. Don't rebuild what doesn't need it.</h2>
+    <ul class="points">
+      <li>We work inside the existing Vue 3 / FastAPI application — no rewrite, no new framework.</li>
+      <li>Required scope is delivered as committed, fixed-fee work.</li>
+      <li>Desired scope is priced separately, so it's never traded off against what's mandatory.</li>
+      <li>We document and test as we go, so what we leave behind outlasts our engagement.</li>
+    </ul>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide">
+    <div class="kicker">Approach — Phase 0</div>
+    <h2>Understand before we touch anything</h2>
+    <p class="lead">We start with a full architecture review of the current system — not because it's ranked last in the RFP, but because every other phase depends on it. The output is current-state documentation Meridian IT can use long after our engagement ends.</p>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide">
+    <div class="kicker">Approach — R1</div>
+    <h2>Reports: audit and fix in place</h2>
+    <p class="lead">We audit the Reports module against Meridian's logged defects plus anything surfaced during architecture review, and resolve them using the application's existing filter → API → computed-property pattern — no new pattern introduced just for this module.</p>
+  </section>
+
+  <!-- 8 -->
+  <section class="slide">
+    <div class="kicker">Approach — R2</div>
+    <h2>Restocking: the biggest build</h2>
+    <p class="lead">A new view turning stock levels, demand forecast, and an operator-supplied budget ceiling into recommended purchase orders. Rule-based and transparent — a decision-support tool, not a black-box forecasting model.</p>
+  </section>
+
+  <!-- 9 -->
+  <section class="slide">
+    <div class="kicker">Approach — R3</div>
+    <h2>Testing: unblock IT, on the flows that matter</h2>
+    <p class="lead">End-to-end browser coverage for the core dashboard, Reports, and Restocking — the three areas of highest change and highest operational risk. Enough for IT to start approving changes again.</p>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide">
+    <div class="kicker">Delivery Plan</div>
+    <h2>Phased over 10–12 weeks</h2>
+    <div class="timeline">
+      <div class="phase"><div class="wk">Wk 1–2</div><div class="nm">Architecture Review</div></div>
+      <div class="phase"><div class="wk">Wk 2–4</div><div class="nm">Reports Fix</div></div>
+      <div class="phase"><div class="wk">Wk 4–8</div><div class="nm">Restocking</div></div>
+      <div class="phase"><div class="wk">Wk 8–10</div><div class="nm">Testing</div></div>
+      <div class="phase stretch"><div class="wk">Wk 10–12</div><div class="nm">Stretch (D1–D3)</div></div>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="slide">
+    <div class="kicker">Investment</div>
+    <h2>Fixed-fee, phased, predictable</h2>
+    <table>
+      <tr><th>Phase</th><th>Scope</th><th>Fee</th></tr>
+      <tr><td>0</td><td>Architecture Review (R4)</td><td>$6,000</td></tr>
+      <tr><td>1</td><td>Reports Remediation (R1)</td><td>$10,000</td></tr>
+      <tr><td>2</td><td>Restocking (R2)</td><td>$24,000</td></tr>
+      <tr><td>3</td><td>Testing (R3)</td><td>$10,000</td></tr>
+    </table>
+    <div class="total">Required scope total: $50,000</div>
+  </section>
+
+  <!-- 12 -->
+  <section class="slide">
+    <div class="kicker">Investment</div>
+    <h2>Desired scope, priced separately</h2>
+    <table>
+      <tr><th>Item</th><th>Scope</th><th>Fee</th></tr>
+      <tr><td>D1</td><td>UI Modernization</td><td>$9,000</td></tr>
+      <tr><td>D2</td><td>Internationalization</td><td>$6,000</td></tr>
+      <tr><td>D3</td><td>Dark Mode</td><td>$4,000</td></tr>
+    </table>
+    <div class="total">Full engagement, all options: up to $69,000</div>
+  </section>
+
+  <!-- 13 -->
+  <section class="slide">
+    <div class="kicker">Why Us</div>
+    <h2>We've inherited systems like this before</h2>
+    <ul class="points">
+      <li>Comparable remediation and extension work for mid-market distributors on Vue/Python stacks.</li>
+      <li>A track record of adding test coverage to systems that had none — the same barrier Meridian's IT team faces today.</li>
+      <li>Experience delivering i18n and documentation for multi-region operations teams.</li>
+      <li>We inherit, we don't reinvent — lower risk, faster time to value.</li>
+    </ul>
+  </section>
+
+  <!-- 14 -->
+  <section class="slide">
+    <div class="kicker">Next Steps</div>
+    <h2>Let's get started</h2>
+    <ul class="points">
+      <li>Confirm scope and any adjustments to the assumptions in our written proposal.</li>
+      <li>Finalize the statement of work and phase-by-phase acceptance criteria.</li>
+      <li>Kick off Phase 0 — Architecture Review — within one week of signing.</li>
+    </ul>
+  </section>
+
+  <!-- 15 -->
+  <section class="slide center">
+    <h1>Thank you</h1>
+    <p class="lead">We're ready to help Meridian's operations team get the dashboard they actually need.</p>
+  </section>
+
+</div>
+
+<div class="nav">
+  <button id="prevBtn">&larr; Prev</button>
+  <span class="counter" id="counter"></span>
+  <button id="nextBtn">Next &rarr;</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let idx = 0;
+  function render() {
+    slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+    document.getElementById('counter').textContent = (idx + 1) + ' / ' + slides.length;
+    document.getElementById('prevBtn').disabled = idx === 0;
+    document.getElementById('nextBtn').disabled = idx === slides.length - 1;
+  }
+  function go(delta) {
+    idx = Math.min(slides.length - 1, Math.max(0, idx + delta));
+    render();
+  }
+  document.getElementById('prevBtn').addEventListener('click', () => go(-1));
+  document.getElementById('nextBtn').addEventListener('click', () => go(1));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') go(1);
+    if (e.key === 'ArrowLeft') go(-1);
+  });
+  render();
+</script>
+</body>
+</html>
