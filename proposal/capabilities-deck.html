@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Meridian Components — Inventory Dashboard Modernization</title>
+<style>
+  :root {
+    --surface-1:      #fcfcfb;
+    --page-plane:     #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --series-1: #2a78d6; /* blue   - Phase 0 */
+    --series-2: #008300; /* green  - Phase 1 */
+    --series-3: #e87ba4; /* magenta- Phase 2 */
+    --series-4: #eda100; /* yellow - Phase 3 */
+    --series-5: #1baf7a; /* aqua   - Phase 4 */
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      --surface-1:      #1a1a19;
+      --page-plane:     #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:       #2c2c2a;
+      --baseline:       #383835;
+      --border: rgba(255,255,255,0.10);
+      --series-1: #3987e5;
+      --series-2: #008300;
+      --series-3: #d55181;
+      --series-4: #c98500;
+      --series-5: #199e70;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page-plane);
+    color: var(--text-primary);
+  }
+
+  .deck {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .slide {
+    width: min(1100px, 92vw);
+    height: min(650px, 84vh);
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 64px 72px;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+  .slide.active { display: flex; }
+
+  .kicker {
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  h1 { font-size: 44px; margin: 0 0 16px; line-height: 1.15; }
+  h2 { font-size: 34px; margin: 0 0 28px; line-height: 1.2; }
+  p.lede { font-size: 20px; color: var(--text-secondary); line-height: 1.5; max-width: 760px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 8px; }
+
+  .card {
+    border: 1px solid var(--gridline);
+    border-radius: 10px;
+    padding: 20px 22px;
+  }
+  .card h3 { font-size: 17px; margin: 0 0 8px; }
+  .card p { font-size: 15px; color: var(--text-secondary); margin: 0; line-height: 1.5; }
+
+  ul.plain { list-style: none; margin: 0; padding: 0; }
+  ul.plain li {
+    font-size: 18px;
+    color: var(--text-secondary);
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gridline);
+    display: flex;
+    gap: 14px;
+  }
+  ul.plain li:last-child { border-bottom: none; }
+  ul.plain li b { color: var(--text-primary); min-width: 34px; flex-shrink: 0; }
+
+  .tag {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    padding: 3px 9px;
+    border-radius: 5px;
+    margin-right: 8px;
+  }
+  .tag.req { background: color-mix(in srgb, var(--series-1) 16%, transparent); color: var(--series-1); }
+  .tag.des { background: color-mix(in srgb, var(--series-5) 18%, transparent); color: var(--series-5); }
+
+  /* timeline chart */
+  .timeline { margin-top: 28px; }
+  .timeline-bar {
+    display: flex;
+    height: 44px;
+    border-radius: 6px;
+    overflow: hidden;
+    gap: 2px;
+  }
+  .seg { display: flex; align-items: center; justify-content: center; }
+  .seg-1 { background: var(--series-1); flex: 1; }
+  .seg-2 { background: var(--series-2); flex: 2; }
+  .seg-3 { background: var(--series-3); flex: 2; }
+  .seg-4 { background: var(--series-4); flex: 3; }
+  .seg-5 { background: var(--series-5); flex: 1; }
+  .timeline-labels {
+    display: flex;
+    margin-top: 10px;
+    gap: 2px;
+  }
+  .timeline-labels .lbl { font-size: 13px; color: var(--text-secondary); text-align: center; }
+  .lbl-1 { flex: 1; } .lbl-2 { flex: 2; } .lbl-3 { flex: 2; } .lbl-4 { flex: 3; } .lbl-5 { flex: 1; }
+  .lbl b { display: block; color: var(--text-primary); font-size: 14px; margin-bottom: 2px; }
+
+  .quote {
+    font-size: 22px;
+    font-style: italic;
+    color: var(--text-primary);
+    border-left: 3px solid var(--series-1);
+    padding-left: 20px;
+    margin: 8px 0;
+  }
+  .quote cite { display: block; font-style: normal; font-size: 14px; color: var(--text-muted); margin-top: 8px; }
+
+  .nav {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .nav button {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .nav button:hover { background: var(--page-plane); }
+  .nav button:disabled { opacity: 0.35; cursor: default; }
+  .counter { font-size: 13px; color: var(--text-muted); min-width: 50px; text-align: center; }
+
+  .footer-mark {
+    position: absolute;
+    top: 28px;
+    right: 40px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <section class="slide active">
+    <div class="kicker">Proposal · MC-2026-0417</div>
+    <h1>Modernizing Meridian's Inventory Dashboard</h1>
+    <p class="lede">A focused engagement to finish what the current system started — reliable Reports, a new Restocking capability, automated test coverage, and documentation your team can actually use.</p>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">The Situation</div>
+    <h2>The dashboard is functional — and unfinished</h2>
+    <ul class="plain">
+      <li><b>Reports</b> The Reports page has known defects — filtering, translations, and inconsistent patterns — logged by your team and never resolved.</li>
+      <li><b>Ops</b> Operations wants a Restocking view that doesn't exist yet — one built with stock, demand, and budget in mind.</li>
+      <li><b>IT</b> IT has paused approving changes entirely because there's no automated test coverage.</li>
+    </ul>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">What We Heard</div>
+    <h2>Three stakeholders, three priorities</h2>
+    <div class="grid-2">
+      <div class="card"><h3>Procurement</h3><p>Wants timeline and price predictability — a number they can trust, delivered on schedule.</p></div>
+      <div class="card"><h3>Operations</h3><p>Lives in this dashboard daily. The Restocking view is a direct response to a real, repeated ask.</p></div>
+    </div>
+    <div class="grid-2" style="margin-top:24px;">
+      <div class="card"><h3>IT</h3><p>Won't approve further changes without test coverage — effectively a gate on everything else in scope.</p></div>
+      <div class="card"><h3>Our read</h3><p>Test coverage isn't just item R3 — it's the precondition for delivering R1 and R2 safely.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Scope</div>
+    <h2>Required items — what wins this engagement</h2>
+    <ul class="plain">
+      <li><span class="tag req">R1</span> Reports remediation — fix filtering, translations, and API inconsistencies.</li>
+      <li><span class="tag req">R2</span> Restocking recommendations — new view driven by stock, demand, and budget ceiling.</li>
+      <li><span class="tag req">R3</span> Automated browser testing — coverage for the highest-risk flows first.</li>
+      <li><span class="tag req">R4</span> Architecture documentation — a real handoff asset, not a stack list.</li>
+    </ul>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Scope</div>
+    <h2>Desired items — pursued without risking the required work</h2>
+    <ul class="plain">
+      <li><span class="tag des">D1</span> UI refresh aligned to Meridian's existing brand.</li>
+      <li><span class="tag des">D2</span> i18n extended to the modules that still lack it.</li>
+      <li><span class="tag des">D3</span> Operator-selectable dark mode for low-light warehouse floors.</li>
+    </ul>
+    <p class="lede" style="margin-top:24px; font-size:16px;">Scoped as stretch goals inside the fixed fee — never sequenced ahead of R1–R4.</p>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Our Approach</div>
+    <h2>Fix what's inconsistent, build what's missing</h2>
+    <div class="grid-2">
+      <div class="card"><h3>Reports (R1)</h3><p>Bring it in line with every other view in the app — same filters, same API client, same translation pattern, no debug noise.</p></div>
+      <div class="card"><h3>Restocking (R2)</h3><p>New view combining existing stock and demand data with an operator-entered budget ceiling to recommend purchase orders.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Our Approach</div>
+    <h2>Testing first, documentation that lasts</h2>
+    <div class="grid-2">
+      <div class="card"><h3>Testing (R3)</h3><p>Automated browser coverage for Reports and Restocking first — the buggiest and the newest — not a diluted sweep of the whole app.</p></div>
+      <div class="card"><h3>Documentation (R4)</h3><p>A current-state architecture overview thorough enough that your IT team doesn't need a call to understand it.</p></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Timeline</div>
+    <h2>~9 weeks, phased so you see progress early</h2>
+    <div class="timeline">
+      <div class="timeline-bar">
+        <div class="seg seg-1"></div>
+        <div class="seg seg-2"></div>
+        <div class="seg seg-3"></div>
+        <div class="seg seg-4"></div>
+        <div class="seg seg-5"></div>
+      </div>
+      <div class="timeline-labels">
+        <div class="lbl lbl-1"><b>Wk 1</b>Onboarding</div>
+        <div class="lbl lbl-2"><b>Wk 2–3</b>Test Foundation</div>
+        <div class="lbl lbl-3"><b>Wk 4–5</b>Reports (R1)</div>
+        <div class="lbl lbl-4"><b>Wk 6–8</b>Restocking (R2)</div>
+        <div class="lbl lbl-5"><b>Wk 9</b>Docs (R4)</div>
+      </div>
+    </div>
+    <p class="lede" style="margin-top:28px; font-size:16px;">Desired items (D1–D3) pursued in parallel or after, as fixed-fee budget allows.</p>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Pricing</div>
+    <h2>Fixed-fee, not-to-exceed</h2>
+    <p class="lede">Required scope (R1–R4) is priced as a single fixed fee, paid in phases as each deliverable lands — not one lump sum at the end. Stretch items (D1–D3) are optional, hourly, not-to-exceed add-ons pursued only if time and budget allow, so they never inflate the core price.</p>
+  </section>
+
+  <section class="slide">
+    <div class="kicker">Why Us</div>
+    <h2>Right-sized for this engagement</h2>
+    <blockquote class="quote">
+      We read the actual codebase before writing this proposal — not just the RFP.
+      <cite>Every commitment in this deck is grounded in what's really there, not a generic template.</cite>
+    </blockquote>
+    <ul class="plain" style="margin-top:12px;">
+      <li><b>①</b> No oversell — scope matches what Meridian actually asked for.</li>
+      <li><b>②</b> No orphaned handoff — documentation and tests are deliverables, not afterthoughts.</li>
+      <li><b>③</b> A dashboard your team can safely keep changing after we leave.</li>
+    </ul>
+  </section>
+
+  <div class="nav">
+    <button id="prevBtn">← Prev</button>
+    <span class="counter" id="counter">1 / 10</span>
+    <button id="nextBtn">Next →</button>
+  </div>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let i = 0;
+  const counter = document.getElementById('counter');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  function render() {
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === i));
+    counter.textContent = (i + 1) + ' / ' + slides.length;
+    prevBtn.disabled = i === 0;
+    nextBtn.disabled = i === slides.length - 1;
+  }
+  prevBtn.addEventListener('click', () => { if (i > 0) { i--; render(); } });
+  nextBtn.addEventListener('click', () => { if (i < slides.length - 1) { i++; render(); } });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { if (i < slides.length - 1) { i++; render(); } }
+    if (e.key === 'ArrowLeft') { if (i > 0) { i--; render(); } }
+  });
+  render();
+</script>
+
+</body>
+</html>
