@@ -6,6 +6,8 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    restocking: '再発注',
+    reports: 'レポート',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
   },
@@ -188,6 +190,93 @@ export default {
     }
   },
 
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期実績指標と月次トレンドを表示',
+    loading: 'レポートを読み込み中...',
+    loadError: 'レポートの読み込みに失敗しました: {message}',
+    notApplicable: '該当なし',
+    quarterly: {
+      title: '四半期実績',
+      quarter: '四半期',
+      totalOrders: '総注文数',
+      totalRevenue: '総収益',
+      avgOrderValue: '平均注文額',
+      fulfillmentRate: '履行率'
+    },
+    monthlyTrend: {
+      title: '月次収益推移'
+    },
+    monthOverMonth: {
+      title: '月次比較分析',
+      month: '月',
+      orders: '注文数',
+      revenue: '収益',
+      change: '変化',
+      growthRate: '成長率'
+    },
+    summary: {
+      totalRevenueYTD: '総収益（年初来）',
+      avgMonthlyRevenue: '平均月次収益',
+      totalOrdersYTD: '総注文数（年初来）',
+      bestQuarter: '最も好調な四半期'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: '再発注のご提案',
+    description: '再注文点以下の品目を確認し、予算内で発注書を作成します',
+    loading: '再発注提案を読み込み中...',
+    loadError: '再発注提案の読み込みに失敗しました: {message}',
+    noRecommendations: '選択したフィルターで再発注が必要な品目はありません。',
+    table: {
+      select: '選択',
+      sku: 'SKU',
+      itemName: '品目名',
+      warehouse: '倉庫',
+      category: 'カテゴリ',
+      quantityOnHand: '手持在庫数',
+      reorderPoint: '再注文点',
+      shortfall: '不足数',
+      trend: 'トレンド',
+      recommendedQuantity: '推奨発注数',
+      unitCost: '単価',
+      estimatedCost: '見積コスト'
+    },
+    budget: {
+      label: '予算上限',
+      placeholder: '予算額を入力'
+    },
+    supplier: {
+      label: 'サプライヤー名',
+      placeholder: 'サプライヤー名を入力'
+    },
+    summary: {
+      itemsSelected: '選択品目数',
+      totalEstimatedCost: '合計見積コスト',
+      remainingBudget: '残予算'
+    },
+    actions: {
+      createPurchaseOrders: '発注書を作成',
+      creating: '発注書を作成中...'
+    },
+    createSuccess: '{count}件の発注書を作成しました。',
+    createError: '発注書の作成に失敗しました: {message}',
+    poList: {
+      title: '発注書一覧',
+      id: '発注書ID',
+      sku: 'SKU',
+      supplier: 'サプライヤー',
+      quantity: '数量',
+      unitCost: '単価',
+      expectedDelivery: '納期予定',
+      status: 'ステータス',
+      empty: 'まだ発注書は作成されていません。'
+    }
+  },
+
   // Filters
   filters: {
     timePeriod: '期間',
@@ -213,7 +302,8 @@ export default {
   trends: {
     increasing: '増加',
     stable: '安定',
-    decreasing: '減少'
+    decreasing: '減少',
+    unknown: '不明'
   },
 
   // Priority

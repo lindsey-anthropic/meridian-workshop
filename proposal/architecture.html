@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Meridian Inventory Dashboard — Current-State Architecture</title>
+<style>
+  :root {
+    --ink: #0f172a;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --bg: #f8fafc;
+    --panel: #ffffff;
+    --accent: #0369a1;
+    --accent-soft: #e0f2fe;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --ok: #15803d;
+    --ok-soft: #dcfce7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  header {
+    padding: 2.5rem 3rem 1.5rem;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel);
+  }
+  header .kicker { text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.78rem; color: var(--accent); font-weight: 700; }
+  header h1 { margin: 0.4rem 0 0.3rem; font-size: 1.9rem; }
+  header p { margin: 0; color: var(--muted); }
+  main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 3rem 5rem; }
+  section { margin-bottom: 3rem; }
+  h2 {
+    font-size: 1.25rem;
+    border-bottom: 2px solid var(--line);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.2rem;
+  }
+  h3 { font-size: 1rem; margin: 1.5rem 0 0.6rem; color: var(--accent); }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1.5rem 1.8rem;
+  }
+
+  /* System diagram */
+  .diagram {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    overflow-x: auto;
+    padding: 1rem 0;
+  }
+  .node {
+    background: var(--panel);
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    padding: 1rem 1.3rem;
+    min-width: 190px;
+    flex-shrink: 0;
+  }
+  .node h4 { margin: 0 0 0.3rem; font-size: 0.95rem; }
+  .node .tag { font-size: 0.72rem; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+  .node ul { margin: 0.5rem 0 0; padding-left: 1.1rem; font-size: 0.82rem; color: var(--muted); }
+  .arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 70px;
+    color: var(--muted);
+    font-size: 0.75rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 0.2rem;
+  }
+  .arrow .line { width: 100%; height: 2px; background: var(--muted); position: relative; }
+  .arrow .line::after {
+    content: "";
+    position: absolute; right: 0; top: -4px;
+    border: 5px solid transparent;
+    border-left-color: var(--muted);
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  th, td { text-align: left; padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  code { background: var(--accent-soft); color: var(--accent); padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.85em; }
+  .badge { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px; }
+  .badge.ok { background: var(--ok-soft); color: var(--ok); }
+  .badge.warn { background: var(--warn-soft); color: var(--warn); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .note {
+    border-left: 4px solid var(--warn);
+    background: var(--warn-soft);
+    padding: 0.8rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin: 0.8rem 0;
+  }
+  .note strong { color: var(--warn); }
+  ul.compact { margin: 0.5rem 0; padding-left: 1.2rem; }
+  ul.compact li { margin-bottom: 0.4rem; font-size: 0.92rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker">Architecture Review · R4</div>
+  <h1>Meridian Inventory Dashboard — Current-State Architecture</h1>
+  <p>Prepared during engagement onboarding, for handoff to Meridian IT.</p>
+</header>
+
+<main>
+
+  <section>
+    <h2>System Overview</h2>
+    <div class="diagram">
+      <div class="node">
+        <div class="tag">Client</div>
+        <h4>Browser</h4>
+        <ul><li>localhost:3000</li></ul>
+      </div>
+      <div class="arrow"><div class="line"></div>HTTP</div>
+      <div class="node">
+        <div class="tag">Frontend</div>
+        <h4>Vue 3 + Vite</h4>
+        <ul>
+          <li>Composition API (mostly)</li>
+          <li>Singleton composables for state</li>
+          <li>axios via <code>api.js</code></li>
+        </ul>
+      </div>
+      <div class="arrow"><div class="line"></div>REST / JSON<br>port 8001</div>
+      <div class="node">
+        <div class="tag">Backend</div>
+        <h4>FastAPI</h4>
+        <ul>
+          <li>Single <code>main.py</code></li>
+          <li>Pydantic v2 models</li>
+          <li>Shared filter helpers</li>
+        </ul>
+      </div>
+      <div class="arrow"><div class="line"></div>load on import</div>
+      <div class="node">
+        <div class="tag">Data</div>
+        <h4>Flat JSON files</h4>
+        <ul>
+          <li><code>server/data/*.json</code></li>
+          <li>Loaded once into memory</li>
+          <li>No database</li>
+        </ul>
+      </div>
+    </div>
+    <p style="color:var(--muted); font-size:0.85rem;">No database, no message queue, no auth layer, no build-time SSR — a straightforward two-tier app with an in-memory data store standing in for persistence.</p>
+  </section>
+
+  <section>
+    <h2>Frontend</h2>
+    <div class="panel">
+      <h3>Routes &amp; Views</h3>
+      <table>
+        <tr><th>Route</th><th>View</th><th>Shows</th><th>Pattern</th></tr>
+        <tr><td><code>/</code></td><td>Dashboard.vue</td><td>KPI cards, backlog table, PO creation</td><td>Composition API</td></tr>
+        <tr><td><code>/inventory</code></td><td>Inventory.vue</td><td>Inventory table + item detail</td><td>Composition API</td></tr>
+        <tr><td><code>/orders</code></td><td>Orders.vue</td><td>Orders list + detail</td><td>Composition API</td></tr>
+        <tr><td><code>/demand</code></td><td>Demand.vue</td><td>Demand forecast data</td><td>Composition API</td></tr>
+        <tr><td><code>/spending</code></td><td>Spending.vue</td><td>Spending summary, charts, transactions</td><td>Composition API</td></tr>
+        <tr><td><code>/reports</code></td><td>Reports.vue</td><td>Quarterly/monthly revenue &amp; fulfillment</td><td><span class="badge warn">Options API</span></td></tr>
+        <tr><td><em>unrouted</em></td><td>Backlog.vue</td><td>Backlog by priority — <strong>not registered in the router</strong>, unreachable</td><td>Composition API</td></tr>
+      </table>
+
+      <h3>State &amp; Data Flow</h3>
+      <p>No Pinia/Vuex. State lives in <strong>module-scope singleton composables</strong> (shared refs, imported wherever needed):</p>
+      <ul class="compact">
+        <li><code>composables/useFilters.js</code> — the 4 shared filters (Time Period, Warehouse, Category, Order Status), rendered once by <code>components/FilterBar.vue</code> in the global app shell.</li>
+        <li><code>composables/useI18n.js</code> — locale state + translator, backed by <code>locales/en.js</code> / <code>locales/ja.js</code>.</li>
+        <li><code>composables/useAuth.js</code> — mock current-user session state.</li>
+        <li><code>utils/currency.js</code> — plain formatting helpers (USD/JPY), not a composable.</li>
+      </ul>
+      <p>Views fetch their own data in <code>onMounted</code> and re-fetch via a <code>watch</code> on the shared filter refs — there's no central store or caching layer beyond the one-time JSON load on the backend.</p>
+
+      <h3>API Client</h3>
+      <p><code>client/src/api.js</code> — axios-based, single exported object, ~18 methods, base URL hardcoded to <code>http://localhost:8001/api</code>. Builds query params from active filters, skipping <code>'all'</code>.</p>
+
+      <div class="note"><strong>Divergence:</strong> <code>Reports.vue</code> calls <code>axios</code> directly instead of going through <code>api.js</code>, uses the legacy Options API instead of Composition API, and doesn't consume <code>useFilters</code> or <code>useI18n</code> at all — it's the one view that grew apart from the rest of the app's conventions. Directly relevant to the Reports defects in scope for this engagement.</div>
+
+      <h3>i18n Coverage</h3>
+      <p>Locale dictionaries (<code>en.js</code>/<code>ja.js</code>) and <code>useI18n</code> are wired into <code>App.vue</code>, <code>FilterBar.vue</code>, and the Dashboard/Inventory/Orders/Demand/Spending views. <strong>Reports.vue and Backlog.vue are hardcoded English</strong> with no translation calls.</p>
+
+      <h3>Styling</h3>
+      <p>No CSS framework. Global tokens and base component styles (cards, badges, tables, nav) live in an unscoped <code>&lt;style&gt;</code> block in <code>App.vue</code> — the de facto design system. Colors are hardcoded hex values, not CSS variables.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Backend</h2>
+    <div class="panel">
+      <h3>Endpoints (<code>server/main.py</code> — single file, no router split)</h3>
+      <table>
+        <tr><th>Method</th><th>Path</th><th>Filters</th></tr>
+        <tr><td>GET</td><td><code>/api/inventory</code></td><td>warehouse, category</td></tr>
+        <tr><td>GET</td><td><code>/api/inventory/{id}</code></td><td>—</td></tr>
+        <tr><td>GET</td><td><code>/api/orders</code></td><td>warehouse, category, status, month</td></tr>
+        <tr><td>GET</td><td><code>/api/orders/{id}</code></td><td>—</td></tr>
+        <tr><td>GET</td><td><code>/api/demand</code></td><td>none</td></tr>
+        <tr><td>GET</td><td><code>/api/backlog</code></td><td>none (adds computed <code>has_purchase_order</code>)</td></tr>
+        <tr><td>GET</td><td><code>/api/dashboard/summary</code></td><td>warehouse, category, status, month</td></tr>
+        <tr><td>GET</td><td><code>/api/spending/*</code></td><td>none (summary, monthly, categories, transactions)</td></tr>
+        <tr><td>GET</td><td><code>/api/reports/quarterly</code></td><td>own hardcoded aggregation</td></tr>
+        <tr><td>GET</td><td><code>/api/reports/monthly-trends</code></td><td>own hardcoded aggregation</td></tr>
+      </table>
+      <p style="font-size:0.85rem; color:var(--muted);">CORS: <code>allow_origins=["*"]</code>, all methods/headers — fine for local dev, worth tightening before any external deployment.</p>
+
+      <h3>Filtering Logic</h3>
+      <p>Shared helpers <code>apply_filters()</code> and <code>filter_by_month()</code> are defined once and reused by inventory/orders/dashboard-summary. The two <code>/api/reports/*</code> endpoints implement their <strong>own separate hardcoded aggregation</strong> rather than reusing these helpers — a second divergence point that lines up with the frontend's Reports.vue divergence.</p>
+
+      <h3>Data Layer</h3>
+      <table>
+        <tr><th>File</th><th>Contents</th></tr>
+        <tr><td><code>inventory.json</code></td><td>32 items — sku, name, category, warehouse, qty, reorder point, unit cost, location</td></tr>
+        <tr><td><code>orders.json</code></td><td>250 orders — customer, line items, status, warehouse, category, dates, total value</td></tr>
+        <tr><td><code>demand_forecasts.json</code></td><td>9 items — current/forecasted demand, trend</td></tr>
+        <tr><td><code>backlog_items.json</code></td><td>4 items</td></tr>
+        <tr><td><code>spending.json</code></td><td>summary + monthly + category breakdowns</td></tr>
+        <tr><td><code>transactions.json</code></td><td>56 transactions</td></tr>
+        <tr><td><code>purchase_orders.json</code></td><td><span class="badge warn">empty</span> — placeholder only, no schema in use yet</td></tr>
+      </table>
+      <p>All loaded once into memory on import via <code>mock_data.py</code> — effectively a read cache with no re-read or persistence; changes require a process restart.</p>
+
+      <h3>Models &amp; Validation</h3>
+      <p>Pydantic v2, all models defined inline in <code>main.py</code>: <code>InventoryItem</code>, <code>Order</code>, <code>DemandForecast</code>, <code>BacklogItem</code>, <code>PurchaseOrder</code>, <code>CreatePurchaseOrderRequest</code>. Used as <code>response_model</code> on inventory/orders/demand/backlog; spending and reports endpoints return raw dicts with no schema enforcement.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Test Coverage</h2>
+    <div class="grid2">
+      <div class="panel">
+        <h3><span class="badge ok">Exists</span> Backend</h3>
+        <p style="font-size:0.9rem;">pytest + FastAPI <code>TestClient</code>, 40 tests across <code>tests/backend/</code>: inventory (list/filter/404/shape), dashboard (filter combinations, calculations), and misc endpoints (demand, backlog, spending, root).</p>
+      </div>
+      <div class="panel">
+        <h3><span class="badge warn">Missing</span> Frontend / E2E</h3>
+        <p style="font-size:0.9rem;">No browser-level test infrastructure exists at all — no Playwright/Cypress config, no e2e directory. This is the gap R3 of the engagement addresses.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Notes for Incoming Work</h2>
+    <div class="panel">
+      <ul class="compact">
+        <li><strong>Reports.vue is the outlier</strong> on both tiers — legacy Options API, direct axios calls, no shared filters, no i18n on the frontend; separate hardcoded aggregation on the backend. This explains the defect cluster reported in R1 and narrows where to look first.</li>
+        <li><strong>Backlog.vue is orphaned</strong> — built but not routed. Worth confirming with Meridian whether it should be wired in, merged into Dashboard (which already has an inline backlog table), or removed.</li>
+        <li><strong>No database</strong> — all data is flat JSON loaded once at process start. Any feature needing to persist new data (e.g., purchase orders for a Restocking feature) needs a real write path; today's <code>purchase_orders.json</code> is an empty placeholder with no create/persist logic wired up server-side beyond the endpoint stub.</li>
+        <li><strong>No CSS variables</strong> despite a repo convention note recommending them — colors are repeated hardcoded hex values across files, worth consolidating before any visual refresh (D1).</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+</body>
+</html>
