@@ -6,6 +6,7 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -186,6 +187,82 @@ export default {
       trend: 'Trend',
       period: 'Period'
     }
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    quarterlyPerformance: {
+      title: 'Quarterly Performance',
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate'
+    },
+    monthlyTrend: {
+      title: 'Monthly Revenue Trend'
+    },
+    monthOverMonth: {
+      title: 'Month-over-Month Analysis',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    },
+    summary: {
+      totalRevenueYTD: 'Total Revenue (YTD)',
+      avgMonthlyRevenue: 'Avg Monthly Revenue',
+      totalOrdersYTD: 'Total Orders (YTD)',
+      bestQuarter: 'Best Performing Quarter'
+    },
+    noData: 'No data for the selected filters'
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    description: 'Purchase order suggestions based on stock levels, demand forecast, and your budget ceiling',
+    budget: {
+      label: 'Budget Ceiling',
+      placeholder: 'Enter a budget amount...',
+      totalRecommended: 'Total Recommended Cost',
+      totalFunded: 'Total Funded Cost',
+      remaining: 'Remaining Budget',
+      itemsFunded: 'Items Funded',
+      itemsUnfunded: 'Items Unfunded',
+      enterPrompt: 'Enter a budget ceiling to see which recommendations can be funded'
+    },
+    table: {
+      item: 'Item',
+      warehouse: 'Warehouse',
+      category: 'Category',
+      stockStatus: 'Stock Status',
+      quantityOnHand: 'On Hand',
+      reorderPoint: 'Reorder Point',
+      demand: 'Demand Trend',
+      recommendedQty: 'Recommended Qty',
+      unitCost: 'Unit Cost',
+      estimatedCost: 'Estimated Cost',
+      fundedStatus: 'Status',
+      action: 'Action'
+    },
+    stockStatus: {
+      lowStock: 'Low Stock',
+      adequate: 'Adequate',
+      inStock: 'In Stock'
+    },
+    fundedStatus: {
+      funded: 'Funded',
+      partial: 'Partial',
+      unfunded: 'Unfunded',
+      ordered: 'Ordered'
+    },
+    noDemandData: 'No demand data',
+    createOrder: 'Create Order',
+    noData: 'No restocking recommendations for the selected filters'
   },
 
   // Filters

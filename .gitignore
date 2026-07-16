@@ -50,5 +50,9 @@ logs/
 # Playwright MCP artifacts
 .playwright-mcp/
 
+# Playwright test run artifacts
+tests/e2e/test-results/
+tests/e2e/playwright-report/
+
 # Environment variables
 .env
