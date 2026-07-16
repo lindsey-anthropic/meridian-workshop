@@ -6,6 +6,8 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
+    reports: 'Reports',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
   },
@@ -188,6 +190,93 @@ export default {
     }
   },
 
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'View quarterly performance metrics and monthly trends',
+    loading: 'Loading reports...',
+    loadError: 'Failed to load reports: {message}',
+    notApplicable: 'N/A',
+    quarterly: {
+      title: 'Quarterly Performance',
+      quarter: 'Quarter',
+      totalOrders: 'Total Orders',
+      totalRevenue: 'Total Revenue',
+      avgOrderValue: 'Avg Order Value',
+      fulfillmentRate: 'Fulfillment Rate'
+    },
+    monthlyTrend: {
+      title: 'Monthly Revenue Trend'
+    },
+    monthOverMonth: {
+      title: 'Month-over-Month Analysis',
+      month: 'Month',
+      orders: 'Orders',
+      revenue: 'Revenue',
+      change: 'Change',
+      growthRate: 'Growth Rate'
+    },
+    summary: {
+      totalRevenueYTD: 'Total Revenue (YTD)',
+      avgMonthlyRevenue: 'Avg Monthly Revenue',
+      totalOrdersYTD: 'Total Orders (YTD)',
+      bestQuarter: 'Best Performing Quarter'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking Recommendations',
+    description: 'Review items at or below reorder point and generate purchase orders within budget',
+    loading: 'Loading recommendations...',
+    loadError: 'Failed to load restocking recommendations: {message}',
+    noRecommendations: 'No items currently need restocking for the selected filters.',
+    table: {
+      select: 'Select',
+      sku: 'SKU',
+      itemName: 'Item Name',
+      warehouse: 'Warehouse',
+      category: 'Category',
+      quantityOnHand: 'Quantity on Hand',
+      reorderPoint: 'Reorder Point',
+      shortfall: 'Shortfall',
+      trend: 'Trend',
+      recommendedQuantity: 'Recommended Qty',
+      unitCost: 'Unit Cost',
+      estimatedCost: 'Estimated Cost'
+    },
+    budget: {
+      label: 'Budget Ceiling',
+      placeholder: 'Enter budget amount'
+    },
+    supplier: {
+      label: 'Supplier Name',
+      placeholder: 'Enter supplier name'
+    },
+    summary: {
+      itemsSelected: 'Items Selected',
+      totalEstimatedCost: 'Total Estimated Cost',
+      remainingBudget: 'Remaining Budget'
+    },
+    actions: {
+      createPurchaseOrders: 'Create Purchase Orders',
+      creating: 'Creating purchase orders...'
+    },
+    createSuccess: 'Successfully created {count} purchase order(s).',
+    createError: 'Failed to create purchase orders: {message}',
+    poList: {
+      title: 'Purchase Orders',
+      id: 'PO ID',
+      sku: 'SKU',
+      supplier: 'Supplier',
+      quantity: 'Quantity',
+      unitCost: 'Unit Cost',
+      expectedDelivery: 'Expected Delivery',
+      status: 'Status',
+      empty: 'No purchase orders created yet.'
+    }
+  },
+
   // Filters
   filters: {
     timePeriod: 'Time Period',
@@ -213,7 +302,8 @@ export default {
   trends: {
     increasing: 'increasing',
     stable: 'stable',
-    decreasing: 'decreasing'
+    decreasing: 'decreasing',
+    unknown: 'Unknown'
   },
 
   // Priority

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Meridian Components — Inventory Dashboard Modernization</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg-alt: #16213b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent-2: #34d399;
+    --border: #1e293b;
+    --card: #131f38;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    overflow: hidden;
+  }
+  .deck {
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+  }
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6vw 8vw;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .slide.active { display: flex; opacity: 1; }
+  .kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 0.8rem;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+  h1 { font-size: 2.6rem; margin: 0 0 0.5rem 0; line-height: 1.15; }
+  h2 { font-size: 2.1rem; margin: 0 0 1.2rem 0; }
+  p.lead { font-size: 1.25rem; color: var(--muted); max-width: 46rem; line-height: 1.5; }
+  ul.points { list-style: none; padding: 0; margin: 1.5rem 0 0 0; }
+  ul.points li {
+    font-size: 1.15rem;
+    padding: 0.6rem 0 0.6rem 1.8rem;
+    position: relative;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+  }
+  ul.points li:last-child { border-bottom: none; }
+  ul.points li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 1.15rem;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  ul.points li strong { color: var(--accent-2); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: start; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.6rem 1.8rem;
+  }
+  .card h3 { margin: 0 0 0.6rem 0; font-size: 1.1rem; color: var(--accent); }
+  .card p { margin: 0; color: var(--muted); font-size: 0.98rem; line-height: 1.5; }
+  .badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .badge.required { background: rgba(52, 211, 153, 0.15); color: var(--accent-2); }
+  .timeline { display: flex; gap: 0.9rem; margin-top: 2rem; }
+  .phase {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: 4px solid var(--accent);
+    border-radius: 10px;
+    padding: 1.1rem 1.2rem;
+  }
+  .phase.polish { border-top-color: var(--muted); }
+  .phase h4 { margin: 0 0 0.3rem 0; font-size: 0.95rem; color: var(--text); }
+  .phase .weeks { font-size: 0.78rem; color: var(--accent); font-weight: 600; margin-bottom: 0.5rem; }
+  .phase p { margin: 0; font-size: 0.85rem; color: var(--muted); line-height: 1.4; }
+  .center { text-align: center; margin: auto; }
+  .footer-note { position: absolute; bottom: 2.2vh; left: 8vw; color: var(--muted); font-size: 0.85rem; }
+  .progress {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 4px;
+    background: var(--accent);
+    transition: width 0.25s ease;
+  }
+  .nav {
+    position: absolute;
+    bottom: 2.2vh; right: 8vw;
+    display: flex; gap: 0.6rem; align-items: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .nav button {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 2.2rem; height: 2.2rem;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  .nav button:hover { border-color: var(--accent); color: var(--accent); }
+  .two-col-list { columns: 2; column-gap: 2.5rem; }
+  .two-col-list li { break-inside: avoid; }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- 1: Title -->
+  <section class="slide active">
+    <div class="kicker">Capabilities Presentation · RFP MC-2026-0417</div>
+    <h1>Modernizing Meridian's<br>Inventory Dashboard</h1>
+    <p class="lead">A proposal to stabilize, extend, and document the platform Meridian's operations team relies on every day.</p>
+    <p class="footer-note">Prepared for J. Okafor, Director of Procurement — Meridian Components, Inc.</p>
+  </section>
+
+  <!-- 2: Where things stand -->
+  <section class="slide">
+    <div class="kicker">Current State</div>
+    <h2>A capable system, left unfinished</h2>
+    <ul class="points">
+      <li>Reports module has <strong>known, unresolved defects</strong> — filters, formatting, and internationalization</li>
+      <li>Operations has requested a <strong>Restocking capability</strong> that doesn't exist yet</li>
+      <li><strong>No automated tests</strong> — IT has been unwilling to approve changes as a result</li>
+      <li>Documentation from the previous engagement is <strong>minimal</strong></li>
+    </ul>
+  </section>
+
+  <!-- 3: Who this affects -->
+  <section class="slide">
+    <div class="kicker">Why It Matters</div>
+    <h2>Three stakeholders, one system</h2>
+    <div class="grid2">
+      <div class="card"><h3>Operations (R. Tanaka)</h3><p>Uses the dashboard daily across three warehouses. The Restocking feature is a direct, repeated ask from her team.</p></div>
+      <div class="card"><h3>IT</h3><p>Has blocked changes because there's no safety net. Automated testing isn't a nice-to-have here — it's the gate.</p></div>
+      <div class="card"><h3>Procurement (J. Okafor)</h3><p>Owns the decision. Cares about timeline confidence and price predictability as much as feature scope.</p></div>
+      <div class="card"><h3>Tokyo team (~12 people)</h3><p>Working in English-only views today. i18n gaps are a real usability barrier, not a polish item.</p></div>
+    </div>
+  </section>
+
+  <!-- 4: Scope overview -->
+  <section class="slide">
+    <div class="kicker">Scope</div>
+    <h2>What we heard in the RFP</h2>
+    <div class="grid2">
+      <div>
+        <span class="badge required">Required</span>
+        <ul class="points">
+          <li><strong>R1</strong> Reports remediation</li>
+          <li><strong>R2</strong> Restocking recommendations</li>
+          <li><strong>R3</strong> Automated browser testing</li>
+          <li><strong>R4</strong> Architecture documentation</li>
+        </ul>
+      </div>
+      <div>
+        <span class="badge">Desired</span>
+        <ul class="points">
+          <li><strong>D1</strong> UI modernization</li>
+          <li><strong>D2</strong> Internationalization</li>
+          <li><strong>D3</strong> Dark mode</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5: Our approach - philosophy -->
+  <section class="slide">
+    <div class="kicker">Our Approach</div>
+    <h2>Stabilize first, then extend</h2>
+    <p class="lead">We don't build new capability on top of a foundation we don't trust yet. Every phase below produces working, demonstrable output — Meridian doesn't wait until the end to see progress.</p>
+  </section>
+
+  <!-- 6: Phase 0 -->
+  <section class="slide">
+    <div class="kicker">Phase 0 · Weeks 1–3</div>
+    <h2>Foundation</h2>
+    <div class="card" style="max-width: 40rem;">
+      <h3>Data layer migration</h3>
+      <p>Migrate off flat JSON files to a proper database, one-to-one, with no behavior change — before anything new is built on top of it. Architecture documentation begins alongside this work.</p>
+    </div>
+  </section>
+
+  <!-- 7: Phase 1 -->
+  <section class="slide">
+    <div class="kicker">Phase 1 · Weeks 4–7</div>
+    <h2>Stabilize &amp; unblock</h2>
+    <div class="card" style="max-width: 40rem;">
+      <h3>Reports remediation + testing infrastructure</h3>
+      <p>Resolve the Reports module's logged defects and stand up automated browser testing alongside the fix — so IT gets a working example of test coverage on day one, not a promise for later.</p>
+    </div>
+  </section>
+
+  <!-- 8: Phase 2 -->
+  <section class="slide">
+    <div class="kicker">Phase 2 · Weeks 8–13</div>
+    <h2>Build</h2>
+    <div class="card" style="max-width: 40rem;">
+      <h3>Restocking recommendations</h3>
+      <p>The largest net-new capability in this engagement: stock levels + demand forecast + operator-supplied budget ceiling → recommended purchase orders. Covered by the same automated testing introduced in Phase 1.</p>
+    </div>
+  </section>
+
+  <!-- 9: Phase 3 -->
+  <section class="slide">
+    <div class="kicker">Phase 3 · Weeks 14–16</div>
+    <h2>Polish</h2>
+    <div class="card" style="max-width: 40rem;">
+      <h3>UI refresh, i18n expansion, dark mode</h3>
+      <p>Desired items (D1–D3), scoped to fit remaining time and budget without displacing required work. First to trim if constraints require it.</p>
+    </div>
+  </section>
+
+  <!-- 10: Timeline overview -->
+  <section class="slide">
+    <div class="kicker">Timeline</div>
+    <h2>16 weeks, four phases</h2>
+    <div class="timeline">
+      <div class="phase"><div class="weeks">Wks 1–3</div><h4>Foundation</h4><p>Data migration, architecture doc begins</p></div>
+      <div class="phase"><div class="weeks">Wks 4–7</div><h4>Stabilize</h4><p>Reports fix + test infrastructure</p></div>
+      <div class="phase"><div class="weeks">Wks 8–13</div><h4>Build</h4><p>Restocking, extended test coverage</p></div>
+      <div class="phase polish"><div class="weeks">Wks 14–16</div><h4>Polish</h4><p>UI, i18n, dark mode</p></div>
+    </div>
+  </section>
+
+  <!-- 11: Testing -->
+  <section class="slide">
+    <div class="kicker">R3 · Automated Testing</div>
+    <h2>Testing as infrastructure, not a checkbox</h2>
+    <p class="lead">Scoped to Reports and Restocking — the highest-change, highest-risk flows in this engagement. This is what lets IT approve changes going forward without a full manual regression pass every time.</p>
+  </section>
+
+  <!-- 12: Pricing approach -->
+  <section class="slide">
+    <div class="kicker">Pricing</div>
+    <h2>Phased fixed-fee</h2>
+    <ul class="points">
+      <li>Each phase priced and approved <strong>independently</strong> — no lump-sum commitment upfront</li>
+      <li>Meridian can stop after any required phase without losing planned value</li>
+      <li>T&amp;M with a not-to-exceed ceiling available as an alternative if scope needs flexibility</li>
+      <li>Final numbers pending Meridian's guidance on target budget range</li>
+    </ul>
+  </section>
+
+  <!-- 13: Relevant experience -->
+  <section class="slide">
+    <div class="kicker">Why Us</div>
+    <h2>We've done this exact handoff before</h2>
+    <ul class="points two-col-list">
+      <li>Inherited a Vue/Python system from a prior vendor — resolved defects, added test coverage, delivered docs</li>
+      <li>Built demand-driven purchase recommendation logic within an operator-defined budget</li>
+      <li>Extended i18n to a non-English-speaking satellite office</li>
+      <li>Migrated legacy flat-file storage to a proper database without disrupting the live application</li>
+    </ul>
+  </section>
+
+  <!-- 14: Differentiators -->
+  <section class="slide">
+    <div class="kicker">Why Us</div>
+    <h2>What we bring to this engagement</h2>
+    <div class="grid2">
+      <div class="card"><h3>We stabilize before we build</h3><p>No new features on a foundation we don't trust — the data migration and testing infrastructure come first.</p></div>
+      <div class="card"><h3>We surface assumptions</h3><p>Where the RFP leaves room for interpretation, we asked rather than guessed — and documented every assumption we're relying on.</p></div>
+      <div class="card"><h3>We build for handoff</h3><p>Architecture documentation and test coverage mean Meridian's own IT team can maintain this without us.</p></div>
+      <div class="card"><h3>We deliver in phases</h3><p>Visible progress and cost at each milestone, not one all-or-nothing delivery date.</p></div>
+    </div>
+  </section>
+
+  <!-- 15: Close -->
+  <section class="slide">
+    <div class="center">
+      <div class="kicker" style="justify-content:center; display:flex;">Next Steps</div>
+      <h1>Let's get Meridian's team<br>back in control of this system.</h1>
+      <p class="lead" style="margin: 1.5rem auto 0;">We're ready to begin with Phase 0 as soon as we're engaged.</p>
+    </div>
+  </section>
+
+  <div class="progress" id="progress"></div>
+  <div class="nav">
+    <span id="counter">1 / 15</span>
+    <button onclick="go(-1)" aria-label="Previous">‹</button>
+    <button onclick="go(1)" aria-label="Next">›</button>
+  </div>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let idx = 0;
+  function render() {
+    slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+    document.getElementById('counter').textContent = (idx + 1) + ' / ' + total;
+    document.getElementById('progress').style.width = ((idx + 1) / total * 100) + '%';
+  }
+  function go(delta) {
+    idx = Math.max(0, Math.min(total - 1, idx + delta));
+    render();
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') go(1);
+    if (e.key === 'ArrowLeft') go(-1);
+  });
+  render();
+</script>
+
+</body>
+</html>
